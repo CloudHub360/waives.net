@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Waives.Client.Tests.IntegrationTests.MockApi;
+using MockWaivesApi;
 using Xunit;
 
 namespace Waives.Client.Tests.IntegrationTests
@@ -16,7 +16,7 @@ namespace Waives.Client.Tests.IntegrationTests
         [Fact]
         public async Task Create_A_Classifier()
         {
-            var classifier = await ApiClient.CreateClassifier(ClassifierName, "samples.zip");
+            var classifier = await ApiClient.CreateClassifier(ClassifierName);
 
             Assert.NotNull(classifier);
         }

@@ -31,7 +31,7 @@ namespace Waives.Client
             return new Document(_httpClient, behaviours);
         }
 
-        public async Task<Classifier> CreateClassifier(string name, string samplesPath)
+        public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
         {
             var response = await _httpClient.PostAsync($"/classifiers/{name}", null).ConfigureAwait(false);
             EnsureSuccessStatus(response);
@@ -41,7 +41,10 @@ namespace Waives.Client
 
             var classifier = new Classifier(_httpClient, behaviours);
 
-            await classifier.AddSamplesFromZip(samplesPath).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(samplesPath))
+            {
+                await classifier.AddSamplesFromZip(samplesPath).ConfigureAwait(false);
+            }
 
             return classifier;
         }

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Waives.Client.Tests.IntegrationTests.MockApi;
+﻿using MockWaivesApi;
 using Xunit;
 
 namespace Waives.Client.Tests.IntegrationTests
@@ -14,12 +13,6 @@ namespace Waives.Client.Tests.IntegrationTests
         {
             Host = host;
             ApiClient = new WaivesClient(Host.CreateClient());
-            Task.Run(async () => await LoginWellKnownAccount(ApiClient)).Wait();
-        }
-
-        protected internal static async Task LoginWellKnownAccount(WaivesClient apiClient)
-        {
-            await apiClient.Login("clientId", "clientSecret");
         }
     }
 }
