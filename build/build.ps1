@@ -52,7 +52,6 @@ Task Build {
     }
 
     dotnet build $SolutionFile -c $Configuration --version-suffix=$versionSuffix
-    dotnet publish --no-build $SolutionFile -c $Configuration
   } finally {
     Pop-Location
   }
