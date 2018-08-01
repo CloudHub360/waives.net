@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acheve.AspNetCore.TestHost.Security" Version="2.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
@@ -15,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Waives.Client\Waives.Client.csproj" />
+    <ProjectReference Include="..\MockWaivesApi\MockWaivesApi.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Waives.Client.Tests.IntegrationTests.MockApi
+namespace MockWaivesApi
 {
     public class MockWaivesApi
     {
@@ -12,11 +12,14 @@ namespace Waives.Client.Tests.IntegrationTests.MockApi
             {
                 options.DefaultScheme = TestServerAuthenticationDefaults.AuthenticationScheme;
             }).AddTestServerAuthentication();
+
+            services.AddMvcCore().AddJsonFormatters();
         }
 
         public void Configure(IApplicationBuilder app)
         {
             app.UseAuthentication();
+            app.UseMvcWithDefaultRoute();
         }
     }
 }

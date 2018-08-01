@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -7,7 +6,7 @@ using Acheve.AspNetCore.TestHost.Security;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 
-namespace Waives.Client.Tests.IntegrationTests.MockApi
+namespace MockWaivesApi
 {
     public class MockWaivesHost
     {
@@ -20,7 +19,7 @@ namespace Waives.Client.Tests.IntegrationTests.MockApi
                     .UseStartup<MockWaivesApi>());
         }
 
-        internal HttpClient CreateClient() => _server.CreateClient().WithDefaultIdentity(Identities.User);
+        public HttpClient CreateClient() => _server.CreateClient().WithDefaultIdentity(Identities.User);
     }
 
     internal static class Identities
