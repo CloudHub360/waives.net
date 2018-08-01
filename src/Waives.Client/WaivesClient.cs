@@ -41,7 +41,7 @@ namespace Waives.Client
 
             var classifier = new Classifier(_httpClient, behaviours);
 
-            await classifier.AddSamplesFromZip(samplesPath);
+            await classifier.AddSamplesFromZip(samplesPath).ConfigureAwait(false);
 
             return classifier;
         }
@@ -69,7 +69,7 @@ namespace Waives.Client
                 return;
             }
 
-            throw new WaivesApiException($"Request failed with reponse {response.StatusCode}.");
+            throw new WaivesApiException($"Request failed with response {(int)response.StatusCode} {response.StatusCode}.");
         }
     }
 }
