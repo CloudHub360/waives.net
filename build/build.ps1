@@ -60,7 +60,14 @@ Task Build {
 Task Test {
   try {
     Push-Location $RootDir
-    exec { dotnet test $SolutionFile --configuration $Configuration --no-build }
+    # dotnet test doesn't properly handle solutions files, expecting a project file
+    # Enumerate the test projects in the solution and call dotnet test on each one
+    $tests = Get-Projects $SolutionFile |? { $_.Name -like "*.Tests" }
+    $tests |% {
+      Push-Location $_.File.Directory
+      Write-Information "Running tests from $($_.Name)"
+       exec { dotnet test --configuration $Configuration --no-build }
+    }
   } finally {
     Pop-Location
   }
