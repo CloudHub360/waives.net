@@ -10,4 +10,8 @@
     <PackageReference Include="docopt.net" Version="0.6.1.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Waives.NET\Waives.NET.csproj" />
+  </ItemGroup>
+
 </Project>
