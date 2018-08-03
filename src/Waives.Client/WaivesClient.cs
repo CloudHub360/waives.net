@@ -61,6 +61,17 @@ namespace Waives.Client
             return classifier;
         }
 
+        public async Task<Classifier> GetClassifier(string name)
+        {
+            var response = await HttpClient.GetAsync($"/classifiers/{name}").ConfigureAwait(false);
+            EnsureSuccessStatus(response);
+
+            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            var behaviours = responseContent.Links;
+
+            return new Classifier(this, name, behaviours);
+        }
+
         public async Task Login(string clientId, string clientSecret)
         {
             var response = await HttpClient.PostAsync("/oauth/token", new FormUrlEncodedContent(new Dictionary<string, string>
