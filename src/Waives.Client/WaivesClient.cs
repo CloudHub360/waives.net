@@ -11,18 +11,18 @@ namespace Waives.Client
 {
     public class WaivesClient
     {
-        private readonly HttpClient _httpClient;
+        internal HttpClient HttpClient { get; }
 
         public WaivesClient() : this(new HttpClient { BaseAddress = new Uri("https://api.waives.io") }) { }
 
         internal WaivesClient(HttpClient httpClient)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         public async Task<Document> CreateDocument(string path)
         {
-            var response = await _httpClient.PostAsync("/documents", new StreamContent(File.OpenRead(path))).ConfigureAwait(false);
+            var response = await HttpClient.PostAsync("/documents", new StreamContent(File.OpenRead(path))).ConfigureAwait(false);
             EnsureSuccessStatus(response);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -33,7 +33,7 @@ namespace Waives.Client
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
         {
-            var response = await _httpClient.PostAsync($"/classifiers/{name}", null).ConfigureAwait(false);
+            var response = await HttpClient.PostAsync($"/classifiers/{name}", null).ConfigureAwait(false);
             EnsureSuccessStatus(response);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace Waives.Client
 
         public async Task Login(string clientId, string clientSecret)
         {
-            var response = await _httpClient.PostAsync("/oauth/token", new FormUrlEncodedContent(new Dictionary<string, string>
+            var response = await HttpClient.PostAsync("/oauth/token", new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "client_id", clientId },
                 { "client_secret", clientSecret },
@@ -62,7 +62,7 @@ namespace Waives.Client
             var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
             var accessToken = responseContent.Token;
 
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
         }
 
         private static void EnsureSuccessStatus(HttpResponseMessage response)
