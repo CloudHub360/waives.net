@@ -56,5 +56,23 @@ namespace Waives.Client
                 throw new WaivesApiException($"Failed to delete the document.");
             }
         }
+
+        public async Task<ClassificationResult> Classify(string classifierName)
+        {
+            var requestUri = _behaviours["document:classify"].CreateUri(new
+            {
+                classifier_name = classifierName
+            });
+
+            var response = await _waivesClient.HttpClient.PostAsync(requestUri, null).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new WaivesApiException($"Failed to classify the document with classifier '{classifierName}'");
+            }
+
+            var responseBody = await response.Content.ReadAsAsync<ClassificationResponse>().ConfigureAwait(false);
+            return responseBody.ClassificationResults;
+        }
     }
 }

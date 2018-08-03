@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using Newtonsoft.Json;
 
 namespace Waives.Client.Responses
@@ -17,9 +19,25 @@ namespace Waives.Client.Responses
             _isTemplated = templated;
         }
 
-        internal Uri CreateUri(params string[] templateTokens)
+        internal Uri CreateUri(object templateTokens = null)
         {
+            if (_isTemplated && templateTokens != null)
+            {
+                return ApplyTemplateTokens(_uri, templateTokens);
+            }
+
             return _uri;
+        }
+
+        private Uri ApplyTemplateTokens(Uri uri, object templateTokens)
+        {
+            var uriString = uri.ToString();
+
+            uriString = templateTokens.GetType().GetProperties().Aggregate(
+                uriString,
+                (current, token) => current.Replace($"{{{token.Name}}}", token.GetValue(templateTokens) as string));
+
+            return new Uri(uriString, UriKind.Relative);
         }
     }
 }
