@@ -1,6 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Waives.Client;
+using Waives.NET;
 
 namespace FileSorter
 {
@@ -44,10 +47,18 @@ namespace FileSorter
             EnsureDirectoryExists(outbox);
             EnsureDirectoryExists(errorbox);
 
-            // Initialise and start here...
+            var waives = new WaivesClient();
+            await waives.Login("clientId", "clientSecret");
+            var classifier = await waives.GetClassifier(options["<classifier>"].ToString());
 
-            // Block until manually exited with Ctrl+C, console window closed, etc.
-            await Task.Run(() => Task.Delay(Timeout.Infinite));
+            var documentStream = FileSystemDocumentStream.Create(inbox);
+            var classificationResultStream = new ClassificationResultStream(classifier, documentStream);
+
+            documentStream.Subscribe(new ConsoleObserver<IDocumentSource>("documents"));
+            classificationResultStream.Subscribe(new ConsoleObserver<DocumentClassification>("classification"));
+            classificationResultStream.Subscribe(new FileSorter(outbox, errorbox));
+
+            Console.ReadLine();
         }
 
         private static void EnsureDirectoryExists(string path)
