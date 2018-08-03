@@ -5,25 +5,25 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{F814F142-1CB4-4124-B0EA-25CBEE1CA324}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSorter", "samples\FileSorter\FileSorter.csproj", "{19F1B7C7-722D-48EC-B127-15C9D6B35D40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSorter", "samples\FileSorter\FileSorter.csproj", "{19F1B7C7-722D-48EC-B127-15C9D6B35D40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlobStorageProcessor", "samples\BlobStorageProcessor\BlobStorageProcessor.csproj", "{90A8D5CE-933C-408D-9F64-134CB493F17E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlobStorageProcessor", "samples\BlobStorageProcessor\BlobStorageProcessor.csproj", "{90A8D5CE-933C-408D-9F64-134CB493F17E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoicePDFConverter", "samples\InvoicePDFConverter\InvoicePDFConverter.csproj", "{6C9A44D2-566A-4B50-BEB3-EBFA2FD555E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvoicePDFConverter", "samples\InvoicePDFConverter\InvoicePDFConverter.csproj", "{6C9A44D2-566A-4B50-BEB3-EBFA2FD555E4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C21C1B55-D173-42CC-B4D6-7F2272B4286A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Waives.NET", "src\Waives.NET\Waives.NET.csproj", "{92089B38-FC07-41BA-A968-8F79A4856BE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.NET", "src\Waives.NET\Waives.NET.csproj", "{92089B38-FC07-41BA-A968-8F79A4856BE3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0DC578F1-8E11-4AD8-B262-E6B317D4F406}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Waives.NET.Tests", "test\Waives.NET.Tests\Waives.NET.Tests.csproj", "{2CD46514-29BB-43C4-9ADB-C662C5DE209A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.NET.Tests", "test\Waives.NET.Tests\Waives.NET.Tests.csproj", "{2CD46514-29BB-43C4-9ADB-C662C5DE209A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Waives.Client", "src\Waives.Client\Waives.Client.csproj", "{A6003210-984C-4206-97F4-B7CBFA6EE318}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Client", "src\Waives.Client\Waives.Client.csproj", "{A6003210-984C-4206-97F4-B7CBFA6EE318}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Waives.Client.Tests", "test\Waives.Client.Tests\Waives.Client.Tests.csproj", "{9D2818F5-413C-432C-84C6-ADC01D39B4DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Client.Tests", "test\Waives.Client.Tests\Waives.Client.Tests.csproj", "{9D2818F5-413C-432C-84C6-ADC01D39B4DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockWaivesApi", "test\MockWaivesApi\MockWaivesApi.csproj", "{E1F451F1-FCDA-48D5-8C32-C7EF0C848285}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockWaivesApi", "test\MockWaivesApi\MockWaivesApi.csproj", "{E1F451F1-FCDA-48D5-8C32-C7EF0C848285}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +33,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{19F1B7C7-722D-48EC-B127-15C9D6B35D40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -135,6 +132,9 @@ Global
 		{E1F451F1-FCDA-48D5-8C32-C7EF0C848285}.Release|x86.ActiveCfg = Release|Any CPU
 		{E1F451F1-FCDA-48D5-8C32-C7EF0C848285}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{19F1B7C7-722D-48EC-B127-15C9D6B35D40} = {F814F142-1CB4-4124-B0EA-25CBEE1CA324}
 		{90A8D5CE-933C-408D-9F64-134CB493F17E} = {F814F142-1CB4-4124-B0EA-25CBEE1CA324}
@@ -144,5 +144,8 @@ Global
 		{A6003210-984C-4206-97F4-B7CBFA6EE318} = {C21C1B55-D173-42CC-B4D6-7F2272B4286A}
 		{9D2818F5-413C-432C-84C6-ADC01D39B4DD} = {0DC578F1-8E11-4AD8-B262-E6B317D4F406}
 		{E1F451F1-FCDA-48D5-8C32-C7EF0C848285} = {0DC578F1-8E11-4AD8-B262-E6B317D4F406}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74AED9A4-D633-46D2-B088-248CE9077CC5}
 	EndGlobalSection
 EndGlobal
