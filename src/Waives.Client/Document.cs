@@ -33,7 +33,7 @@ namespace Waives.Client
 
             var request = new HttpRequestMessage(HttpMethod.Get, _behaviours["document:read"].CreateUri());
             request.Headers.Add("Accept", contentType);
-            var response = await _httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -44,7 +44,16 @@ namespace Waives.Client
 
             using (var fileStream = File.OpenWrite(resultsFilename))
             {
-                await resultsStream.CopyToAsync(fileStream);
+                await resultsStream.CopyToAsync(fileStream).ConfigureAwait(false);
+            }
+        }
+
+        public async Task Delete()
+        {
+            var response = await _waivesClient.HttpClient.DeleteAsync(_behaviours["self"].CreateUri()).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new WaivesApiException($"Failed to delete the document.");
             }
         }
     }
