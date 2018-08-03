@@ -9,12 +9,12 @@ namespace Waives.Client
 {
     public class Document
     {
-        private readonly HttpClient _httpClient;
+        private readonly WaivesClient _waivesClient;
         private readonly IDictionary<string, HalUri> _behaviours;
 
-        internal Document(HttpClient httpClient, IDictionary<string, HalUri> behaviours)
+        internal Document(WaivesClient httpClient, IDictionary<string, HalUri> behaviours)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _waivesClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
         }
 
@@ -22,7 +22,7 @@ namespace Waives.Client
         {
             contentType = contentType ?? ContentTypes.WaivesReadResults;
 
-            var readResponse = await _httpClient.PutAsync(
+            var readResponse = await _waivesClient.HttpClient.PutAsync(
                 _behaviours["document:read"].CreateUri(),
                 new StringContent(string.Empty)).ConfigureAwait(false);
 
@@ -33,7 +33,7 @@ namespace Waives.Client
 
             var request = new HttpRequestMessage(HttpMethod.Get, _behaviours["document:read"].CreateUri());
             request.Headers.Add("Accept", contentType);
-            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+            var response = await _waivesClient.HttpClient.SendAsync(request).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {

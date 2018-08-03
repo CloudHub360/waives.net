@@ -10,13 +10,13 @@ namespace Waives.Client
 {
     public class Classifier
     {
-        private readonly HttpClient _httpClient;
+        private readonly WaivesClient _waivesClient;
         private readonly string _name;
         private readonly IDictionary<string, HalUri> _behaviours;
 
-        internal Classifier(HttpClient httpClient, string name, IDictionary<string, HalUri> behaviours)
+        internal Classifier(WaivesClient httpClient, string name, IDictionary<string, HalUri> behaviours)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _waivesClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -32,7 +32,7 @@ namespace Waives.Client
             var streamContent = new StreamContent(File.OpenRead(path));
             streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/zip");
 
-            var response = await _httpClient.PostAsync(
+            var response = await _waivesClient.HttpClient.PostAsync(
                 _behaviours["classifier:add_samples_from_zip"].CreateUri(),
                 streamContent).ConfigureAwait(false);
 

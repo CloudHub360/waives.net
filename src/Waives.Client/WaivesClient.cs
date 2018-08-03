@@ -28,7 +28,7 @@ namespace Waives.Client
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
 
-            return new Document(_httpClient, behaviours);
+            return new Document(this, behaviours);
         }
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
@@ -39,7 +39,7 @@ namespace Waives.Client
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
 
-            var classifier = new Classifier(_httpClient, behaviours);
+            var classifier = new Classifier(this, name, behaviours);
 
             if (!string.IsNullOrWhiteSpace(samplesPath))
             {
