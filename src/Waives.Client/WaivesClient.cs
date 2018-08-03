@@ -20,6 +20,18 @@ namespace Waives.Client
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
+        internal async Task<Document> CreateDocument(Stream documentSource)
+        {
+            var requestBody = new StreamContent(documentSource);
+            var response = await HttpClient.PostAsync("/documents", requestBody).ConfigureAwait(false);
+            EnsureSuccessStatus(response);
+
+            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            var behaviours = responseContent.Links;
+
+            return new Document(this, behaviours);
+        }
+
         public async Task<Document> CreateDocument(string path)
         {
             var response = await HttpClient.PostAsync("/documents", new StreamContent(File.OpenRead(path))).ConfigureAwait(false);

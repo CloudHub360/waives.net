@@ -41,5 +41,18 @@ namespace Waives.Client
                 throw new WaivesApiException();
             }
         }
+
+        public async Task<ClassificationResult> Classify(Stream documentStream)
+        {
+            var document = await _waivesClient.CreateDocument(documentStream).ConfigureAwait(false);
+            try
+            {
+                return await document.Classify(_name).ConfigureAwait(false);
+            }
+            finally
+            {
+                await document.Delete().ConfigureAwait(false);
+            }
+        }
     }
 }
