@@ -6,7 +6,12 @@ namespace BlobStorageProcessor
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            // Point at a blob storage account
+            // Identify all blobs there
+            // Classify the files
+            // Write results to a CSV file
+
+
         }
     }
 }
