@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Waives.NET;
+using Waives;
 
 namespace BlobStorageProcessor
 {

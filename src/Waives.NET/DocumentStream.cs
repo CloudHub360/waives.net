@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
 
-namespace Waives.NET
+namespace Waives
 {
     public abstract class DocumentStream : IObservable<IDocumentSource>
     {

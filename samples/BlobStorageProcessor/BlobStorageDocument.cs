@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Waives.NET;
+using Waives;
 
 namespace BlobStorageProcessor
 {

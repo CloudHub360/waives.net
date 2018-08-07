@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Waives.NET
+namespace Waives
 {
     public class FileSystemDocumentSource : IDocumentSource
     {

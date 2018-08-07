@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Waives.Client;
 
-namespace Waives.NET
+namespace Waives
 {
     public class ClassificationResultStream : IObservable<DocumentClassification>
     {

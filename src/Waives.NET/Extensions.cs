@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives.NET
+namespace Waives
 {
     public static class Extensions
     {

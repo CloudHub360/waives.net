@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using CsvHelper;
-using Waives.NET;
+using Waives;
 
 namespace BlobStorageProcessor
 {

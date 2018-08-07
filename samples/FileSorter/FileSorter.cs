@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Waives.NET;
+using Waives;
 
 namespace FileSorter
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives.NET
+namespace Waives
 {
     public class ConsoleObserver<T> : IObserver<T>
     {
