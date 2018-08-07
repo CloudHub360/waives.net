@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DocoptNet;
@@ -30,7 +31,7 @@ namespace BlobStorageProcessor
     container(s) will be ignored.
 
     Usage:
-      BlobStorageProcessor.exe classify (<container>...) --classifier=<classifier> (--connection-string=<connection-string> | --container-sas=<container-sas>)
+      BlobStorageProcessor.exe classify (<container>...) --classifier=<classifier> [--output=<file>] (--connection-string=<connection-string> | --container-sas=<container-sas>)
       BlobStorageProcessor.exe (-h | --help)
       BlobStorageProcessor.exe --version
 
@@ -39,6 +40,7 @@ namespace BlobStorageProcessor
       --classifier=<classifier>                The classifier, previously created on Waives, with which the blobs will be classified.
       --connection-string=<connection-string>  A connection string to your Azure Blob Storage account. At least one <container> must be specified if using this option.
       --container-sas=<container-sas>          A Shared Access Signature (SAS) for an Azure Blob Storage container. <container> is ignored if using this option.
+      --output=<file>                          The file to which the CSV records will be written. [default: stdout]
 
 ";
 
@@ -71,12 +73,26 @@ namespace BlobStorageProcessor
             var classifier = await waives.GetClassifier(options["--classifier"].ToString());
 
             // Classify the files
-            var stream = BlobStorageDocumentStream.Create(blobs);
-            stream.SubscribeConsole("Blob Storage");
-            var classificationResults = new ClassificationResultStream(classifier, stream);
-            classificationResults.SubscribeConsole("classification");
+            var blobStream = BlobStorageDocumentStream.Create(blobs);
+            var classificationResults = new ClassificationResultStream(classifier, blobStream);
 
             // Write results to a CSV file
+            var output = options["--output"].ToString();
+            if (output != "stdout")
+            {
+                blobStream.SubscribeConsole();
+
+                // Create or overwrite destination file and configure writer
+                using (var writer = new CsvWriter(new StreamWriter(File.Create(output))))
+                {
+                    classificationResults.Subscribe(writer);
+                    classificationResults.SubscribeConsole("Classification");
+                }
+            }
+            else
+            {
+                classificationResults.Subscribe(new CsvWriter(Console.Out));
+            }
         }
     }
 }
