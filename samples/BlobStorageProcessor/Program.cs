@@ -6,6 +6,7 @@ using DocoptNet;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Waives.Client;
+using Waives.NET;
 
 namespace BlobStorageProcessor
 {
@@ -71,6 +72,11 @@ namespace BlobStorageProcessor
             var classifier = await waives.GetClassifier(options["--classifier"].ToString());
 
             // Classify the files
+            var stream = BlobStorageDocumentStream.Create(blobs);
+            stream.SubscribeConsole("Blob Storage");
+            var classificationResults = new ClassificationResultStream(classifier, stream);
+            classificationResults.SubscribeConsole("classification");
+
             // Write results to a CSV file
         }
 
