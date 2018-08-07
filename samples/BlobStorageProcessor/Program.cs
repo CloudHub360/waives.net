@@ -63,8 +63,7 @@ namespace BlobStorageProcessor
             }
 
             // Identify all blobs there
-            var blobs = containers.SelectMany(GetBlobsInContainer).ToList();
-            Console.WriteLine($"Found {blobs.Count} blobs in containers {string.Join(", ", containers.Select(c => c.Name))}");
+            var blobs = (await Task.WhenAll(containers.Select(GetBlobsInContainer))).SelectMany(c => c);
 
             // Log in to Waives
             var waives = new WaivesClient();
@@ -80,22 +79,41 @@ namespace BlobStorageProcessor
             // Write results to a CSV file
         }
 
-        private static IEnumerable<CloudBlockBlob> GetBlobsInContainer(CloudBlobContainer container)
+        private static async Task<IEnumerable<CloudBlockBlob>> GetBlobsInContainer(CloudBlobContainer container)
         {
-            var continuation = new BlobContinuationToken();
-            var allBlobs = Task.Run(() => container.ListBlobsSegmentedAsync(continuation)).Result.Results;
-            var blobsInDirectories = allBlobs.OfType<CloudBlobDirectory>().SelectMany(GetBlobsInDirectory);
-            var blobs = allBlobs.OfType<CloudBlockBlob>().Concat(blobsInDirectories);
-            return blobs;
+            BlobContinuationToken continuation = null;
+            var allBlobs = new List<CloudBlockBlob>();
+
+            do
+            {
+                var segment = await container.ListBlobsSegmentedAsync(continuation);
+                continuation = segment.ContinuationToken;
+
+                var directories = segment.Results.OfType<CloudBlobDirectory>();
+                var blobsInDirectories = (await Task.WhenAll(directories.Select(GetBlobsInDirectory))).SelectMany(d => d);
+                allBlobs.AddRange(segment.Results.OfType<CloudBlockBlob>().Concat(blobsInDirectories));
+            } while (continuation != null);
+
+            return allBlobs;
         }
 
-        private static IEnumerable<CloudBlockBlob> GetBlobsInDirectory(CloudBlobDirectory directory)
+        private static async Task<IEnumerable<CloudBlockBlob>> GetBlobsInDirectory(CloudBlobDirectory directory)
         {
-            var continuation = new BlobContinuationToken();
-            var allBlobs = Task.Run(() => directory.ListBlobsSegmentedAsync(continuation)).Result.Results;
-            var subDirectoryBlobs = allBlobs.OfType<CloudBlobDirectory>().SelectMany(GetBlobsInDirectory);
+            BlobContinuationToken continuation = null;
+            var allBlobs = new List<CloudBlockBlob>();
 
-            return allBlobs.OfType<CloudBlockBlob>().Concat(subDirectoryBlobs);
+            do
+            {
+                var blobSegment = await directory.ListBlobsSegmentedAsync(continuation);
+                continuation = blobSegment.ContinuationToken;
+
+                var directories = blobSegment.Results.OfType<CloudBlobDirectory>();
+                var subDirectoryBlobs = (await Task.WhenAll(directories.Select(GetBlobsInDirectory))).SelectMany(d => d);
+
+                allBlobs.AddRange(blobSegment.Results.OfType<CloudBlockBlob>().Concat(subDirectoryBlobs));
+            } while (continuation != null);
+
+            return allBlobs;
         }
     }
 }
