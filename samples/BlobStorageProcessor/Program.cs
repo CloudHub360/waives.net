@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DocoptNet;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Waives.Client;
 
 namespace BlobStorageProcessor
 {
@@ -63,6 +64,11 @@ namespace BlobStorageProcessor
             // Identify all blobs there
             var blobs = containers.SelectMany(GetBlobsInContainer).ToList();
             Console.WriteLine($"Found {blobs.Count} blobs in containers {string.Join(", ", containers.Select(c => c.Name))}");
+
+            // Log in to Waives
+            var waives = new WaivesClient();
+            await waives.Login("clientId", "clientSecret");
+            var classifier = await waives.GetClassifier(options["--classifier"].ToString());
 
             // Classify the files
             // Write results to a CSV file
