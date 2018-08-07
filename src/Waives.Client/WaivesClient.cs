@@ -24,7 +24,7 @@ namespace Waives.Client
         {
             var requestBody = new StreamContent(documentSource);
             var response = await HttpClient.PostAsync("/documents", requestBody).ConfigureAwait(false);
-            EnsureSuccessStatus(response);
+            await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
@@ -35,7 +35,7 @@ namespace Waives.Client
         public async Task<Document> CreateDocument(string path)
         {
             var response = await HttpClient.PostAsync("/documents", new StreamContent(File.OpenRead(path))).ConfigureAwait(false);
-            EnsureSuccessStatus(response);
+            await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
@@ -46,7 +46,7 @@ namespace Waives.Client
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
         {
             var response = await HttpClient.PostAsync($"/classifiers/{name}", null).ConfigureAwait(false);
-            EnsureSuccessStatus(response);
+            await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
@@ -64,7 +64,7 @@ namespace Waives.Client
         public async Task<Classifier> GetClassifier(string name)
         {
             var response = await HttpClient.GetAsync($"/classifiers/{name}").ConfigureAwait(false);
-            EnsureSuccessStatus(response);
+            await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
@@ -80,7 +80,7 @@ namespace Waives.Client
                 { "client_secret", clientSecret },
             })).ConfigureAwait(false);
 
-            EnsureSuccessStatus(response);
+            await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
             var accessToken = responseContent.Token;
@@ -88,14 +88,16 @@ namespace Waives.Client
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
         }
 
-        private static void EnsureSuccessStatus(HttpResponseMessage response)
+        private static async Task EnsureSuccessStatus(HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode)
             {
                 return;
             }
 
-            throw new WaivesApiException($"Request failed with response {(int)response.StatusCode} {response.StatusCode}.");
+            var error = await response.Content.ReadAsAsync<Error>().ConfigureAwait(false);
+
+            throw new WaivesApiException(error.Message);
         }
     }
 }
