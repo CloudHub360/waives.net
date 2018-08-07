@@ -5,6 +5,20 @@
     <VersionPrefix>0.1.0</VersionPrefix>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LangVersion>latest</LangVersion>
+    <AssemblyName>Waives</AssemblyName>
+    <RootNamespace>Waives</RootNamespace>
+    <Version>0.2.0</Version>
+    <Company>CloudHub 360 Ltd.</Company>
+    <Product>Waives.io</Product>
+    <Authors>CloudHub 360 Ltd.</Authors>
+    <Copyright>CloudHub 360 Ltd.</Copyright>
+    <PackageLicenseUrl>https://github.com/waives/waives.net/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl></PackageProjectUrl>
+    <PackageIconUrl>https://avatars1.githubusercontent.com/u/41697261?s=400&amp;u=232bcf1c9ce942b67c9d42925ba8242602dccbe5&amp;v=4</PackageIconUrl>
+    <RepositoryUrl>https://github.com/waives/waives.net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>This is the top-level library for the Waives .NET SDK.</Description>
   </PropertyGroup>
 
   <ItemGroup>
