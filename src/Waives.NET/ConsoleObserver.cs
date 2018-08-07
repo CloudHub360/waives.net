@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FileSorter
+namespace Waives.NET
 {
     public class ConsoleObserver<T> : IObserver<T>
     {
@@ -25,14 +25,6 @@ namespace FileSorter
         public void OnNext(T value)
         {
             Console.WriteLine($"{_name} - OnNext({value})");
-        }
-    }
-
-    public static class Extensions
-    {
-        public static IDisposable SubscribeConsole<T>(this IObservable<T> observable, string name = "")
-        {
-            return observable.Subscribe(new ConsoleObserver<T>(name));
         }
     }
 }
