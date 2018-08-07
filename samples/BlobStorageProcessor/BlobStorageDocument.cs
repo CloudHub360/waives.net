@@ -18,5 +18,10 @@ namespace BlobStorageProcessor
         {
             return await _blob.OpenReadAsync();
         }
+
+        public override string ToString()
+        {
+            return _blob.Name;
+        }
     }
 }

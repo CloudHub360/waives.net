@@ -14,5 +14,10 @@ namespace Waives.NET
         public IDocumentSource Document { get; }
 
         public ClassificationResult ClassificationResult { get; }
+
+        public override string ToString()
+        {
+            return $"{ClassificationResult.DocumentType} ({(ClassificationResult.IsConfident ? "" : "Not ")}Confident)";
+        }
     }
 }
