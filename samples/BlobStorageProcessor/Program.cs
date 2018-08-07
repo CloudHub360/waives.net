@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DocoptNet;
 
 namespace BlobStorageProcessor
 {
-    class Program
+    public static class Program
     {
         private const string Usage = @"Blob Storage processor sample app.
 
@@ -35,7 +36,7 @@ namespace BlobStorageProcessor
 
 ";
 
-        static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Point at a blob storage account
             var options = new Docopt().Apply(Usage, args, version: "Blob Storage processor sample app 1.0", exit: true);
