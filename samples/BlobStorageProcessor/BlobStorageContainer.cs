@@ -22,31 +22,10 @@ namespace BlobStorageProcessor
 
             do
             {
-                var segment = await _containerReference.ListBlobsSegmentedAsync(continuation);
+                var segment = await _containerReference.ListBlobsSegmentedAsync(string.Empty, useFlatBlobListing: true, BlobListingDetails.None, null, continuation, null, null);
                 continuation = segment.ContinuationToken;
 
-                var directories = segment.Results.OfType<CloudBlobDirectory>();
-                var blobsInDirectories = (await Task.WhenAll(directories.Select(GetBlobsInDirectory))).SelectMany(d => d);
-                allBlobs.AddRange(segment.Results.OfType<CloudBlockBlob>().Concat(blobsInDirectories));
-            } while (continuation != null);
-
-            return allBlobs;
-        }
-
-        private static async Task<IEnumerable<CloudBlockBlob>> GetBlobsInDirectory(CloudBlobDirectory directory)
-        {
-            BlobContinuationToken continuation = null;
-            var allBlobs = new List<CloudBlockBlob>();
-
-            do
-            {
-                var blobSegment = await directory.ListBlobsSegmentedAsync(continuation);
-                continuation = blobSegment.ContinuationToken;
-
-                var directories = blobSegment.Results.OfType<CloudBlobDirectory>();
-                var subDirectoryBlobs = (await Task.WhenAll(directories.Select(GetBlobsInDirectory))).SelectMany(d => d);
-
-                allBlobs.AddRange(blobSegment.Results.OfType<CloudBlockBlob>().Concat(subDirectoryBlobs));
+                allBlobs.AddRange(segment.Results.OfType<CloudBlockBlob>());
             } while (continuation != null);
 
             return allBlobs;
