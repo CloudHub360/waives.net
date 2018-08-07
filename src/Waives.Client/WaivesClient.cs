@@ -95,9 +95,14 @@ namespace Waives.Client
                 return;
             }
 
-            var error = await response.Content.ReadAsAsync<Error>().ConfigureAwait(false);
+            var responseContentType = response.Content.Headers.ContentType.MediaType;
+            if (responseContentType == "application/json")
+            {
+                var error = await response.Content.ReadAsAsync<Error>().ConfigureAwait(false);
+                throw new WaivesApiException(error.Message);
+            }
 
-            throw new WaivesApiException(error.Message);
+            throw new WaivesApiException($"Unknown Waives error occured: {(int)response.StatusCode} {response.ReasonPhrase}");
         }
     }
 }
