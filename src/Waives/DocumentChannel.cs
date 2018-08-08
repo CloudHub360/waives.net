@@ -3,11 +3,11 @@ using System.Reactive.Disposables;
 
 namespace Waives
 {
-    public abstract class DocumentStream : IObservable<IDocumentSource>
+    public abstract class DocumentChannel : IObservable<IDocumentSource>
     {
         private readonly IObservable<IDocumentSource> _observable;
 
-        protected DocumentStream(IObservable<IDocumentSource> buffer)
+        protected DocumentChannel(IObservable<IDocumentSource> buffer)
         {
             _observable = buffer;
         }

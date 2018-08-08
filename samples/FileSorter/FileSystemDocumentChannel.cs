@@ -5,13 +5,13 @@ using Waives;
 
 namespace FileSorter
 {
-    public class FileSystemDocumentStream : DocumentStream
+    public class FileSystemDocumentChannel : DocumentChannel
     {
-        private FileSystemDocumentStream(IObservable<IDocumentSource> buffer) : base(buffer)
+        private FileSystemDocumentChannel(IObservable<IDocumentSource> buffer) : base(buffer)
         {
         }
 
-        public static DocumentStream Create(string inbox)
+        public static DocumentChannel Create(string inbox)
         {
             var watcher = new FileSystemWatcher(inbox)
             {
@@ -27,7 +27,7 @@ namespace FileSorter
                 .EnumerateFiles(inbox).ToObservable()
                 .Select(p => new FileSystemDocumentSource(p));
 
-            return new FileSystemDocumentStream(inboxObservable.Merge(initialContentsObservable));
+            return new FileSystemDocumentChannel(inboxObservable.Merge(initialContentsObservable));
         }
     }
 }

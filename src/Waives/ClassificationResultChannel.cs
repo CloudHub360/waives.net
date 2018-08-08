@@ -6,20 +6,20 @@ using Waives.Client;
 
 namespace Waives
 {
-    public class ClassificationResultStream : IObservable<DocumentClassification>
+    public class ClassificationResultChannel : IObservable<DocumentClassification>
     {
         private readonly Classifier _classifier;
-        private readonly IObservable<IDocumentSource> _documentStream;
+        private readonly IObservable<IDocumentSource> _documentChannel;
 
-        public ClassificationResultStream(Classifier classifier, IObservable<IDocumentSource> documentStream)
+        public ClassificationResultChannel(Classifier classifier, IObservable<IDocumentSource> documentChannel)
         {
             _classifier = classifier;
-            _documentStream = documentStream;
+            _documentChannel = documentChannel;
         }
 
         public IDisposable Subscribe(IObserver<DocumentClassification> observer)
         {
-            var subscription = _documentStream.Select(d => Task.Run(() => ClassifyDocument(d)).Result).Subscribe(observer);
+            var subscription = _documentChannel.Select(d => Task.Run(() => ClassifyDocument(d)).Result).Subscribe(observer);
             return Disposable.Create(() => subscription.Dispose());
         }
 
