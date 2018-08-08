@@ -2,7 +2,7 @@
 
 namespace Waives
 {
-    public static class Extensions
+    public static class WaivesObservable
     {
         public static IDisposable SubscribeConsole<T>(this IObservable<T> observable, string name = "")
         {

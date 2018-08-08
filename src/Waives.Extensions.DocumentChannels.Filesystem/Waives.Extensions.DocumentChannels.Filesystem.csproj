@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.1.0</Version>
+    <Company>CloudHub 360 Ltd.</Company>
+    <Authors>CloudHub 360 Ltd.</Authors>
+    <Product>Waives.io</Product>
+    <Description>This extension provides file system-appropriate implementations of DocumentChannel from the core library.</Description>
+    <Copyright>CloudHub 360 Ltd.</Copyright>
+    <PackageLicenseUrl>https://github.com/waives/waives.net/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageIconUrl>https://avatars1.githubusercontent.com/u/41697261?s=400&amp;amp;u=232bcf1c9ce942b67c9d42925ba8242602dccbe5&amp;amp;v=4</PackageIconUrl>
+    <RepositoryUrl>https://github.com/waives/waives.net</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Waives\Waives.csproj" />
+  </ItemGroup>
+
+</Project>
