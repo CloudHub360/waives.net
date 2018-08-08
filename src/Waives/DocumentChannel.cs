@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Disposables;
 
 namespace Waives
 {
@@ -14,8 +13,7 @@ namespace Waives
 
         public IDisposable Subscribe(IObserver<IDocumentSource> observer)
         {
-            _observable.Subscribe(observer);
-            return Disposable.Empty;
+            return _observable.Subscribe(observer);
         }
     }
 }
