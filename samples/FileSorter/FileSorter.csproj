@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Waives.Extensions.DocumentChannels.Filesystem\Waives.Extensions.DocumentChannels.Filesystem.csproj" />
     <ProjectReference Include="..\..\src\Waives\Waives.csproj" />
   </ItemGroup>
 

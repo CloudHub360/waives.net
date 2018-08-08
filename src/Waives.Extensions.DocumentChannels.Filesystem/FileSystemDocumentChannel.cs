@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Reactive.Linq;
-using Waives;
 
-namespace FileSorter
+namespace Waives.Extensions.DocumentChannels.Filesystem
 {
     public class FileSystemDocumentChannel : DocumentChannel
     {
@@ -27,7 +26,7 @@ namespace FileSorter
                 .EnumerateFiles(inbox).ToObservable()
                 .Select(p => new FileSystemDocumentSource(p));
 
-            return new FileSystemDocumentChannel(inboxObservable.Merge(initialContentsObservable));
+            return new FileSystemDocumentChannel(initialContentsObservable.Concat(inboxObservable));
         }
     }
 }
