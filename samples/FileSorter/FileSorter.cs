@@ -15,11 +15,6 @@ namespace FileSorter
             _errorboxPath = errorboxPath;
         }
 
-        public IDisposable SubscribeTo(IObservable<DocumentClassification> classificationResults)
-        {
-            return classificationResults.Subscribe(this);
-        }
-
         public void OnCompleted()
         {
 
