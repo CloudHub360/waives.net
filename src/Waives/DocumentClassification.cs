@@ -17,7 +17,7 @@ namespace Waives
 
         public override string ToString()
         {
-            return $"{ClassificationResult.DocumentType} ({(ClassificationResult.IsConfident ? "" : "Not ")}Confident)";
+            return $"{Document.SourceId}: {ClassificationResult.DocumentType} ({(ClassificationResult.IsConfident ? "" : "Not ")}Confident)";
         }
     }
 }

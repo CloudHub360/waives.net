@@ -15,6 +15,11 @@ namespace FileSorter
             _errorboxPath = errorboxPath;
         }
 
+        public IDisposable SubscribeTo(IObservable<DocumentClassification> classificationResults)
+        {
+            return classificationResults.Subscribe(this);
+        }
+
         public void OnCompleted()
         {
 
@@ -42,8 +47,9 @@ namespace FileSorter
 
             try
             {
-                File.Move(fileSystemDocument.FilePath.FullName,
-                    Path.Combine(destination, fileSystemDocument.FilePath.Name);
+                var destinationFileName = Path.Combine(destination, fileSystemDocument.FilePath.Name);
+                Console.WriteLine($"Moving {fileSystemDocument} to {destinationFileName}");
+                File.Move(fileSystemDocument.FilePath.FullName, destinationFileName);
             }
             catch (IOException ex)
             {
