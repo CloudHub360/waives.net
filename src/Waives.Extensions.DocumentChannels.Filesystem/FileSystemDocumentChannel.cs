@@ -10,23 +10,28 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
         {
         }
 
-        public static DocumentChannel Create(string inbox)
+        public static DocumentChannel Create(string inbox, bool watch = false)
         {
-            var watcher = new FileSystemWatcher(inbox)
-            {
-                IncludeSubdirectories = false,
-                EnableRaisingEvents = true
-            };
-
-            var inboxObservable = Observable
-                .FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Created))
-                .Select(e => new FileSystemDocumentSource(e.EventArgs.FullPath));
-
             var initialContentsObservable = Directory
                 .EnumerateFiles(inbox).ToObservable()
                 .Select(p => new FileSystemDocumentSource(p));
 
-            return new FileSystemDocumentChannel(initialContentsObservable.Concat(inboxObservable));
+            if (watch)
+            {
+                var watcher = new FileSystemWatcher(inbox)
+                {
+                    IncludeSubdirectories = false,
+                    EnableRaisingEvents = true
+                };
+
+                var inboxObservable = Observable
+                    .FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Created))
+                    .Select(e => new FileSystemDocumentSource(e.EventArgs.FullPath));
+
+                return new FileSystemDocumentChannel(initialContentsObservable.Concat(inboxObservable));
+            }
+
+            return new FileSystemDocumentChannel(initialContentsObservable);
         }
     }
 }
