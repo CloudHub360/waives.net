@@ -37,21 +37,9 @@ function Test-ProjectFile([Io.FileInfo]$projectFile) {
 Task Build {
   try {
     Push-Location $RootDir
-
-    [int] $buildNumber = $env:BUILD_NUMBER
-    if ($buildNumber -eq $null) { $buildNumber = 0 }
-
-    $isMaster = ($(git rev-parse --abbrev-ref HEAD) -eq 'master')
-
-    if ($isMaster) {
-      # Build stable package versions
-      $versionSuffix = ''
-    } else {
-      # Build a pre-release package on branches
-      $versionSuffix = "$([string]::Format('pre-{0:d6}', $buildNumber))"
-    }
-
-    dotnet build $SolutionFile -c $Configuration --version-suffix=$versionSuffix
+    [int] $buildNumber = $env:BUILD_COUNTER
+    $version = $env:BUILD_NUMBER
+    dotnet build $SolutionFile -c $Configuration /p:Version=$version
   } finally {
     Pop-Location
   }
