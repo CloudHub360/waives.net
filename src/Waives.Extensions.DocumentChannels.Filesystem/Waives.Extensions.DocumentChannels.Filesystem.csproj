@@ -11,6 +11,8 @@
     <PackageLicenseUrl>https://github.com/waives/waives.net/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/41697261?s=400&amp;amp;u=232bcf1c9ce942b67c9d42925ba8242602dccbe5&amp;amp;v=4</PackageIconUrl>
     <RepositoryUrl>https://github.com/waives/waives.net</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
