@@ -7,7 +7,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Waives</AssemblyName>
     <RootNamespace>Waives</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Company>CloudHub 360 Ltd.</Company>
     <Product>Waives.io</Product>
     <Authors>CloudHub 360 Ltd.</Authors>

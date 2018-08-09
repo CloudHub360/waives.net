@@ -51,11 +51,11 @@ namespace FileSorter
             await waives.Login("clientId", "clientSecret");
             var classifier = await waives.GetClassifier(options["<classifier>"].ToString());
 
-            var documentChannel = FileSystemDocumentChannel.Create(inbox);
-            var classificationResultChannel = new ClassificationResultChannel(classifier, documentChannel);
+            var documentSource = FileSystemDocumentSource.Create(inbox);
+            var classificationResultChannel = new ClassificationResultChannel(classifier, documentSource);
 
-            documentChannel.Subscribe(new ConsoleObserver<IDocumentSource>("documents"));
-            classificationResultChannel.Subscribe(new ConsoleObserver<DocumentClassification>("classification"));
+            documentSource.SubscribeConsole("documents");
+            classificationResultChannel.SubscribeConsole("classification");
             classificationResultChannel.Subscribe(new FileSorter(outbox, errorbox));
 
             Console.ReadLine();

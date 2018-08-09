@@ -5,17 +5,20 @@ using System.Reactive.Linq;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem
 {
-    public class FileSystemDocumentChannel : DocumentChannel
+    /// <summary>
+    /// A folder on disk from where documents will be retrieved for processing.
+    /// </summary>
+    public class FileSystemDocumentSource : DocumentSource
     {
-        private FileSystemDocumentChannel(IObservable<IDocumentSource> buffer) : base(buffer)
+        private FileSystemDocumentSource(IObservable<Document> buffer) : base(buffer)
         {
         }
 
-        public static DocumentChannel Create(string inbox, bool watch = false)
+        public static DocumentSource Create(string inbox, bool watch = false)
         {
             var initialContents = Directory
                 .EnumerateFiles(inbox)
-                .Select(p => new FileSystemDocumentSource(p))
+                .Select(p => new FileSystemDocument(p))
                 .ToObservable();
 
             if (watch)
@@ -28,12 +31,12 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
 
                 var createdFiles = Observable
                     .FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Created))
-                    .Select(e => new FileSystemDocumentSource(e.EventArgs.FullPath));
+                    .Select(e => new FileSystemDocument(e.EventArgs.FullPath));
 
-                return new FileSystemDocumentChannel(initialContents.Concat(createdFiles));
+                return new FileSystemDocumentSource(initialContents.Concat(createdFiles));
             }
 
-            return new FileSystemDocumentChannel(initialContents);
+            return new FileSystemDocumentSource(initialContents);
         }
     }
 }

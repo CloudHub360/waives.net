@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
 {
     // ReSharper disable once InconsistentNaming
-    public class FileSystemDocumentChannel_Should
+    public class FileSystemDocumentSource_Should
     {
         private static readonly string TestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "test-files");
 
         private readonly IEnumerable<string> _filesInTestDirectory;
         private readonly string _newTestFile = Path.Combine(TestDirectory, $"{Guid.NewGuid()}.txt");
 
-        public FileSystemDocumentChannel_Should()
+        public FileSystemDocumentSource_Should()
         {
             _filesInTestDirectory = Directory.EnumerateFiles(TestDirectory);
         }
@@ -25,10 +23,10 @@ namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
         [Fact]
         public void Return_all_files_in_the_specified_directory()
         {
-            var sut = FileSystemDocumentChannel.Create(TestDirectory);
+            var sut = FileSystemDocumentSource.Create(TestDirectory);
 
             var expected = _filesInTestDirectory
-                .Select(d => new FileSystemDocumentSource(d));
+                .Select(d => new FileSystemDocument(d));
 
             Assert.Equal(expected, sut.ToEnumerable());
         }
@@ -36,9 +34,9 @@ namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
         [Fact]
         public void Return_new_files_created_in_the_specified_directory()
         {
-            var sut = FileSystemDocumentChannel.Create(TestDirectory, watch: true);
+            var sut = FileSystemDocumentSource.Create(TestDirectory, watch: true);
 
-            sut.Cast<FileSystemDocumentSource>()
+            sut.Cast<FileSystemDocument>()
                 .Skip(_filesInTestDirectory.Count())
                 .Take(1)
                 .Subscribe(d =>

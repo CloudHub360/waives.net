@@ -27,23 +27,23 @@ namespace FileSorter
 
         public void OnNext(DocumentClassification value)
         {
-            if (!(value.Document is FileSystemDocumentSource documentSource))
+            if (!(value.Document is FileSystemDocument document))
             {
                 throw new InvalidOperationException("Cannot move");
             }
 
-            MoveFile(documentSource, _outboxPath, value.ClassificationResult.DocumentType);
+            MoveFile(document, _outboxPath, value.ClassificationResult.DocumentType);
         }
 
-        private void MoveFile(FileSystemDocumentSource fileSystemDocumentSource, string boxPath, string subfolder = "")
+        private void MoveFile(FileSystemDocument fileSystemDocument, string boxPath, string subfolder = "")
         {
             var destination = Path.Combine(boxPath, subfolder);
             EnsureDirectoryExists(destination);
 
             try
             {
-                File.Move(fileSystemDocumentSource.FilePath.FullName,
-                    Path.Combine(destination, fileSystemDocumentSource.FilePath.Name));
+                File.Move(fileSystemDocument.FilePath.FullName,
+                    Path.Combine(destination, fileSystemDocument.FilePath.Name);
             }
             catch (IOException ex)
             {

@@ -5,16 +5,16 @@ using Waives;
 
 namespace BlobStorageProcessor
 {
-    internal class BlobStorageDocument : IDocumentSource
+    internal class BlobStorageDocument : Document
     {
         private readonly CloudBlockBlob _blob;
 
-        public BlobStorageDocument(CloudBlockBlob blob)
+        public BlobStorageDocument(CloudBlockBlob blob) : base(blob.Uri.ToString())
         {
             _blob = blob;
         }
 
-        public async Task<Stream> OpenStream()
+        public override async Task<Stream> OpenStream()
         {
             return await _blob.OpenReadAsync();
         }

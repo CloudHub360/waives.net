@@ -73,7 +73,7 @@ namespace BlobStorageProcessor
             var classifier = await waives.GetClassifier(options["--classifier"].ToString());
 
             // Classify the files
-            var blobChannel = BlobStorageDocumentChannel.Create(blobs);
+            var blobChannel = BlobStorageDocumentSource.Create(blobs);
             var classificationResults = new ClassificationResultChannel(classifier, blobChannel);
 
             // Write results to a CSV file

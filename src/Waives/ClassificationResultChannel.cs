@@ -9,9 +9,9 @@ namespace Waives
     public class ClassificationResultChannel : IObservable<DocumentClassification>
     {
         private readonly Classifier _classifier;
-        private readonly IObservable<IDocumentSource> _documentChannel;
+        private readonly IObservable<Document> _documentChannel;
 
-        public ClassificationResultChannel(Classifier classifier, IObservable<IDocumentSource> documentChannel)
+        public ClassificationResultChannel(Classifier classifier, IObservable<Document> documentChannel)
         {
             _classifier = classifier;
             _documentChannel = documentChannel;
@@ -19,11 +19,10 @@ namespace Waives
 
         public IDisposable Subscribe(IObserver<DocumentClassification> observer)
         {
-            var subscription = _documentChannel.Select(d => Task.Run(() => ClassifyDocument(d)).Result).Subscribe(observer);
-            return Disposable.Create(() => subscription.Dispose());
+            return _documentChannel.Select(d => Task.Run(() => ClassifyDocument(d)).Result).Subscribe(observer);
         }
 
-        private async Task<DocumentClassification> ClassifyDocument(IDocumentSource document)
+        private async Task<DocumentClassification> ClassifyDocument(Document document)
         {
             using (var documentStream = await document.OpenStream().ConfigureAwait(false))
             {
