@@ -52,7 +52,7 @@ namespace FileSorter
             var _classifier = await waives.GetClassifier(options["<classifier>"].ToString());
 
             var documentSource = FileSystemDocumentSource.Create(inbox);
-            var classifier = new ClassificationResultChannel(_classifier, documentSource);
+            var classifier = new Classifier(options["<classifier>"].ToString(), documentSource);
 
             new FileSorter(outbox, errorbox).SubscribeTo(classifier);
 

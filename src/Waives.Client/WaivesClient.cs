@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Waives.Client.Responses;
 
 [assembly: InternalsVisibleTo("Waives.Client.Tests")]
+[assembly: InternalsVisibleTo("Waives")]
 namespace Waives.Client
 {
     public class WaivesClient

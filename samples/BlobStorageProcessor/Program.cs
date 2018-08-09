@@ -74,7 +74,7 @@ namespace BlobStorageProcessor
 
             // Classify the files
             var blobChannel = BlobStorageDocumentSource.Create(blobs);
-            var classificationResults = new ClassificationResultChannel(classifier, blobChannel);
+            var classificationResults = new Classifier(options["--classifier"].ToString(), blobChannel);
 
             // Write results to a CSV file
             var output = options["--output"].ToString();
