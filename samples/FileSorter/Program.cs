@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Waives;
-using Waives.Client;
 using Waives.Extensions.DocumentChannels.Filesystem;
 
 namespace FileSorter
 {
+    using Waives;
+
     public static class Program
     {
         private const string Usage = @"File system sorter sample app.
@@ -47,9 +47,7 @@ namespace FileSorter
             EnsureDirectoryExists(outbox);
             EnsureDirectoryExists(errorbox);
 
-            var waives = new WaivesClient();
-            await waives.Login("clientId", "clientSecret");
-            var _classifier = await waives.GetClassifier(options["<classifier>"].ToString());
+            await Waives.Login("clientId", "clientSecret");
 
             var documentSource = FileSystemDocumentSource.Create(inbox);
             var classifier = new Classifier(options["<classifier>"].ToString(), documentSource);
