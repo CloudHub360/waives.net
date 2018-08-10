@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives
+namespace Waives.Reactive
 {
     public static class WaivesObservable
     {

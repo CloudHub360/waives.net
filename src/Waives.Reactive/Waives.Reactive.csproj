@@ -5,8 +5,8 @@
     <VersionPrefix>0.1.0</VersionPrefix>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LangVersion>latest</LangVersion>
-    <AssemblyName>Waives</AssemblyName>
-    <RootNamespace>Waives</RootNamespace>
+    <AssemblyName>Waives.Reactive</AssemblyName>
+    <RootNamespace>Waives.Reactive</RootNamespace>
     <Version>0.3.0</Version>
     <Company>CloudHub 360 Ltd.</Company>
     <Product>Waives.io</Product>
@@ -18,7 +18,8 @@
     <RepositoryUrl>https://github.com/waives/waives.net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>This is the top-level library for the Waives .NET SDK.</Description>
+    <Description>This provides a Reactive API for building document processing pipelines with the Waives API.</Description>
+    <PackageId>Waives.Reactive</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

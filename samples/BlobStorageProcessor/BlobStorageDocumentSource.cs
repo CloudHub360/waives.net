@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Waives;
+using Waives.Reactive;
 
 namespace BlobStorageProcessor
 {

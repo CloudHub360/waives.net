@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Waives.Reactive;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem
 {

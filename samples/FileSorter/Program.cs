@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Waives.Extensions.DocumentChannels.Filesystem;
+using Waives.Reactive;
 
 namespace FileSorter
 {
@@ -47,7 +48,7 @@ namespace FileSorter
             EnsureDirectoryExists(outbox);
             EnsureDirectoryExists(errorbox);
 
-            await Waives.Login("clientId", "clientSecret");
+            await Waives.Reactive.WaivesApi.Login("clientId", "clientSecret");
 
             var documentSource = FileSystemDocumentSource.Create(inbox);
             var classifier = new Classification(options["<classifier>"].ToString(), documentSource);

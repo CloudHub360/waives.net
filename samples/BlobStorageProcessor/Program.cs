@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using DocoptNet;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Waives.Reactive;
 
 namespace BlobStorageProcessor
 {
-    using Waives;
-
     public static class Program
     {
         private const string Usage = @"Blob Storage processor sample app.
@@ -68,7 +67,7 @@ namespace BlobStorageProcessor
             var blobs = (await Task.WhenAll(containers.Select(c => c.GetBlobs()))).SelectMany(c => c);
 
             // Log in to Waives
-            await Waives.Login("clientId", "clientSecret");
+            await WaivesApi.Login("clientId", "clientSecret");
 
             // Classify the files
             var blobChannel = BlobStorageDocumentSource.Create(blobs);

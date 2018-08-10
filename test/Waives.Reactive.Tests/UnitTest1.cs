@@ -1,7 +1,6 @@
-using System;
 using Xunit;
 
-namespace Waives.NET.Tests
+namespace Waives.Reactive.Tests
 {
     public class UnitTest1
     {

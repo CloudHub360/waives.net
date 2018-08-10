@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives
+namespace Waives.Reactive
 {
     public class ConsoleObserver<T> : IObserver<T>
     {

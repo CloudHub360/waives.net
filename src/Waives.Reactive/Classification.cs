@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Waives.Http;
 
-namespace Waives
+namespace Waives.Reactive
 {
     public class Classification : IObservable<DocumentClassification>
     {
         private readonly string _name;
 
-        private Client.Classifier _classifier;
+        private Classifier _classifier;
         private readonly IObservable<Document> _documentChannel;
 
         public Classification(string name, IObservable<Document> documentChannel)
@@ -24,7 +25,7 @@ namespace Waives
 
         public IDisposable Subscribe(IObserver<DocumentClassification> observer)
         {
-            _classifier = _classifier ?? Task.Run(() => Waives.ApiClient.GetClassifier(_name)).Result;
+            _classifier = _classifier ?? Task.Run(() => WaivesApi.ApiClient.GetClassifier(_name)).Result;
 
             return _documentChannel.Select(d => Task.Run(() => ClassifyDocument(d)).Result).Subscribe(observer);
         }

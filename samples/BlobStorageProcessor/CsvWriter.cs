@@ -2,6 +2,7 @@
 using System.IO;
 using CsvHelper;
 using Waives;
+using Waives.Reactive;
 
 namespace BlobStorageProcessor
 {

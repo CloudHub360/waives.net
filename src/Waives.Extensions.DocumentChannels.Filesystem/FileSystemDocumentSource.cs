@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using Waives.Reactive;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem
 {

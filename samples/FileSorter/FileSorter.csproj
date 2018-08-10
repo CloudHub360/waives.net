@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Waives.Extensions.DocumentChannels.Filesystem\Waives.Extensions.DocumentChannels.Filesystem.csproj" />
-    <ProjectReference Include="..\..\src\Waives\Waives.csproj" />
+    <ProjectReference Include="..\..\src\Waives.Reactive\Waives.Reactive.csproj" />
   </ItemGroup>
 
 </Project>

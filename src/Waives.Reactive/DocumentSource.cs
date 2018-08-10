@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives
+namespace Waives.Reactive
 {
     /// <summary>
     /// Provides a set of documents to be processed. Use <see cref="Subscribe"/>

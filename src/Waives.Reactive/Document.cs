@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace Waives
+namespace Waives.Reactive
 {
     /// <summary>
     /// Represents a document which will be processed.

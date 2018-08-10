@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Waives.Client;
+using Waives.Http;
 
-namespace Waives
+namespace Waives.Reactive
 {
-    public static class Waives
+    public static class WaivesApi
     {
         internal static WaivesClient ApiClient { get; private set; } = new WaivesClient();
 
