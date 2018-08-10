@@ -1,4 +1,4 @@
-﻿namespace Waives.Client
+﻿namespace Waives.Http
 {
     public static class ContentTypes
     {

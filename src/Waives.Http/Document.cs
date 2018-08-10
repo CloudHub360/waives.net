@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Waives.Client.Responses;
+using Waives.Http.Responses;
 
-namespace Waives.Client
+namespace Waives.Http
 {
     public class Document
     {

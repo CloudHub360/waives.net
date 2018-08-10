@@ -2,7 +2,7 @@
 using MockWaivesApi;
 using Xunit;
 
-namespace Waives.Client.Tests.IntegrationTests
+namespace Waives.Http.Tests.IntegrationTests
 {
     // ReSharper disable once InconsistentNaming
     public class Classifiers_Client_Should : IntegrationTest

@@ -4,9 +4,9 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Waives.Client.Responses;
+using Waives.Http.Responses;
 
-namespace Waives.Client
+namespace Waives.Http
 {
     public class Classifier
     {

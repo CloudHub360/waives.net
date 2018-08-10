@@ -1,7 +1,6 @@
-using System;
 using Xunit;
 
-namespace Waives.Client.Tests
+namespace Waives.Http.Tests
 {
     public class UnitTest1
     {

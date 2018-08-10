@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Waives.Client.Responses
+namespace Waives.Http.Responses
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class AccessToken

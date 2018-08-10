@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using Newtonsoft.Json;
 
-namespace Waives.Client.Responses
+namespace Waives.Http.Responses
 {
     internal class HalUri
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Waives.Client.Responses
+namespace Waives.Http.Responses
 {
     internal class HalResponse
     {

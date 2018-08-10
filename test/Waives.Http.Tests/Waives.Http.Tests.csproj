@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Waives.Client\Waives.Client.csproj" />
+    <ProjectReference Include="..\..\src\Waives.Http\Waives.Http.csproj" />
     <ProjectReference Include="..\MockWaivesApi\MockWaivesApi.csproj" />
   </ItemGroup>
 

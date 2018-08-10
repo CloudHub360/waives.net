@@ -1,6 +1,6 @@
 using System;
 
-namespace Waives.Client
+namespace Waives.Http
 {
     public class WaivesApiException : Exception
     {

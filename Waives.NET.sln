@@ -17,9 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0DC578F1-8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Tests", "test\Waives.NET.Tests\Waives.Tests.csproj", "{2CD46514-29BB-43C4-9ADB-C662C5DE209A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Client", "src\Waives.Client\Waives.Client.csproj", "{A6003210-984C-4206-97F4-B7CBFA6EE318}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Http", "src\Waives.Http\Waives.Http.csproj", "{A6003210-984C-4206-97F4-B7CBFA6EE318}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Client.Tests", "test\Waives.Client.Tests\Waives.Client.Tests.csproj", "{9D2818F5-413C-432C-84C6-ADC01D39B4DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Http.Tests", "test\Waives.Http.Tests\Waives.Http.Tests.csproj", "{9D2818F5-413C-432C-84C6-ADC01D39B4DD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockWaivesApi", "test\MockWaivesApi\MockWaivesApi.csproj", "{E1F451F1-FCDA-48D5-8C32-C7EF0C848285}"
 EndProject

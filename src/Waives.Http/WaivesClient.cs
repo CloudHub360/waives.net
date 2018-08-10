@@ -4,11 +4,11 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Waives.Client.Responses;
+using Waives.Http.Responses;
 
-[assembly: InternalsVisibleTo("Waives.Client.Tests")]
-[assembly: InternalsVisibleTo("Waives")]
-namespace Waives.Client
+[assembly: InternalsVisibleTo("Waives.Http.Tests")]
+[assembly: InternalsVisibleTo("Waives.Reactive")]
+namespace Waives.Http
 {
     public class WaivesClient
     {

@@ -1,7 +1,7 @@
 ﻿using MockWaivesApi;
 using Xunit;
 
-namespace Waives.Client.Tests.IntegrationTests
+namespace Waives.Http.Tests.IntegrationTests
 {
     public abstract class IntegrationTest : IClassFixture<MockWaivesHost>
     {
