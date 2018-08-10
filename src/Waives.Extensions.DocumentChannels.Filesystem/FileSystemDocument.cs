@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace Waives
+namespace Waives.Extensions.DocumentChannels.Filesystem
 {
     /// <summary>
     /// Represents a document on disk
