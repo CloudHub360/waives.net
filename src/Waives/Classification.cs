@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 namespace Waives
 {
-    public class Classifier : IObservable<DocumentClassification>
+    public class Classification : IObservable<DocumentClassification>
     {
         private readonly string _name;
 
         private Client.Classifier _classifier;
         private readonly IObservable<Document> _documentChannel;
 
-        public Classifier(string name, IObservable<Document> documentChannel)
+        public Classification(string name, IObservable<Document> documentChannel)
         {
             if (string.IsNullOrWhiteSpace(name))
             {

@@ -50,7 +50,7 @@ namespace FileSorter
             await Waives.Login("clientId", "clientSecret");
 
             var documentSource = FileSystemDocumentSource.Create(inbox);
-            var classifier = new Classifier(options["<classifier>"].ToString(), documentSource);
+            var classifier = new Classification(options["<classifier>"].ToString(), documentSource);
 
             new FileSorter(outbox, errorbox).SubscribeTo(classifier);
 
