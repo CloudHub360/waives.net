@@ -1,8 +1,5 @@
 using System;
-using System.IO;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Responses;
 using Waives.Reactive.HttpAdapters;
@@ -43,13 +40,11 @@ namespace Waives.Reactive.Tests
             var source = Observable.Repeat<Document>(new TestDocument(Generate.Bytes()), 3);
             var pipeline = _sut.WithDocumentsFrom(source);
 
-            source.Zip(pipeline, (s, p) => (s, p.Source)).Subscribe(
-                Observer.Create<ValueTuple<Document, Document>>(
-                    t =>
-                    {
-                        var (expected, actual) = t;
-                        Assert.Same(expected, actual);
-                    }));
+            source.Zip(pipeline, (s, p) => (s, p.Source)).Subscribe(t =>
+            {
+                var (expected, actual) = t;
+                Assert.Same(expected, actual);
+            });
         }
 
         [Fact]
@@ -59,13 +54,10 @@ namespace Waives.Reactive.Tests
 
             var pipeline = _sut.WithDocumentsFrom(source);
 
-            pipeline.Subscribe(
-                Observer.Create<WaivesDocument>(
-                    t =>
-                    {
-                        var testDocument = t.Source as TestDocument;
-                        WaivesClient.Received(1).CreateDocument(testDocument.Stream);
-                    }));
+            pipeline.Subscribe(t =>
+            {
+                _documentFactory.Received(1).CreateDocument(t.Source);
+            });
         }
 
         [Fact]
