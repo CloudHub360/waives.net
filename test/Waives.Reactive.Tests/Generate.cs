@@ -15,5 +15,10 @@ namespace Waives.Reactive.Tests
             }
             return result;
         }
+
+        public static string String(string prefix = "")
+        {
+            return $"{prefix}-{Guid.NewGuid()}";
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using Waives.Http;
+using Waives.Reactive.HttpAdapters;
 
 namespace Waives.Reactive
 {
@@ -49,13 +50,13 @@ namespace Waives.Reactive
     /// </example>
     public class Pipeline : IObservable<WaivesDocument>
     {
-        private readonly IWaivesClient _apiClient;
+        private readonly IHttpDocumentFactory _documentFactory;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
         private Action _onPipelineCompleted = () => { };
 
-        public Pipeline(IWaivesClient apiClient)
+        internal Pipeline(IHttpDocumentFactory documentFactory)
         {
-            _apiClient = apiClient ?? throw new ArgumentNullException(nameof(apiClient));
+            _documentFactory = documentFactory;
         }
 
         /// <summary>
@@ -66,14 +67,21 @@ namespace Waives.Reactive
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            _pipeline = documentSource.SelectMany(async d =>
-            {
-                using (var documentStream = await d.OpenStream().ConfigureAwait(false))
-                {
-                    return new WaivesDocument(d,
-                        await _apiClient.CreateDocument(documentStream).ConfigureAwait(false));
-                }
-            });
+            _pipeline = documentSource.SelectMany(
+                async d => new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false)));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Classify a document with the specified classifier, optionally only if the specified filter returns True
+        /// </summary>
+        /// <param name="classifierName"></param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline ClassifyWith(string classifierName)
+        {
+            _pipeline = _pipeline.SelectMany(
+                async d => await d.Classify(classifierName).ConfigureAwait(false));
 
             return this;
         }

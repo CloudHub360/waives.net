@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http;
+using Waives.Reactive.HttpAdapters;
 
 [assembly: InternalsVisibleTo("Waives.Reactive.Tests")]
 namespace Waives.Reactive
@@ -128,7 +129,7 @@ namespace Waives.Reactive
         /// configure your document processing pipeline.</returns>
         public static Pipeline CreatePipeline()
         {
-            return new Pipeline(ApiClient);
+            return new Pipeline(new HttpDocumentFactory(ApiClient));
         }
     }
 }
