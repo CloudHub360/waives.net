@@ -122,11 +122,11 @@ namespace Waives.Reactive
         /// }
         /// ]]>
         /// </example>
-        /// <returns>A new <see cref="PipelineBuilder"/> instance with which you can
+        /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static PipelineBuilder CreatePipeline()
+        public static Pipeline CreatePipeline()
         {
-            return new PipelineBuilder();
+            return new Pipeline();
         }
     }
 }
