@@ -1,5 +1,6 @@
 using System;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Responses;
 using Waives.Reactive.HttpAdapters;
@@ -74,6 +75,49 @@ namespace Waives.Reactive.Tests
                 t.HttpDocument.Received(1).Classify(classifierName);
                 Assert.NotNull(t.ClassificationResults);
             });
+        }
+
+        [Fact]
+        public void Then_invokes_the_supplied_Action()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var actionInvoked = false;
+            var pipeline = _sut.WithDocumentsFrom(source)
+                .Then(d => actionInvoked = true);
+
+            pipeline.Start();
+
+            Assert.True(actionInvoked);
+        }
+
+        [Fact]
+        public void Then_invokes_the_supplied_async_Action()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var actionInvoked = false;
+            var pipeline = _sut.WithDocumentsFrom(source)
+                .Then(async d => await Task.Run(() => actionInvoked = true));
+
+            pipeline.Start();
+
+            Assert.True(actionInvoked);
+        }
+
+        [Fact]
+        public void Then_invokes_the_supplied_Func()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var actionInvoked = false;
+            var pipeline = _sut.WithDocumentsFrom(source)
+                .Then(async d =>
+                {
+                    await Task.Run(() => actionInvoked = true);
+                    return d;
+                });
+
+            pipeline.Start();
+
+            Assert.True(actionInvoked);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Waives.Reactive.HttpAdapters;
 
 namespace Waives.Reactive
@@ -81,6 +82,49 @@ namespace Waives.Reactive
         {
             _pipeline = _pipeline.SelectMany(
                 async d => await d.Classify(classifierName).ConfigureAwait(false));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Run an arbitrary transform on each document, doing something with results for example
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> func)
+        {
+            _pipeline = _pipeline.SelectMany(func);
+            return this;
+        }
+
+        /// <summary>
+        /// Run an arbitrary action on each document, doing something with results for example
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline Then(Action<WaivesDocument> action)
+        {
+            _pipeline = _pipeline.Select(d =>
+            {
+                action(d);
+                return d;
+            });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Run an arbitrary action on each document, doing something with results for example
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline Then(Func<WaivesDocument, Task> action)
+        {
+            _pipeline = _pipeline.SelectMany(async d =>
+            {
+                await action(d).ConfigureAwait(false);
+                return d;
+            });
 
             return this;
         }
