@@ -28,5 +28,10 @@ namespace Waives.Reactive
 
             return ApiClient;
         }
+
+        public static PipelineBuilder CreatePipeline()
+        {
+            return new PipelineBuilder();
+        }
     }
 }
