@@ -47,7 +47,7 @@ namespace Waives.Reactive
     /// }
     /// ]]>
     /// </example>
-    public class Pipeline
+    public class Pipeline : IObservable<WaivesDocument>
     {
         private readonly IWaivesClient _apiClient;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
@@ -99,6 +99,12 @@ namespace Waives.Reactive
         {
             var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
             return pipelineObserver.SubscribeTo(_pipeline);
+        }
+
+        /// <inheritdoc />
+        public IDisposable Subscribe(IObserver<WaivesDocument> observer)
+        {
+            return observer.SubscribeTo(_pipeline);
         }
     }
 

@@ -1,8 +1,7 @@
 using System;
-using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http;
 using Xunit;
@@ -22,6 +21,21 @@ namespace Waives.Reactive.Tests
             _sut.Start();
 
             Assert.True(pipelineCompleted);
+        }
+
+        [Fact]
+        public void WithDocumentsFrom_projects_the_document_source_into_the_pipeline()
+        {
+            var source = Observable.Repeat<Document>(new TestDocument(), 3);
+            var pipeline = _sut.WithDocumentsFrom(source);
+
+            source.Zip(pipeline, (s, p) => (s, p.Source)).Subscribe(
+                Observer.Create<ValueTuple<Document, Document>>(
+                    t =>
+                    {
+                        var (expected, actual) = t;
+                        Assert.Same(expected, actual);
+                    }));
         }
     }
 }
