@@ -17,9 +17,9 @@ namespace Waives.Reactive.HttpAdapters
     /// </summary>
     internal class HttpDocumentFactory : IHttpDocumentFactory
     {
-        private readonly IWaivesClient _apiClient;
+        private readonly WaivesClient _apiClient;
 
-        internal HttpDocumentFactory(IWaivesClient apiClient)
+        internal HttpDocumentFactory(WaivesClient apiClient)
         {
             _apiClient = apiClient;
         }

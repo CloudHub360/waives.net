@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using Waives.Http;
 using Waives.Reactive.HttpAdapters;
 
 namespace Waives.Reactive
