@@ -50,6 +50,7 @@ namespace Waives.Reactive
     public class PipelineBuilder
     {
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
+        private Action _onPipelineCompleted = () => { };
 
         /// <summary>
         /// Add the source of documents to the pipeline. This represents the start
@@ -68,6 +69,17 @@ namespace Waives.Reactive
                 }
             });
 
+            return this;
+        }
+
+        /// <summary>
+        /// Run an arbitrary action when all documents have been processed.
+        /// </summary>
+        /// <param name="action">The action to execute when the pipeline completes.</param>
+        /// <returns>The modified <see cref="PipelineBuilder"/>.</returns>
+        public PipelineBuilder OnPipelineCompleted(Action action)
+        {
+            _onPipelineCompleted = action ?? (() => {});
             return this;
         }
 
