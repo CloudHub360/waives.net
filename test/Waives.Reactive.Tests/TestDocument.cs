@@ -5,13 +5,16 @@ namespace Waives.Reactive.Tests
 {
     internal class TestDocument : Document
     {
-        public TestDocument() : base("Test Document")
+        public TestDocument(byte[] contents) : base("Test Document")
         {
+            Stream = new MemoryStream(contents);
         }
 
         public override Task<Stream> OpenStream()
         {
-            return Task.FromResult(Stream.Null);
+            return Task.FromResult(Stream);
         }
+
+        internal Stream Stream { get; }
     }
 }
