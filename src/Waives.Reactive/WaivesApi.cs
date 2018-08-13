@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http;
 
+[assembly: InternalsVisibleTo("Waives.Reactive.Tests")]
 namespace Waives.Reactive
 {
     public static class WaivesApi
@@ -126,7 +128,7 @@ namespace Waives.Reactive
         /// configure your document processing pipeline.</returns>
         public static Pipeline CreatePipeline()
         {
-            return new Pipeline();
+            return new Pipeline(ApiClient);
         }
     }
 }

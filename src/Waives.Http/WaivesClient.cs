@@ -10,7 +10,16 @@ using Waives.Http.Responses;
 [assembly: InternalsVisibleTo("Waives.Reactive")]
 namespace Waives.Http
 {
-    public class WaivesClient
+    public interface IWaivesClient
+    {
+        Task<Document> CreateDocument(Stream documentSource);
+        Task<Document> CreateDocument(string path);
+        Task<Classifier> CreateClassifier(string name, string samplesPath = null);
+        Task<Classifier> GetClassifier(string name);
+        Task Login(string clientId, string clientSecret);
+    }
+
+    public class WaivesClient : IWaivesClient
     {
         internal HttpClient HttpClient { get; }
 
@@ -21,7 +30,7 @@ namespace Waives.Http
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
-        internal async Task<Document> CreateDocument(Stream documentSource)
+        public async Task<Document> CreateDocument(Stream documentSource)
         {
             var requestBody = new StreamContent(documentSource);
             var response = await HttpClient.PostAsync("/documents", requestBody).ConfigureAwait(false);

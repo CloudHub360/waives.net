@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Waives.Http;
 
 namespace Waives.Reactive
 {
@@ -49,8 +49,14 @@ namespace Waives.Reactive
     /// </example>
     public class Pipeline
     {
+        private readonly IWaivesClient _apiClient;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
         private Action _onPipelineCompleted = () => { };
+
+        public Pipeline(IWaivesClient apiClient)
+        {
+            _apiClient = apiClient ?? throw new ArgumentNullException(nameof(apiClient));
+        }
 
         /// <summary>
         /// Add the source of documents to the pipeline. This represents the start
@@ -65,7 +71,7 @@ namespace Waives.Reactive
                 using (var documentStream = await d.OpenStream().ConfigureAwait(false))
                 {
                     return new WaivesDocument(d,
-                        await WaivesApi.ApiClient.CreateDocument(documentStream).ConfigureAwait(false));
+                        await _apiClient.CreateDocument(documentStream).ConfigureAwait(false));
                 }
             });
 
@@ -91,7 +97,8 @@ namespace Waives.Reactive
         /// this object.</returns>
         public IDisposable Start()
         {
-            return _pipeline.Subscribe(new PipelineObserver(_onPipelineCompleted));
+            var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
+            return pipelineObserver.SubscribeTo(_pipeline);
         }
     }
 
@@ -111,12 +118,12 @@ namespace Waives.Reactive
 
         public void OnError(Exception error)
         {
-            throw new NotImplementedException();
+
         }
 
         public void OnNext(WaivesDocument value)
         {
-            throw new NotImplementedException();
+
         }
     }
 }
