@@ -91,7 +91,32 @@ namespace Waives.Reactive
         /// this object.</returns>
         public IDisposable Start()
         {
-            return Disposable.Empty;
+            return _pipeline.Subscribe(new PipelineObserver(_onPipelineCompleted));
+        }
+    }
+
+    public class PipelineObserver : IObserver<WaivesDocument>
+    {
+        private readonly Action _onPipelineCompleted;
+
+        internal PipelineObserver(Action onPipelineCompleted)
+        {
+            _onPipelineCompleted = onPipelineCompleted;
+        }
+
+        public void OnCompleted()
+        {
+            _onPipelineCompleted();
+        }
+
+        public void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(WaivesDocument value)
+        {
+            throw new NotImplementedException();
         }
     }
 }
