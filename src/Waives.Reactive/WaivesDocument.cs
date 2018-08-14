@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Waives.Http.Responses;
 using Waives.Reactive.HttpAdapters;
 
@@ -29,6 +30,11 @@ namespace Waives.Reactive
             {
                 ClassificationResults = await _waivesDocument.Classify(classifierName).ConfigureAwait(false)
             };
+        }
+
+        public async Task Delete(Action afterDeletedAction)
+        {
+            await _waivesDocument.Delete(afterDeletedAction).ConfigureAwait(false);
         }
     }
 }
