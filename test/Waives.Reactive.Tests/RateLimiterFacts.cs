@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using Microsoft.Reactive.Testing;
@@ -17,20 +18,13 @@ namespace Waives.Reactive.Tests
 
             // Schedule one more document than the maximum concurrency, all to be scheduled immediately
             var source = scheduler
-                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.MaximumConcurrentDocuments+1));
+                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.MaximumConcurrentDocuments + 1));
 
             var rateLimitedDocuments = sut.RateLimited(source);
 
             var testObserver = scheduler.Start(() => rateLimitedDocuments);
 
             Assert.Equal(RateLimiter.MaximumConcurrentDocuments, testObserver.Messages.Count);
-
-            for (var index = 0; index < testObserver.Messages.Count; index++)
-            {
-                var expectedDocumentSourceId = index.ToString();
-                var actualDocumentSourceId = testObserver.Messages[index].Value.Value.SourceId;
-                Assert.Equal(expectedDocumentSourceId, actualDocumentSourceId);
-            }
         }
 
         [Fact]
@@ -63,11 +57,9 @@ namespace Waives.Reactive.Tests
         private static Recorded<Notification<Document>>[] AnArrayOfDocumentNotifications(long numberOfDocuments)
         {
             var notifications = new List<Recorded<Notification<Document>>>();
-            for (long i = 0; i < numberOfDocuments; i++)
-            {
-                notifications.Add(new Recorded<Notification<Document>>(0,
-                    Notification.CreateOnNext<Document>(new TestDocument(Generate.Bytes(), i.ToString()))));
-            }
+            notifications.AddRange(Enumerable.Repeat(
+                new Recorded<Notification<Document>>(0,
+                    Notification.CreateOnNext<Document>(new TestDocument(Generate.Bytes()))), (int) numberOfDocuments));
 
             return notifications.ToArray();
         }
