@@ -8,7 +8,7 @@ using System.Threading;
 namespace Waives.Reactive
 {
     //Inspired by http://granitestatehacker.kataire.com/2016/01/rate-limiting-observables-with-reactive.html
-    public class RateLimiter
+    public class RateLimiter : IRateLimiter
     {
         private readonly IScheduler _scheduler;
         private long _availableDocumentSlots;
