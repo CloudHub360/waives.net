@@ -38,41 +38,41 @@ namespace Waives.Reactive
         public IObservable<TSource> RateLimited<TSource>(IObservable<TSource> source)
         {
             var timeSpan = TimeSpan.FromMilliseconds(500);
-            bool sourceCompleted = false;
+            var sourceCompleted = false;
+
+            void EmitIfSlotAvailable(ConcurrentQueue<TSource> buffer, IObserver<TSource> observer)
+            {
+                while (Interlocked.Read(ref _availableDocumentSlots) > 0)
+                {
+                    if (!buffer.TryDequeue(out var item))
+                    {
+                        Console.WriteLine("RateLimiter: No more items on queue");
+
+                        if (sourceCompleted)
+                        {
+                            Console.WriteLine("RateLimiter: Source has completed, so calling observer.OnCompleted");
+                            observer.OnCompleted();
+                        }
+
+                        break;
+                    }
+
+                    Console.WriteLine($"RateLimiter: There are {_availableDocumentSlots} slots free. Emitting item {item.ToString()}");
+                    observer.OnNext(item);
+                    Interlocked.Decrement(ref _availableDocumentSlots);
+                }
+            }
 
             return Observable.Create<TSource>(
                 observer =>
                 {
                     var buffer = new ConcurrentQueue<TSource>();
-                    Action emitIfSlotAvailable = delegate ()
-                    {
-                        while (Interlocked.Read(ref _availableDocumentSlots) > 0)
-                        {
-                            TSource item;
-                            if (!buffer.TryDequeue(out item))
-                            {
-                                Console.WriteLine("RateLimiter: No more items on queue");
-
-                                if (sourceCompleted)
-                                {
-                                    Console.WriteLine("RateLimiter: Source has completed, so calling observer.OnCompleted");
-                                    observer.OnCompleted();
-                                }
-                                break;
-                            }
-
-                            Console.WriteLine($"RateLimiter: There are {_availableDocumentSlots} slots free. Emitting item {item.ToString()}");
-                            observer.OnNext(item);
-                            Interlocked.Decrement(ref _availableDocumentSlots);
-                        }
-                    };
-
                     var sourceSub = source
                         .Subscribe(x =>
                         {
                             Console.WriteLine($"RateLimiter: Enqueuing {x.ToString()}");
                             buffer.Enqueue(x);
-                            emitIfSlotAvailable();
+                            EmitIfSlotAvailable(buffer, observer);
                         }, () =>
                         {
                             Console.WriteLine("RateLimiter: Source has completed. RateLimiter will complete on next check where queue is empty.");
@@ -83,7 +83,7 @@ namespace Waives.Reactive
                         .Subscribe(x =>
                         {
                             Console.WriteLine("DebugRateLimiter: Running check...");
-                            emitIfSlotAvailable();
+                            EmitIfSlotAvailable(buffer, observer);
                         }, observer.OnError, observer.OnCompleted);
                     return new CompositeDisposable(sourceSub, timer);
                 });
