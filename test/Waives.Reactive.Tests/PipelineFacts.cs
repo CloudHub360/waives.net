@@ -91,33 +91,36 @@ namespace Waives.Reactive.Tests
         }
 
         [Fact]
-        public void Then_invokes_the_supplied_async_Action()
+        public async Task Then_invokes_the_supplied_async_Action()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-            var actionInvoked = false;
+            var completion = new TaskCompletionSource<bool>();
             var pipeline = _sut.WithDocumentsFrom(source)
-                .Then(async d => await Task.Run(() => actionInvoked = true));
+                .Then(async d => await Task.Run(() => completion.SetResult(true)));
 
             pipeline.Start();
+            var actionWasCalled = await completion.Task;
 
-            Assert.True(actionInvoked);
+            Assert.True(actionWasCalled);
         }
 
         [Fact]
-        public void Then_invokes_the_supplied_Func()
+        public async Task Then_invokes_the_supplied_Func()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-            var actionInvoked = false;
+            var completion = new TaskCompletionSource<bool>();
+
             var pipeline = _sut.WithDocumentsFrom(source)
-                .Then(async d =>
+                .Then(d =>
                 {
-                    await Task.Run(() => actionInvoked = true);
-                    return d;
+                    completion.SetResult(true);
+                    return Task.FromResult(d);
                 });
 
             pipeline.Start();
+            var funcWasCalled = await completion.Task;
 
-            Assert.True(actionInvoked);
+            Assert.True(funcWasCalled);
         }
     }
 }
