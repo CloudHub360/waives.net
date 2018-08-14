@@ -148,6 +148,12 @@ namespace Waives.Reactive
         /// this object.</returns>
         public IDisposable Start()
         {
+            _pipeline = _pipeline.SelectMany(async d =>
+            {
+                await d.Delete(() => { }).ConfigureAwait(false);
+                return d;
+            });
+
             var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
             return pipelineObserver.SubscribeTo(_pipeline);
         }

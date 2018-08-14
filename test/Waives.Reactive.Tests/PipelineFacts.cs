@@ -122,5 +122,15 @@ namespace Waives.Reactive.Tests
 
             Assert.True(funcWasCalled);
         }
+
+        [Fact]
+        public void The_document_is_deleted_when_processing_completes()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            _sut
+                .WithDocumentsFrom(source)
+                .Then(d => d.HttpDocument.Received(1).Delete(Arg.Any<Action>()))
+                .Start();
+        }
     }
 }
