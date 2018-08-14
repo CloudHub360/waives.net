@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -12,6 +13,7 @@ namespace Waives.Reactive.Tests
     {
         private readonly IHttpDocumentFactory _documentFactory = Substitute.For<IHttpDocumentFactory>();
         private readonly Pipeline _sut;
+        private readonly IRateLimiter _rateLimiter = Substitute.For<IRateLimiter>();
 
         public PipelineFacts()
         {
@@ -21,7 +23,7 @@ namespace Waives.Reactive.Tests
                 .CreateDocument(Arg.Any<Document>())
                 .Returns(httpDocument);
 
-            _sut = new Pipeline(_documentFactory);
+            _sut = new Pipeline(_documentFactory, _rateLimiter);
         }
 
         [Fact]
@@ -36,16 +38,33 @@ namespace Waives.Reactive.Tests
         }
 
         [Fact]
-        public void WithDocumentsFrom_projects_the_document_source_into_the_pipeline()
+        public void WithDocumentsFrom_passes_the_document_source_to_the_ratelimiter()
         {
+            var rateLimiter = Substitute.For<IRateLimiter>();
+            var sut = new Pipeline(_documentFactory, rateLimiter);
             var source = Observable.Repeat<Document>(new TestDocument(Generate.Bytes()), 3);
-            var pipeline = _sut.WithDocumentsFrom(source);
+            sut.WithDocumentsFrom(source);
 
-            source.Zip(pipeline, (s, p) => (s, p.Source)).Subscribe(t =>
-            {
-                var (expected, actual) = t;
-                Assert.Same(expected, actual);
-            });
+            rateLimiter
+                .Received(1)
+                .RateLimited(Arg.Is<IObservable<Document>>(ds =>
+                    ReferenceEquals(ds, source)));
+        }
+
+        [Fact]
+        public void WithDocumentsFrom_projects_the_rate_limited_documents_into_the_pipeline()
+        {
+            var expectedDocuments = Enumerable.Repeat<Document>(new TestDocument(Generate.Bytes()), 5).ToObservable();
+
+            _rateLimiter
+                .RateLimited(Arg.Any<IObservable<Document>>())
+                .Returns(expectedDocuments);
+
+            var pipeline = _sut.WithDocumentsFrom(expectedDocuments);
+
+            Assert.Equal(
+                expectedDocuments.ToEnumerable(),
+                pipeline.Select(d => d.Source).ToEnumerable());
         }
 
         [Fact]
@@ -130,6 +149,16 @@ namespace Waives.Reactive.Tests
             _sut
                 .WithDocumentsFrom(source)
                 .Then(d => d.HttpDocument.Received(1).Delete(Arg.Any<Action>()))
+                .Start();
+        }
+
+        [Fact]
+        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_finishes_its_processing()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+
+            _sut.WithDocumentsFrom(source)
+                .Then(d => _rateLimiter.Received(1).MakeDocumentSlotAvailable())
                 .Start();
         }
     }
