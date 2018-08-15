@@ -39,7 +39,10 @@ Task Build {
     Push-Location $RootDir
     [int] $buildNumber = $env:BUILD_COUNTER
     $version = $env:BUILD_NUMBER
-    dotnet build $SolutionFile -c $Configuration /p:Version=$version
+    if ($version -eq $null){
+      $version = "0.0.0"
+    }
+    exec { dotnet build $SolutionFile -c $Configuration /p:Version=$version }
   } finally {
     Pop-Location
   }
