@@ -84,8 +84,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ClassifyWith(string classifierName)
         {
-            _pipeline = _pipeline.SelectMany(
-                async d => await d.Classify(classifierName).ConfigureAwait(false));
+            _pipeline = _pipeline.Process(async d => await d.Classify(classifierName).ConfigureAwait(false), OnProcessingError);
 
             return this;
         }
@@ -154,10 +153,12 @@ namespace Waives.Pipelines
         {
             _pipeline = _pipeline.SelectMany(async d =>
             {
+                Console.WriteLine($"Successful completion. Deleting document {d.Source.SourceId}");
                 await d.HttpDocument.Delete(() =>
                 {
                     _rateLimiter.MakeDocumentSlotAvailable();
                 }).ConfigureAwait(false);
+
                 return d;
             });
 
@@ -169,6 +170,22 @@ namespace Waives.Pipelines
         public IDisposable Subscribe(IObserver<WaivesDocument> observer)
         {
             return observer.SubscribeTo(_pipeline);
+        }
+
+        private async Task OnProcessingError(ProcessingError value)
+        {
+            Console.WriteLine($"Errored completion. Deleting document {value.Document.Source.SourceId}");
+
+            await DeleteDocumentAndNotifyRateLimiter(value.Document).ConfigureAwait(false);
+            Console.WriteLine($"OnProessingError: {value.Exception.Message} {value.Exception.StackTrace}");
+        }
+
+        private async Task DeleteDocumentAndNotifyRateLimiter(WaivesDocument document)
+        {
+            await document.HttpDocument.Delete(() =>
+            {
+                _rateLimiter.MakeDocumentSlotAvailable();
+            }).ConfigureAwait(false);
         }
     }
 }
