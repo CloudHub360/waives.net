@@ -42,6 +42,7 @@ namespace Waives.Reactive
 
             void EmitIfSlotAvailable(ConcurrentQueue<TSource> buffer, IObserver<TSource> observer)
             {
+                Console.WriteLine($"RateLimiter check: There are {_availableDocumentSlots} available document slots");
                 while (Interlocked.Read(ref _availableDocumentSlots) > 0)
                 {
                     if (!buffer.TryDequeue(out var item))
