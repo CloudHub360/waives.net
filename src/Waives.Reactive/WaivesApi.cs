@@ -129,7 +129,9 @@ namespace Waives.Reactive
         /// configure your document processing pipeline.</returns>
         public static Pipeline CreatePipeline()
         {
-            return new Pipeline(new HttpDocumentFactory(ApiClient));
+            return new Pipeline(
+                new HttpDocumentFactory(ApiClient),
+                new RateLimiter());
         }
     }
 }

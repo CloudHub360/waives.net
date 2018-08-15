@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
 
@@ -11,6 +12,7 @@ namespace Waives.Reactive.HttpAdapters
     internal interface IHttpDocument
     {
         Task<ClassificationResult> Classify(string classifierName);
+        Task Delete(Action afterDeletedAction);
     }
 
     /// <summary>
@@ -31,6 +33,13 @@ namespace Waives.Reactive.HttpAdapters
         public async Task<ClassificationResult> Classify(string classifierName)
         {
             return await _documentClient.Classify(classifierName).ConfigureAwait(false);
+        }
+
+        public async Task Delete(Action afterDeletedAction)
+        {
+            await _documentClient.Delete().ConfigureAwait(false);
+
+            afterDeletedAction();
         }
     }
 }

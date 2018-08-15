@@ -5,7 +5,7 @@ namespace Waives.Reactive.Tests
 {
     internal class TestDocument : Document
     {
-        public TestDocument(byte[] contents) : base("Test Document")
+        public TestDocument(byte[] contents, string sourceId = "Test Document") : base(sourceId)
         {
             Stream = new MemoryStream(contents);
         }

@@ -17,10 +17,12 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
 
         public static DocumentSource Create(string inbox, bool watch = false)
         {
-            var initialContents = Directory
+            var files = Directory
                 .EnumerateFiles(inbox)
-                .Select(p => new FileSystemDocument(p))
-                .ToObservable();
+                .Select(p => new FileSystemDocument(p));
+
+            Console.WriteLine($"Found {files.Count()} files to process in {inbox}");
+            var initialContents = files.ToObservable();
 
             if (watch)
             {

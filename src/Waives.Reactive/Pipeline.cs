@@ -53,10 +53,12 @@ namespace Waives.Reactive
         private readonly IHttpDocumentFactory _documentFactory;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
         private Action _onPipelineCompleted = () => { };
+        private readonly IRateLimiter _rateLimiter;
 
-        internal Pipeline(IHttpDocumentFactory documentFactory)
+        internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter)
         {
             _documentFactory = documentFactory;
+            _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
         }
 
         /// <summary>
@@ -67,7 +69,9 @@ namespace Waives.Reactive
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            _pipeline = documentSource.SelectMany(
+            var rateLimitedDocument = _rateLimiter.RateLimited(documentSource);
+
+            _pipeline = rateLimitedDocument.SelectMany(
                 async d => new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false)));
 
             return this;
@@ -148,6 +152,15 @@ namespace Waives.Reactive
         /// this object.</returns>
         public IDisposable Start()
         {
+            _pipeline = _pipeline.SelectMany(async d =>
+            {
+                await d.HttpDocument.Delete(() =>
+                {
+                    _rateLimiter.MakeDocumentSlotAvailable();
+                }).ConfigureAwait(false);
+                return d;
+            });
+
             var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
             return pipelineObserver.SubscribeTo(_pipeline);
         }
