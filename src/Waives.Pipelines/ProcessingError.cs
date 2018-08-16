@@ -13,4 +13,16 @@ namespace Waives.Pipelines
             Exception = exception;
         }
     }
+
+    internal class ProcessingErrorDocument
+    {
+        public Document Document { get; }
+        public Exception Exception { get; }
+
+        public ProcessingErrorDocument(Document document, Exception exception)
+        {
+            Document = document;
+            Exception = exception;
+        }
+    }
 }
