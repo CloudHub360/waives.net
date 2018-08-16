@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -71,6 +72,15 @@ namespace Waives.Http
             var behaviours = responseContent.Links;
 
             return new Classifier(this, name, behaviours);
+        }
+
+        public async Task<IEnumerable<Document>> GetAllDocuments()
+        {
+            var response = await HttpClient.GetAsync("/documents").ConfigureAwait(false);
+            await EnsureSuccessStatus(response).ConfigureAwait(false);
+
+            var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
+            return responseContent.Documents.Select(d => new Document(this, d.Links));
         }
 
         public async Task Login(string clientId, string clientSecret)
