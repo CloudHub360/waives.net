@@ -7,7 +7,7 @@ namespace Waives.Pipelines
     internal static class ProcessExtension
     {
         internal static IObservable<WaivesDocument> Process(this IObservable<WaivesDocument> documents,
-            Func<WaivesDocument, Task<WaivesDocument>> processAction, Func<ProcessingError, Task> errorAction)
+            Func<WaivesDocument, Task<WaivesDocument>> processAction, Func<ProcessingError<WaivesDocument>, Task> errorAction)
         {
             var results = documents.Select(d =>
             {
@@ -19,7 +19,7 @@ namespace Waives.Pipelines
                 }
                 catch (Exception e)
                 {
-                    errorAction(new ProcessingError(d, e));
+                    errorAction(new ProcessingError<WaivesDocument>(d, e));
 
                     return new ProcessingResult(d, false);
                 }
@@ -30,7 +30,7 @@ namespace Waives.Pipelines
         }
 
         internal static IObservable<WaivesDocument> Process(this IObservable<Document> documents,
-            Func<Document, Task<WaivesDocument>> processAction, Func<ProcessingErrorDocument, Task> errorAction)
+            Func<Document, Task<WaivesDocument>> processAction, Func<ProcessingError<Document>, Task> errorAction)
         {
             var results = documents.Select(d =>
             {
@@ -42,7 +42,7 @@ namespace Waives.Pipelines
                 }
                 catch (Exception e)
                 {
-                    errorAction(new ProcessingErrorDocument(d, e));
+                    errorAction(new ProcessingError<Document>(d, e));
 
                     return new ProcessingResult(null, false);
                 }
