@@ -177,13 +177,15 @@ namespace Waives.Pipelines
         private async Task OnDocumentCreationError(ProcessingError<Document> error)
         {
             Console.WriteLine($"An error occurred during creation {error.Document.SourceId}. " +
-                              $"The error was: {error.Exception.InnerException.GetType().Name} {error.Exception.InnerException.Message}");
+                              $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
+
+            _rateLimiter.MakeDocumentSlotAvailable();
         }
 
         private async Task OnProcessingError(ProcessingError<WaivesDocument> error)
         {
             Console.WriteLine($"An error occurred during processing of {error.Document.Source.SourceId}. " +
-                              $"The error was: {error.Exception.InnerException.GetType().Name} {error.Exception.InnerException.Message}");
+                              $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
 
             await DeleteDocumentAndNotifyRateLimiter(error.Document).ConfigureAwait(false);
         }

@@ -9,17 +9,16 @@ namespace Waives.Pipelines
         internal static IObservable<WaivesDocument> Process(this IObservable<WaivesDocument> documents,
             Func<WaivesDocument, Task<WaivesDocument>> processAction, Func<ProcessingError<WaivesDocument>, Task> errorAction)
         {
-            var results = documents.Select(d =>
+            var results = documents.SelectMany(async d =>
             {
                 try
                 {
-                    // TODO: Try again to make this lambda async and not need .Result
-                    var waivesDocument = processAction(d).Result;
+                    var waivesDocument = await processAction(d).ConfigureAwait(false);
                     return new ProcessingResult(waivesDocument, true);
                 }
                 catch (Exception e)
                 {
-                    errorAction(new ProcessingError<WaivesDocument>(d, e));
+                    await errorAction(new ProcessingError<WaivesDocument>(d, e)).ConfigureAwait(false);
 
                     return new ProcessingResult(d, false);
                 }
@@ -32,17 +31,16 @@ namespace Waives.Pipelines
         internal static IObservable<WaivesDocument> Process(this IObservable<Document> documents,
             Func<Document, Task<WaivesDocument>> processAction, Func<ProcessingError<Document>, Task> errorAction)
         {
-            var results = documents.Select(d =>
+            var results = documents.SelectMany(async d =>
             {
                 try
                 {
-                    // TODO: Try again to make this lambda async and not need .Result
-                    var document = processAction(d).Result;
+                    var document = await processAction(d).ConfigureAwait(false);
                     return new ProcessingResult(document, true);
                 }
                 catch (Exception e)
                 {
-                    errorAction(new ProcessingError<Document>(d, e));
+                    await errorAction(new ProcessingError<Document>(d, e)).ConfigureAwait(false);
 
                     return new ProcessingResult(null, false);
                 }
