@@ -48,48 +48,58 @@ namespace BlobStorageProcessor
             // Point at a blob storage account
             var options = new Docopt().Apply(Usage, args, version: "Blob Storage processor sample app 1.0", exit: true);
 
-            IEnumerable<BlobStorageContainer> containers;
-            if (options["--connection-string"] != null)
-            {
-                var connectionString = options["--connection-string"].ToString();
-                var containerNames = options["<container>"].AsEnumerable(i => i.ToString());
+            var connectionString = options["--connection-string"]?.ToString() ?? string.Empty;
+            var containerSas = options["--container-sas"]?.ToString() ?? string.Empty;
+            var containers = EnumerateContainers(connectionString, containerSas, options["<container>"].AsEnumerable(i => i.ToString()));
 
-                var client = CloudStorageAccount.Parse(connectionString).CreateCloudBlobClient();
-                containers = containerNames.Select(n => new BlobStorageContainer(client.GetContainerReference(n)));
-            }
-            else
-            {
-                var containerSas = options["--container-sas"].ToString();
-                containers = new[] { new BlobStorageContainer(new CloudBlobContainer(new Uri(containerSas))) };
-            }
-
-            // Identify all blobs there
+            // Identify all blobs in the specified containers
             var blobs = (await Task.WhenAll(containers.Select(c => c.GetBlobs()))).SelectMany(c => c);
 
             // Log in to Waives
             await WaivesApi.Login("clientId", "clientSecret");
 
-            // Classify the files
-            var blobChannel = BlobStorageDocumentSource.Create(blobs);
-            var classificationResults = new Classification(options["--classifier"].ToString(), blobChannel);
+            var blobStorage = BlobStorageDocumentSource.Create(blobs);
+            var writer = CreateResultWriter(options["--output"].ToString());
+            var pipeline = WaivesApi.CreatePipeline()
+                .WithDocumentsFrom(blobStorage)
+                .ClassifyWith(options["--classifier"].ToString())
+                .Then(d => writer.Write(d));
 
-            // Write results to a CSV file
-            var output = options["--output"].ToString();
-            if (output != "stdout")
+            try
             {
-                blobChannel.SubscribeConsole();
+                pipeline.Start();
+            }
+            catch (PipelineException ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
 
-                // Create or overwrite destination file and configure writer
-                using (var writer = new CsvWriter(new StreamWriter(File.Create(output))))
-                {
-                    classificationResults.Subscribe(writer);
-                    classificationResults.SubscribeConsole("Classification");
-                }
+        private static IEnumerable<BlobStorageContainer> EnumerateContainers(string connectionString, string containerSas, IEnumerable<string> containerNames)
+        {
+            IEnumerable<BlobStorageContainer> containers;
+            if (!string.IsNullOrWhiteSpace(connectionString))
+            {
+                var client = CloudStorageAccount.Parse(connectionString).CreateCloudBlobClient();
+                containers = containerNames.Select(n => new BlobStorageContainer(client.GetContainerReference(n)));
             }
             else
             {
-                classificationResults.Subscribe(new CsvWriter(Console.Out));
+                containers = new[] {new BlobStorageContainer(new CloudBlobContainer(new Uri(containerSas)))};
             }
+
+            return containers;
+        }
+
+        private static CsvWriter CreateResultWriter(string output)
+        {
+            if (output != "stdout")
+            {
+                // Create or overwrite destination file and configure writer
+                return new CsvWriter(new StreamWriter(File.Create(output)));
+            }
+
+            return new CsvWriter(Console.Out);
         }
     }
 }

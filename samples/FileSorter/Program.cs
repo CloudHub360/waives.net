@@ -6,8 +6,6 @@ using Waives.Reactive;
 
 namespace FileSorter
 {
-    using Waives;
-
     public static class Program
     {
         private const string Usage = @"File system sorter sample app.
@@ -48,12 +46,25 @@ namespace FileSorter
             EnsureDirectoryExists(outbox);
             EnsureDirectoryExists(errorbox);
 
-            await Waives.Reactive.WaivesApi.Login("clientId", "clientSecret");
+            await WaivesApi.Login("clientId", "clientSecret");
 
-            var documentSource = FileSystemDocumentSource.Create(inbox);
-            var classifier = new Classification(options["<classifier>"].ToString(), documentSource);
+            var fileSorter = new FileSorter(outbox, errorbox);
+            var filesystem = FileSystemDocumentSource.Create(inbox, watch: true);
 
-            new FileSorter(outbox, errorbox).SubscribeTo(classifier);
+            var pipeline = WaivesApi.CreatePipeline()
+                .WithDocumentsFrom(filesystem)
+                .ClassifyWith(options["<classifier>"].ToString())
+                .Then(d => fileSorter.MoveDocument(d))
+                .OnPipelineCompleted(() => Console.WriteLine("Processing completed, press any key to exit."));
+
+            try
+            {
+                pipeline.Start();
+            }
+            catch (PipelineException ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             Console.ReadLine();
         }

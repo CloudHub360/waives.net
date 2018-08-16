@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
 using CsvHelper;
-using Waives;
+using Waives.Http.Responses;
 using Waives.Reactive;
 
 namespace BlobStorageProcessor
 {
-    internal sealed class CsvWriter : IObserver<DocumentClassification>, IDisposable
+    internal sealed class CsvWriter : IDisposable
     {
         private readonly IWriter _writer;
 
@@ -15,24 +15,13 @@ namespace BlobStorageProcessor
             if (textWriter == null) throw new ArgumentNullException(nameof(textWriter));
 
             _writer = new Factory().CreateWriter(textWriter);
-            _writer.WriteHeader<DocumentClassification>();
+            _writer.WriteHeader<ClassificationResult>();
             _writer.NextRecord();
         }
 
-        public void OnCompleted()
+        public void Write(WaivesDocument value)
         {
-            _writer.Dispose();
-        }
-
-        public void OnError(Exception error)
-        {
-            Console.Error.WriteLine(error);
-            _writer.Dispose();
-        }
-
-        public void OnNext(DocumentClassification value)
-        {
-            _writer.WriteRecord(value);
+            _writer.WriteRecord(value.ClassificationResults);
             _writer.NextRecord();
         }
 
