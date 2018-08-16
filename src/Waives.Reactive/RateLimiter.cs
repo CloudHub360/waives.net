@@ -25,7 +25,6 @@ namespace Waives.Reactive
             if (Interlocked.Read(ref _availableDocumentSlots) < MaximumConcurrentDocuments)
             {
                 Interlocked.Increment(ref _availableDocumentSlots);
-                Console.WriteLine($"RateLimiter: Freed slot. There are now {_availableDocumentSlots} available slots.");
             }
         }
 
@@ -42,23 +41,18 @@ namespace Waives.Reactive
 
             void EmitIfSlotAvailable(ConcurrentQueue<TSource> buffer, IObserver<TSource> observer)
             {
-                Console.WriteLine($"RateLimiter check: There are {_availableDocumentSlots} available document slots");
                 while (Interlocked.Read(ref _availableDocumentSlots) > 0)
                 {
                     if (!buffer.TryDequeue(out var item))
                     {
-                        Console.WriteLine("RateLimiter: No more items on queue");
-
                         if (sourceCompleted)
                         {
-                            Console.WriteLine("RateLimiter: Source has completed, so calling observer.OnCompleted");
                             observer.OnCompleted();
                         }
 
                         break;
                     }
 
-                    Console.WriteLine($"RateLimiter: There are {_availableDocumentSlots} slots free. Emitting item {item.ToString()}");
                     observer.OnNext(item);
                     Interlocked.Decrement(ref _availableDocumentSlots);
                 }
@@ -71,19 +65,16 @@ namespace Waives.Reactive
                     var sourceSub = source
                         .Subscribe(x =>
                         {
-                            Console.WriteLine($"RateLimiter: Enqueuing {x.ToString()}");
                             buffer.Enqueue(x);
                             EmitIfSlotAvailable(buffer, observer);
                         }, () =>
                         {
-                            Console.WriteLine("RateLimiter: Source has completed. RateLimiter will complete on next check where queue is empty.");
                             sourceCompleted = true;
                         });
 
                     var timer = Observable.Interval(timeSpan, _scheduler)
                         .Subscribe(x =>
                         {
-                            Console.WriteLine("DebugRateLimiter: Running check...");
                             EmitIfSlotAvailable(buffer, observer);
                         }, observer.OnError, observer.OnCompleted);
                     return new CompositeDisposable(sourceSub, timer);
