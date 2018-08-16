@@ -14,14 +14,17 @@ namespace Waives.Pipelines.Tests
         private readonly IHttpDocumentFactory _documentFactory = Substitute.For<IHttpDocumentFactory>();
         private readonly Pipeline _sut;
         private readonly IRateLimiter _rateLimiter = Substitute.For<IRateLimiter>();
+        private readonly IHttpDocument _httpDocument;
 
         public PipelineFacts()
         {
-            var httpDocument = Substitute.For<IHttpDocument>();
-            httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
+            _httpDocument = Substitute.For<IHttpDocument>();
+            _httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
+            _httpDocument.Delete(Arg.Invoke());
+
             _documentFactory
                 .CreateDocument(Arg.Any<Document>())
-                .Returns(httpDocument);
+                .Returns(_httpDocument);
 
             _sut = new Pipeline(_documentFactory, _rateLimiter);
         }
@@ -157,9 +160,28 @@ namespace Waives.Pipelines.Tests
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
 
-            _sut.WithDocumentsFrom(source)
-                .Then(d => _rateLimiter.Received(1).MakeDocumentSlotAvailable())
+            var fakeRateLimiter = new FakeRateLimiter();
+            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
+
+            sut.WithDocumentsFrom(source)
                 .Start();
+
+            Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
+        }
+
+        private class FakeRateLimiter : IRateLimiter
+        {
+            public bool MakeDocumentSlotAvailableCalled { get; private set; }
+
+            public void MakeDocumentSlotAvailable()
+            {
+                MakeDocumentSlotAvailableCalled = true;
+            }
+
+            public IObservable<TSource> RateLimited<TSource>(IObservable<TSource> source)
+            {
+                return source;
+            }
         }
     }
 }
