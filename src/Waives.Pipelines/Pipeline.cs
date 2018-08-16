@@ -69,10 +69,12 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            var rateLimitedDocument = _rateLimiter.RateLimited(documentSource);
+            var rateLimitedDocuments = _rateLimiter.RateLimited(documentSource);
 
-            _pipeline = rateLimitedDocument.SelectMany(
-                async d => new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false)));
+            _pipeline = rateLimitedDocuments.Process(async d =>
+            {
+                return new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false));
+            }, OnDocumentCreationError);
 
             return this;
         }
@@ -172,12 +174,17 @@ namespace Waives.Pipelines
             return observer.SubscribeTo(_pipeline);
         }
 
-        private async Task OnProcessingError(ProcessingError value)
+        private async Task OnDocumentCreationError(ProcessingErrorDocument value)
         {
-            Console.WriteLine($"Errored completion. Deleting document {value.Document.Source.SourceId}");
+            Console.WriteLine($"Errored during document creation. {value.Document.SourceId} {value.Exception.Message}");
+        }
 
-            await DeleteDocumentAndNotifyRateLimiter(value.Document).ConfigureAwait(false);
-            Console.WriteLine($"OnProessingError: {value.Exception.Message} {value.Exception.StackTrace}");
+        private async Task OnProcessingError(ProcessingError error)
+        {
+            Console.WriteLine($"Errored completion. Deleting document {error.Document.Source.SourceId}");
+
+            await DeleteDocumentAndNotifyRateLimiter(error.Document).ConfigureAwait(false);
+            Console.WriteLine($"OnProessingError: {error.Exception.Message} {error.Exception.StackTrace}");
         }
 
         private async Task DeleteDocumentAndNotifyRateLimiter(WaivesDocument document)
