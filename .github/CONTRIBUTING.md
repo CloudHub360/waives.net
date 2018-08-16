@@ -1,7 +1,8 @@
 # Contributing to Waives
 
-:green_heart: Thank you for taking the time to contribute :green_heart: We know that contributing
-to an open-source project is time-consuming
+:green_heart: *Thank you for taking the time to contribute!* :green_heart: We know that contributing
+to an open-source project is time-consuming and sometimes can be stressful too. This guide is here to
+help you with your contributions. 
 
 ## Table of Contents
 
@@ -22,6 +23,19 @@ By participating, you are expected to abide by and to uphold this code. Please r
 to [community@waives.io](mailto:community@waives.io).
 
 ## TL;DR
+
+1. **Be friendly and respectful to all with whom you interact here.** Remember text is a lossy communication format
+and what you write _will_ be interpreted differently from how it was meant.
+2. **Use the bug and pull request templates provided.** These are intended to make everyone's lives easier.
+3. **Keep your commits and pull requests small.**
+4. **Follow the coding style guidelines.**
+5. **Include clear and thoughtfully-worded tests.**
+
+### I just have a question to ask!
+
+Please do not file issues to ask questions; we'll be happy to answer your questions via email at support@waives.io.
+We expect to implement lower-friction communication methods such as chat and message boards in time as the project
+and community grows. 
 
 ## How can I contribute?
 
