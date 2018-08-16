@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Waives.Http;
 
 namespace Waives.Reactive.HttpAdapters
@@ -19,7 +20,7 @@ namespace Waives.Reactive.HttpAdapters
     {
         private readonly WaivesClient _apiClient;
 
-        internal HttpDocumentFactory(WaivesClient apiClient)
+        private HttpDocumentFactory(WaivesClient apiClient)
         {
             _apiClient = apiClient;
         }
@@ -30,6 +31,22 @@ namespace Waives.Reactive.HttpAdapters
             {
                 return new HttpDocument(await _apiClient.CreateDocument(documentStream).ConfigureAwait(false));
             }
+        }
+
+        internal static async Task<HttpDocumentFactory> Create(WaivesClient apiClient, bool clearOrphans = true)
+        {
+            if (clearOrphans)
+            {
+                await DeleteOrphanedDocuments(apiClient).ConfigureAwait(false);
+            }
+
+            return new HttpDocumentFactory(apiClient);
+        }
+
+        private static async Task DeleteOrphanedDocuments(WaivesClient apiClient)
+        {
+            var orphanedDocuments = await apiClient.GetAllDocuments().ConfigureAwait(false);
+            await Task.WhenAll(orphanedDocuments.Select(d => d.Delete())).ConfigureAwait(false);
         }
     }
 }
