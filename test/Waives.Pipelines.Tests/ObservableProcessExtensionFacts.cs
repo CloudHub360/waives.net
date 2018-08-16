@@ -57,7 +57,7 @@ namespace Waives.Pipelines.Tests
                 .ToArray());
         }
 
-        private async Task OnProcessingError(ProcessingError value)
+        private async Task OnProcessingError(ProcessingError<WaivesDocument> value)
         {
         }
 
@@ -85,7 +85,7 @@ namespace Waives.Pipelines.Tests
         [Fact]
         public void Does_not_call_error_action_for_documents_where_process_action_succeeds()
         {
-            var errorActionCalledFor = new List<ProcessingError>();
+            var errorActionCalledFor = new List<ProcessingError<WaivesDocument>>();
 
             var documents = _documentsObservable.Process(
                 ProcessAndThrowForErrorDocument,
@@ -105,7 +105,7 @@ namespace Waives.Pipelines.Tests
         [Fact]
         public void Calls_error_action_for_documents_where_process_action_throws()
         {
-            var errorActionCalledFor = new List<ProcessingError>();
+            var errorActionCalledFor = new List<ProcessingError<WaivesDocument>>();
 
             var documents = _documentsObservable.Process(
                 ProcessAndThrowForErrorDocument,

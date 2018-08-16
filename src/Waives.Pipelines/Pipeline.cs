@@ -174,12 +174,12 @@ namespace Waives.Pipelines
             return observer.SubscribeTo(_pipeline);
         }
 
-        private async Task OnDocumentCreationError(ProcessingErrorDocument value)
+        private async Task OnDocumentCreationError(ProcessingError<Document> value)
         {
             Console.WriteLine($"Errored during document creation. {value.Document.SourceId} {value.Exception.Message}");
         }
 
-        private async Task OnProcessingError(ProcessingError error)
+        private async Task OnProcessingError(ProcessingError<WaivesDocument> error)
         {
             Console.WriteLine($"Errored completion. Deleting document {error.Document.Source.SourceId}");
 
