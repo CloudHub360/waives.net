@@ -57,7 +57,7 @@ namespace FileSorter
             };
 
             var fileSorter = new FileSorter(outbox, errorbox);
-            var filesystem = FileSystemDocumentSource.Watch(inbox, cancellation.Token);
+            var filesystem = FileSystem.WatchForChanges(inbox, cancellation.Token);
 
             var pipeline = WaivesApi.CreatePipeline()
                 .WithDocumentsFrom(filesystem)
