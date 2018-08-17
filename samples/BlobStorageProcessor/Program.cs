@@ -58,7 +58,7 @@ namespace BlobStorageProcessor
             // Log in to Waives
             await WaivesApi.Login("clientId", "clientSecret");
 
-            var blobStorage = BlobStorageDocumentSource.Create(blobs);
+            var blobStorage = new EnumerableDocumentSource(blobs.Select(b => new BlobStorageDocument(b)));
             var writer = CreateResultWriter(options["--output"].ToString());
             var pipeline = WaivesApi.CreatePipeline()
                 .WithDocumentsFrom(blobStorage)
