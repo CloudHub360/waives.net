@@ -1,45 +1,37 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
+using System.Threading;
 using Waives.Reactive;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem
 {
     /// <summary>
-    /// A folder on disk from where documents will be retrieved for processing.
+    /// Convenience class for creating <see cref="DocumentSource"/>s for paths
+    /// on the file system.
     /// </summary>
-    public class FileSystemDocumentSource : DocumentSource
+    public static class FileSystemDocumentSource
     {
-        private FileSystemDocumentSource(IObservable<Document> buffer) : base(buffer)
-        {
-        }
-
+        /// <summary>
+        /// Convenience factory method for creating a <see cref="DocumentSource"/> for the given
+        /// path on a local or remote filesystem.
+        /// </summary>
+        /// <param name="inbox">The path containing the documents to process.</param>
+        /// <param name="watch">Whether or not the path should be watched for new documents added
+        /// to it.</param>
+        /// <returns>An <see cref="EnumerableDocumentSource"/> for the path if <paramref name="watch"/>
+        /// is <c>false</c>; otherwise an <see cref="EventingDocumentSource"/>.</returns>
         public static DocumentSource Create(string inbox, bool watch = false)
         {
-            var files = Directory
-                .EnumerateFiles(inbox)
-                .Select(p => new FileSystemDocument(p));
-
-            Console.WriteLine($"Found {files.Count()} files to process in {inbox}");
-            var initialContents = files.ToObservable();
-
             if (watch)
             {
-                var watcher = new FileSystemWatcher(inbox)
-                {
-                    IncludeSubdirectories = false,
-                    EnableRaisingEvents = true
-                };
-
-                var createdFiles = Observable
-                    .FromEventPattern<FileSystemEventArgs>(watcher, nameof(watcher.Created))
-                    .Select(e => new FileSystemDocument(e.EventArgs.FullPath));
-
-                return new FileSystemDocumentSource(initialContents.Concat(createdFiles));
+                return EventingDocumentSource.Create(
+                    new FileSystemDocumentEmitter(inbox),
+                    CancellationToken.None);
             }
 
-            return new FileSystemDocumentSource(initialContents);
+            return new EnumerableDocumentSource(
+                Directory.EnumerateFiles(inbox)
+                    .Select(path => new FileSystemDocument(path)));
         }
     }
 }
