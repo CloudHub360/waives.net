@@ -33,9 +33,9 @@ namespace Waives.Reactive.HttpAdapters
             }
         }
 
-        internal static async Task<HttpDocumentFactory> Create(WaivesClient apiClient, bool clearOrphans = true)
+        internal static async Task<HttpDocumentFactory> Create(WaivesClient apiClient, bool deleteOrphanedDocuments = true)
         {
-            if (clearOrphans)
+            if (deleteOrphanedDocuments)
             {
                 await DeleteOrphanedDocuments(apiClient).ConfigureAwait(false);
             }
