@@ -12,29 +12,6 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
     public static class FileSystem
     {
         /// <summary>
-        /// Convenience factory method for creating a <see cref="DocumentSource"/> for the given
-        /// path on a local or remote filesystem.
-        /// </summary>
-        /// <param name="inbox">The path containing the documents to process.</param>
-        /// <param name="watch">Whether or not the path should be watched for new documents added
-        /// to it.</param>
-        /// <returns>An <see cref="EnumerableDocumentSource"/> for the path if <paramref name="watch"/>
-        /// is <c>false</c>; otherwise an <see cref="EventingDocumentSource"/>.</returns>
-        public static DocumentSource Create(string inbox, bool watch = false)
-        {
-            if (watch)
-            {
-                return EventingDocumentSource.Create(
-                    new FileSystemDocumentEmitter(inbox),
-                    CancellationToken.None);
-            }
-
-            return new EnumerableDocumentSource(
-                Directory.EnumerateFiles(inbox)
-                    .Select(path => new FileSystemDocument(path)));
-        }
-
-        /// <summary>
         /// Convenience method creating a <see cref="DocumentSource"/> watching the specified
         /// <paramref name="inbox"/> path for new files being created.
         /// </summary>
@@ -51,6 +28,20 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
             return EventingDocumentSource.Create(
                 new FileSystemDocumentEmitter(inbox),
                 token);
+        }
+
+        /// <summary>
+        /// Convenience method creating a <see cref="DocumentSource"/> enumerating all files
+        /// in the specified <paramref name="path"/> directory.
+        /// </summary>
+        /// <param name="path">The path to enumerate for files.</param>
+        /// <returns>A <see cref="DocumentSource"/> emitting documents for the enumerated
+        /// files.</returns>
+        public static DocumentSource ReadFrom(string path)
+        {
+            return new EnumerableDocumentSource(
+                Directory.EnumerateFiles(path)
+                    .Select(f => new FileSystemDocument(f)));
         }
     }
 }
