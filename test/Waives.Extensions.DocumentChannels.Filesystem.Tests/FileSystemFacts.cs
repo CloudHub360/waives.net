@@ -8,15 +8,14 @@ using Xunit;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
 {
-    // ReSharper disable once InconsistentNaming
-    public class FileSystemDocumentSource_Should
+    public class FileSystemFacts
     {
         private static readonly string TestDirectory = Path.Combine(Directory.GetCurrentDirectory(), "test-files");
 
         private readonly IEnumerable<string> _filesInTestDirectory;
         private readonly string _newTestFile = Path.Combine(TestDirectory, $"{Guid.NewGuid()}.txt");
 
-        public FileSystemDocumentSource_Should()
+        public FileSystemFacts()
         {
             _filesInTestDirectory = Directory.EnumerateFiles(TestDirectory);
         }
@@ -24,7 +23,7 @@ namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
         [Fact]
         public void Return_all_files_in_the_specified_directory()
         {
-            var sut = FileSystemDocumentSource.Create(TestDirectory);
+            var sut = FileSystem.Create(TestDirectory);
 
             var expected = _filesInTestDirectory
                 .Select(d => new FileSystemDocument(d));
@@ -35,7 +34,7 @@ namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
         [Fact]
         public void Return_new_files_created_in_the_specified_directory()
         {
-            var sut = FileSystemDocumentSource.Watch(TestDirectory, CancellationToken.None);
+            var sut = FileSystem.WatchForChanges(TestDirectory, CancellationToken.None);
 
             sut.Cast<FileSystemDocument>()
                 .Skip(_filesInTestDirectory.Count())
