@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Extensions.DocumentChannels.Filesystem;
 using Waives.Reactive;
@@ -48,8 +49,15 @@ namespace FileSorter
 
             await WaivesApi.Login("clientId", "clientSecret");
 
+            var cancellation = new CancellationTokenSource();
+            Console.CancelKeyPress += (s, e) =>
+            {
+                Console.WriteLine("Cancelling processing...");
+                cancellation.Cancel();
+            };
+
             var fileSorter = new FileSorter(outbox, errorbox);
-            var filesystem = FileSystemDocumentSource.Create(inbox, watch: true);
+            var filesystem = FileSystemDocumentSource.Watch(inbox, cancellation.Token);
 
             var pipeline = WaivesApi.CreatePipeline()
                 .WithDocumentsFrom(filesystem)
@@ -66,7 +74,7 @@ namespace FileSorter
                 Console.WriteLine(ex);
             }
 
-            Console.ReadLine();
+            await Task.Delay(Timeout.Infinite, cancellation.Token);
         }
 
         private static void EnsureDirectoryExists(string path)

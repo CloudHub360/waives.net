@@ -33,5 +33,12 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
                 Directory.EnumerateFiles(inbox)
                     .Select(path => new FileSystemDocument(path)));
         }
+
+        public static DocumentSource Watch(string inbox, CancellationToken token)
+        {
+            return EventingDocumentSource.Create(
+                new FileSystemDocumentEmitter(inbox),
+                token);
+        }
     }
 }
