@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using Xunit;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
@@ -34,7 +35,7 @@ namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
         [Fact]
         public void Return_new_files_created_in_the_specified_directory()
         {
-            var sut = FileSystemDocumentSource.Create(TestDirectory, watch: true);
+            var sut = FileSystemDocumentSource.Watch(TestDirectory, CancellationToken.None);
 
             sut.Cast<FileSystemDocument>()
                 .Skip(_filesInTestDirectory.Count())
