@@ -23,7 +23,7 @@ namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
         [Fact]
         public void Return_all_files_in_the_specified_directory()
         {
-            var sut = FileSystem.Create(TestDirectory);
+            var sut = FileSystem.ReadFrom(TestDirectory);
 
             var expected = _filesInTestDirectory
                 .Select(d => new FileSystemDocument(d));
