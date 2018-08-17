@@ -125,14 +125,14 @@ namespace Waives.Reactive
         /// }
         /// ]]>
         /// </example>
-        /// <param name="clearOrphans">If set to <c>true</c>, it will (immediately) delete all documents
+        /// <param name="deleteExistingDocuments">If set to <c>true</c>, it will (immediately) delete all documents
         /// in existence in the Waives account; if set to <c>false</c>, no such clean up will be completed.
         /// Defaults to <c>true</c>.</param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static Pipeline CreatePipeline(bool clearOrphans = true)
+        public static Pipeline CreatePipeline(bool deleteExistingDocuments = true)
         {
-            var documentFactory = Task.Run(() => HttpDocumentFactory.Create(ApiClient, clearOrphans)).Result;
+            var documentFactory = Task.Run(() => HttpDocumentFactory.Create(ApiClient, deleteExistingDocuments)).Result;
             return new Pipeline(
                 documentFactory,
                 new RateLimiter());
