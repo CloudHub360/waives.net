@@ -89,6 +89,11 @@ namespace Waives.Pipelines.Tests
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             var classifierName = Generate.String();
+
+            _rateLimiter
+                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
             var pipeline = _sut
                 .WithDocumentsFrom(source)
                 .ClassifyWith(classifierName);
