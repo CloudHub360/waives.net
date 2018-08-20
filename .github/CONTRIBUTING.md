@@ -24,18 +24,26 @@ to [community@waives.io](mailto:community@waives.io).
 
 ## TL;DR
 
+Please:
+
 1. **Be friendly and respectful to all with whom you interact here.** Remember text is a lossy communication format
 and what you write _will_ be interpreted differently from how it was meant.
-2. **Use the bug and pull request templates provided.** These are intended to make everyone's lives easier.
-3. **Keep your commits and pull requests small.**
-4. **Follow the coding style guidelines.**
-5. **Include clear and thoughtfully-worded tests.**
+2. **Use the bug and pull request templates provided.** These are here to make everyone's lives easier, contributors
+and maintainers.
+3. **Keep your commits and pull requests small.** A small commit is easier to understand, to cherry-pick, revert, and
+undo. Pull requests are easier to review, and so will be merged more quickly, if you keep them small. 
+4. **Follow the coding guidelines.** We have tried to make these easy-to-follow and not too demanding; hopefully it
+will be clear from the code files themselves, but there are also written guides for reference. 
+5. **Include clear and thoughtfully-worded tests.** Tests should only test one thing, and they should clearly describe
+the behaviour they're trying to test. Take your time over test names. 
 
-### I just have a question to ask!
+:pray: Thank you for your time and contributions! :pray:
 
-Please do not file issues to ask questions; we'll be happy to answer your questions via email at support@waives.io.
-We expect to implement lower-friction communication methods such as chat and message boards in time as the project
-and community grows. 
+### But I just have a question to ask!
+
+We'd love to answer your questions! We'll be happy to answer your questions via email at support@waives.io, and we
+expect to implement lower-friction communication methods such as chat and message boards in time as the project and
+community grows. Please do _not_ file issues to ask questions; these are for work items (e.g. bugs, features) only. 
 
 ## How can I contribute?
 
