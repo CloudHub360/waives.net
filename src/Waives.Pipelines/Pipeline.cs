@@ -53,6 +53,7 @@ namespace Waives.Pipelines
         private readonly IHttpDocumentFactory _documentFactory;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
         private Action _onPipelineCompleted = () => { };
+        private Action<DocumentError> _onDocumentError = (pe) => { };
         private readonly IRateLimiter _rateLimiter;
 
         internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter)
@@ -147,6 +148,17 @@ namespace Waives.Pipelines
         }
 
         /// <summary>
+        /// Run an arbitrary action when a document has an error during processing.
+        /// </summary>
+        /// <param name="action">The action to execute when document has an error.</param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline OnDocumentError(Action<DocumentError> action)
+        {
+            _onDocumentError = action ?? throw new ArgumentNullException(nameof(action));
+            return this;
+        }
+
+        /// <summary>
         /// Start processing the documents in the pipeline.
         /// </summary>
         /// <returns>An <see cref="IDisposable"/> subscription object. If you wish to terminate
@@ -177,9 +189,11 @@ namespace Waives.Pipelines
         private async Task OnDocumentCreationError(ProcessingError<Document> error)
         {
             Console.WriteLine($"An error occurred during creation {error.Document.SourceId}. " +
-                              $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
+                                $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
 
             _rateLimiter.MakeDocumentSlotAvailable();
+
+            _onDocumentError(new DocumentError(error.Document, error.Exception));
         }
 
         private async Task OnProcessingError(ProcessingError<WaivesDocument> error)
@@ -188,6 +202,8 @@ namespace Waives.Pipelines
                               $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
 
             await DeleteDocumentAndNotifyRateLimiter(error.Document).ConfigureAwait(false);
+
+            _onDocumentError(new DocumentError(error.Document.Source, error.Exception));
         }
 
         private async Task DeleteDocumentAndNotifyRateLimiter(WaivesDocument document)
