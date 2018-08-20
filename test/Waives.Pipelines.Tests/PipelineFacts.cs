@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Waives.Http.Responses;
 using Waives.Pipelines.HttpAdapters;
 using Xunit;
@@ -167,6 +168,42 @@ namespace Waives.Pipelines.Tests
                 .Start();
 
             Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
+        }
+
+        [Fact]
+        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_a_processing_error()
+        {
+            var source = Observable
+                .Repeat(new TestDocument(Generate.Bytes()), 1);
+
+            var fakeRateLimiter = new FakeRateLimiter();
+            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
+
+            sut.WithDocumentsFrom(source)
+                .Then(d => { throw new Exception("anexception"); })
+                .Start();
+
+            Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
+        }
+
+        [Fact]
+        public async Task A_slot_is_freed_in_the_rate_limiter_when_a_document_has_an_error_during_creation()
+        {
+            var source = Observable
+                .Repeat(new TestDocument(Generate.Bytes()), 1);
+
+            _documentFactory
+                .CreateDocument(Arg.Any<Document>())
+                .Throws(new Exception("Could not create document"));
+
+            _rateLimiter
+                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            _sut.WithDocumentsFrom(source)
+                .Start();
+
+            _rateLimiter.Received(1).MakeDocumentSlotAvailable();
         }
 
         private class FakeRateLimiter : IRateLimiter
