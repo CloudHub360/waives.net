@@ -211,6 +211,64 @@ namespace Waives.Pipelines.Tests
             _rateLimiter.Received(1).MakeDocumentSlotAvailable();
         }
 
+        [Fact]
+        public async Task OnDocumentError_is_run_when_a_document_has_a_processing_error()
+        {
+            var onDocumentErrorActionRun = false;
+            var document = new TestDocument(Generate.Bytes());
+            var exception = new Exception("anexception");
+            var source = Observable.Repeat(document, 1);
+
+            _rateLimiter
+                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            _sut.WithDocumentsFrom(source)
+                .Then(d =>
+                {
+                    throw exception;
+                })
+                .OnDocumentError(pe =>
+                {
+                    Assert.Same(document, pe.Document);
+                    Assert.Same(exception, pe.Exception);
+                    onDocumentErrorActionRun = true;
+                })
+                .Start();
+
+            Assert.True(onDocumentErrorActionRun);
+        }
+
+        [Fact]
+        public async Task OnDocumentError_is_run_when_a_document_has_an_error_during_creation()
+        {
+            var onDocumentErrorActionRun = false;
+            var document = new TestDocument(Generate.Bytes());
+            var exception = new Exception("Could not create document");
+            var source = Observable.Repeat(document, 1);
+
+            _documentFactory
+                .CreateDocument(Arg.Any<Document>())
+                .Throws(exception);
+
+            _rateLimiter
+                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            _sut.WithDocumentsFrom(source)
+                .OnDocumentError(pe =>
+                {
+                    Assert.Same(document, pe.Document);
+                    Assert.NotNull(pe.Exception);
+                    Assert.Null(pe.Exception.InnerException);
+                    Assert.Equal(pe.Exception.Message,exception.Message);
+                    onDocumentErrorActionRun = true;
+                })
+                .Start();
+
+                Assert.True(onDocumentErrorActionRun);
+        }
+
         private class FakeRateLimiter : IRateLimiter
         {
             public bool MakeDocumentSlotAvailableCalled { get; private set; }
