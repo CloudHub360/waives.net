@@ -8,7 +8,7 @@ namespace Waives.Pipelines
     public class PipelineException : Exception
     {
         public PipelineException(Exception innerException)
-            : base("A fatal error occurred in the processing pipeline. View the InnerException" +
+            : base("A fatal error occurred in the processing pipeline. View the InnerException " +
                    "for more details.", innerException)
         {
 
