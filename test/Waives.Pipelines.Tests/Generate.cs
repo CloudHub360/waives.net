@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives.Reactive.Tests
+namespace Waives.Pipelines.Tests
 {
     internal static class Generate
     {

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using Microsoft.Reactive.Testing;
-using Waives.Pipelines;
 using Xunit;
 
-namespace Waives.Reactive.Tests
+namespace Waives.Pipelines.Tests
 {
     public class RateLimiterFacts
     {
