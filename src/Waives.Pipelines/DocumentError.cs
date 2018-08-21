@@ -12,6 +12,7 @@ namespace Waives.Pipelines
         /// The <see cref="Document"/> on which the error occurred
         /// </summary>
         public Document Document { get; }
+
         /// <summary>
         /// The exception containing details of the error
         /// </summary>

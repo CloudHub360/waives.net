@@ -22,7 +22,6 @@ namespace Waives.Pipelines
 
                     return new ProcessingResult(d, false);
                 }
-
             }).Where(r => r.ProcessedSuccessfully);
 
             return results.Select(r => r.Document);
@@ -44,7 +43,6 @@ namespace Waives.Pipelines
 
                     return new ProcessingResult(null, false);
                 }
-
             }).Where(r => r.ProcessedSuccessfully);
 
             return results.Select(r => r.Document);
