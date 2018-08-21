@@ -18,7 +18,7 @@ namespace Waives.Pipelines
         /// </summary>
         public Exception Exception { get; }
 
-        public DocumentError(Document document, Exception exception)
+        internal DocumentError(Document document, Exception exception)
         {
             Document = document;
             Exception = exception;
