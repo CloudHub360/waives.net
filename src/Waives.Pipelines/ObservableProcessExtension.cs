@@ -29,7 +29,7 @@ namespace Waives.Pipelines
         }
 
         internal static IObservable<WaivesDocument> Process(this IObservable<Document> documents,
-            Func<Document, Task<WaivesDocument>> processAction, Func<ProcessingError<Document>, Task> errorAction)
+            Func<Document, Task<WaivesDocument>> processAction, Action<ProcessingError<Document>> errorAction)
         {
             var results = documents.SelectMany(async d =>
             {
@@ -40,7 +40,7 @@ namespace Waives.Pipelines
                 }
                 catch (Exception e)
                 {
-                    await errorAction(new ProcessingError<Document>(d, e)).ConfigureAwait(false);
+                    errorAction(new ProcessingError<Document>(d, e));
 
                     return new ProcessingResult(null, false);
                 }
