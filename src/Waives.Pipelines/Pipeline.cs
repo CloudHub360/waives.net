@@ -207,7 +207,6 @@ namespace Waives.Pipelines
 
         private async Task DeleteDocumentAndNotifyRateLimiter(WaivesDocument document)
         {
-            //TODO: Work out error handling and failure behaviour here
             await document.HttpDocument.Delete(() =>
             {
                 _rateLimiter.MakeDocumentSlotAvailable();
