@@ -3,9 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Waives.Pipelines;
 
-namespace Waives.Extensions.DocumentChannels.Filesystem
+namespace Waives.Pipelines.Extensions.DocumentSources.FileSystem
 {
     /// <inheritdoc cref="DocumentEmitter" />
     /// <summary>

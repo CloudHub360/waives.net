@@ -1,9 +1,8 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading;
-using Waives.Pipelines;
 
-namespace Waives.Extensions.DocumentChannels.Filesystem
+namespace Waives.Pipelines.Extensions.DocumentSources.FileSystem
 {
     /// <summary>
     /// Convenience class for creating <see cref="DocumentSource"/>s for paths

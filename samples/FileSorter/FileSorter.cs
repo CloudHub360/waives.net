@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using Waives.Extensions.DocumentChannels.Filesystem;
 using Waives.Pipelines;
+using Waives.Pipelines.Extensions.DocumentSources.FileSystem;
 
 namespace FileSorter
 {

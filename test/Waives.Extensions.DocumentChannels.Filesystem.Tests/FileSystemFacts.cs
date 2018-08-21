@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using Waives.Pipelines.Extensions.DocumentSources.FileSystem;
 using Xunit;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem.Tests
