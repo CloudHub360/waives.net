@@ -13,7 +13,7 @@ namespace Waives.Pipelines
     /// using System;
     /// using System.Threading.Tasks;
     /// using Waives.Pipelines;
-    /// using Waives.Pipelines.Extensions.DocumentSources.Filesystem
+    /// using Waives.Pipelines.Extensions.DocumentSources.FileSystem
     ///
     /// namespace Waives.Pipelines.Example
     /// {
