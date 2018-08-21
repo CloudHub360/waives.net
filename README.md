@@ -31,14 +31,14 @@ bit of configuration of NuGet:
 4. Install the latest pre-release version using your NuGet client or
 
    ```powershell
-   Install-Package -Pre Waives.Reactive
+   Install-Package -Pre Waives.Pipelines
    ```
 
 ## API overview
 
-### Waives.Reactive
+### Waives.Pipelines
 
-Waives.Reactive is the high-level document-processing API built against Waives.
+Waives.Pipelines is the high-level document-processing API built against Waives.
 It exposes a pipeline model sourcing documents from the place you specify (e.g.
 file system, cloud storage, database, etc.), defines a set of operations that
 can be completed on a document, such as classification and extraction, and
@@ -78,15 +78,15 @@ catch (PipelineException ex)
 Waives.Http is a lower-level client which makes the HTTP requests against the
 Waives API. This is provided for completeness for advanced scenarios that may
 not fit the pipeline model nicely, but is generally considered an implementation
-detail of Waives.Reactive.
+detail of Waives.Pipelines.
 
 ### Extension packages
 
 Similarly to the ASP.NET Core set of packages, we publish non-core functionality
 as separate NuGet packages named extensions. These extensions are:
 
-* **Waives.Extensions.DocumentChannels.Filesystem**: provides an implementation of
-  `Document` and `DocumentSource` reading files from a local or remote disk.
+* **Waives.Pipelines.Extensions.DocumentSources.FileSystem**: provides an implementation of
+  `Document` and `DocumentEmitter` reading files from a local or remote disk.
 
 ## Sample applications
 
