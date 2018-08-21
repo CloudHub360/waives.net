@@ -12,10 +12,10 @@ namespace Waives.Pipelines
     /// <![CDATA[
     /// using System;
     /// using System.Threading.Tasks;
-    /// using Waives.Reactive;
-    /// using Waives.Reactive.Extensions.DocumentSources.Filesystem
+    /// using Waives.Pipelines;
+    /// using Waives.Pipelines.Extensions.DocumentSources.Filesystem
     ///
-    /// namespace Waives.Reactive.Example
+    /// namespace Waives.Pipelines.Example
     /// {
     ///     public class Program
     ///     {
