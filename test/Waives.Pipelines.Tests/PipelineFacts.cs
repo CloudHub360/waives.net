@@ -261,7 +261,7 @@ namespace Waives.Pipelines.Tests
                     Assert.Same(document, pe.Document);
                     Assert.NotNull(pe.Exception);
                     Assert.Null(pe.Exception.InnerException);
-                    Assert.Equal(pe.Exception.Message,exception.Message);
+                    Assert.Equal(pe.Exception.Message, exception.Message);
                     onDocumentErrorActionRun = true;
                 })
                 .Start();
