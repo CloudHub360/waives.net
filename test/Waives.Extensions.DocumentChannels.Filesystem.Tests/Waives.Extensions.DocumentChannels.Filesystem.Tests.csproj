@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Waives.Extensions.DocumentChannels.Filesystem\Waives.Extensions.DocumentChannels.Filesystem.csproj" />
+    <ProjectReference Include="..\..\src\Waives.Pipelines.Extensions.DocumentSources.FileSystem\Waives.Pipelines.Extensions.DocumentSources.FileSystem.csproj" />
   </ItemGroup>
 
 </Project>

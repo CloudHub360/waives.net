@@ -13,6 +13,8 @@
     <RepositoryUrl>https://github.com/waives/waives.net</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <AssemblyName>Waives.Pipelines.Extensions.DocumentSources.FileSystem</AssemblyName>
+    <RootNamespace>Waives.Pipelines.Extensions.DocumentSources.FileSystem</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
