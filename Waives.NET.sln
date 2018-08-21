@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Pipelines", "src\Wai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Pipelines.Extensions.DocumentSources.FileSystem", "src\Waives.Pipelines.Extensions.DocumentSources.FileSystem\Waives.Pipelines.Extensions.DocumentSources.FileSystem.csproj", "{228C2570-07F7-4CD4-8DA6-A55A33019886}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Extensions.DocumentChannels.Filesystem.Tests", "test\Waives.Extensions.DocumentChannels.Filesystem.Tests\Waives.Extensions.DocumentChannels.Filesystem.Tests.csproj", "{05A83B49-6BC2-4C61-BF18-6405B79BED9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Pipelines.Extensions.DocumentSources.FileSystem.Tests", "test\Waives.Pipelines.Extensions.DocumentSources.FileSystem.Tests\Waives.Pipelines.Extensions.DocumentSources.FileSystem.Tests.csproj", "{05A83B49-6BC2-4C61-BF18-6405B79BED9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
