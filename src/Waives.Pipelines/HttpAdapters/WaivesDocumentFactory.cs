@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Waives.Http;
 
-namespace Waives.Reactive.HttpAdapters
+namespace Waives.Pipelines.HttpAdapters
 {
     /// <summary>
     /// Adapter interface for creating documents.

@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Http.Tests", "test\W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockWaivesApi", "test\MockWaivesApi\MockWaivesApi.csproj", "{E1F451F1-FCDA-48D5-8C32-C7EF0C848285}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Reactive", "src\Waives.Reactive\Waives.Reactive.csproj", "{35325E85-5FB8-47C7-A026-052DD4AEA8CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Pipelines", "src\Waives.Pipelines\Waives.Pipelines.csproj", "{35325E85-5FB8-47C7-A026-052DD4AEA8CB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Waives.Extensions.DocumentChannels.Filesystem", "src\Waives.Extensions.DocumentChannels.Filesystem\Waives.Extensions.DocumentChannels.Filesystem.csproj", "{228C2570-07F7-4CD4-8DA6-A55A33019886}"
 EndProject

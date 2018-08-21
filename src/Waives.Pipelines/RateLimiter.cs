@@ -5,7 +5,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     //Inspired by http://granitestatehacker.kataire.com/2016/01/rate-limiting-observables-with-reactive.html
     public class RateLimiter : IRateLimiter

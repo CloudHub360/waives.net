@@ -1,7 +1,7 @@
 ﻿using System;
 using Waives.Http.Responses;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     public class DocumentClassification
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reactive.Linq;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     /// <summary>
     /// Adapter class converting an <see cref="IEnumerable{Document}"/> into a

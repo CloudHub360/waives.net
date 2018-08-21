@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Waives.Http.Responses;
 
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
-namespace Waives.Reactive.HttpAdapters
+namespace Waives.Pipelines.HttpAdapters
 {
     /// <summary>
     /// Adapter interface to allow us to substitute the underlying calls.

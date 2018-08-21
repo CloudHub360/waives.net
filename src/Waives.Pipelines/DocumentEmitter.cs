@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     /// <summary>
     /// Wraps an event stream (logical or literal) producing documents

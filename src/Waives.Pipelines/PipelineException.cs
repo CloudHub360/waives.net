@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     /// <summary>
     /// Indicates an unrecoverable error occurred in the processing of the pipeline.

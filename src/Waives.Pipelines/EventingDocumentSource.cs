@@ -2,7 +2,7 @@
 using System.Reactive.Linq;
 using System.Threading;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     /// <summary>
     /// Adapter class converting an event stream from a <see cref="DocumentEmitter"/>
