@@ -57,6 +57,10 @@ namespace FileSorter
             };
 
             var fileSorter = new FileSorter(outbox, errorbox);
+
+            // Creates an EventingDocumentSource wrapping a FileSystemWatcher emitting
+            // a new doucment into the pipeline whenever a document is created in the
+            // inbox path.
             var filesystem = FileSystem.WatchForChanges(inbox, cancellation.Token);
 
             var pipeline = WaivesApi.CreatePipeline()
