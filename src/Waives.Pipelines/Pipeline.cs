@@ -53,7 +53,7 @@ namespace Waives.Pipelines
         private readonly IHttpDocumentFactory _documentFactory;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
         private Action _onPipelineCompleted = () => { };
-        private Action<DocumentError> _onDocumentError = (pe) => { };
+        private Action<DocumentError> _onDocumentError = err => { };
         private readonly IRateLimiter _rateLimiter;
 
         internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter)
@@ -73,9 +73,8 @@ namespace Waives.Pipelines
             var rateLimitedDocuments = _rateLimiter.RateLimited(documentSource);
 
             _pipeline = rateLimitedDocuments.Process(async d =>
-            {
-                return new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false));
-            }, OnDocumentCreationError);
+                new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false)),
+                OnDocumentCreationError);
 
             return this;
         }

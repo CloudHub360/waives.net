@@ -15,17 +15,16 @@ namespace Waives.Pipelines.Tests
         private readonly IHttpDocumentFactory _documentFactory = Substitute.For<IHttpDocumentFactory>();
         private readonly Pipeline _sut;
         private readonly IRateLimiter _rateLimiter = Substitute.For<IRateLimiter>();
-        private readonly IHttpDocument _httpDocument;
 
         public PipelineFacts()
         {
-            _httpDocument = Substitute.For<IHttpDocument>();
-            _httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
-            _httpDocument.Delete(Arg.Invoke());
+            var httpDocument = Substitute.For<IHttpDocument>();
+            httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
+            httpDocument.Delete(Arg.Invoke());
 
             _documentFactory
                 .CreateDocument(Arg.Any<Document>())
-                .Returns(_httpDocument);
+                .Returns(httpDocument);
 
             _sut = new Pipeline(_documentFactory, _rateLimiter);
         }
@@ -91,7 +90,7 @@ namespace Waives.Pipelines.Tests
             var classifierName = Generate.String();
 
             _rateLimiter
-                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .RateLimited(Arg.Any<IObservable<Document>>())
                 .Returns(source);
 
             var pipeline = _sut
@@ -185,14 +184,14 @@ namespace Waives.Pipelines.Tests
             var sut = new Pipeline(_documentFactory, fakeRateLimiter);
 
             sut.WithDocumentsFrom(source)
-                .Then(d => { throw new Exception("anexception"); })
+                .Then(d => throw new Exception("An exception"))
                 .Start();
 
             Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
         }
 
         [Fact]
-        public async Task A_slot_is_freed_in_the_rate_limiter_when_a_document_has_an_error_during_creation()
+        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_an_error_during_creation()
         {
             var source = Observable
                 .Repeat(new TestDocument(Generate.Bytes()), 1);
@@ -202,7 +201,7 @@ namespace Waives.Pipelines.Tests
                 .Throws(new Exception("Could not create document"));
 
             _rateLimiter
-                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .RateLimited(Arg.Any<IObservable<Document>>())
                 .Returns(source);
 
             _sut.WithDocumentsFrom(source)
@@ -212,26 +211,23 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public async Task OnDocumentError_is_run_when_a_document_has_a_processing_error()
+        public void OnDocumentError_is_run_when_a_document_has_a_processing_error()
         {
             var onDocumentErrorActionRun = false;
             var document = new TestDocument(Generate.Bytes());
-            var exception = new Exception("anexception");
+            var exception = new Exception("An exception");
             var source = Observable.Repeat(document, 1);
 
             _rateLimiter
-                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .RateLimited(Arg.Any<IObservable<Document>>())
                 .Returns(source);
 
             _sut.WithDocumentsFrom(source)
-                .Then(d =>
+                .Then(d => throw exception)
+                .OnDocumentError(err =>
                 {
-                    throw exception;
-                })
-                .OnDocumentError(pe =>
-                {
-                    Assert.Same(document, pe.Document);
-                    Assert.Same(exception, pe.Exception);
+                    Assert.Same(document, err.Document);
+                    Assert.Same(exception, err.Exception);
                     onDocumentErrorActionRun = true;
                 })
                 .Start();
@@ -240,7 +236,7 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public async Task OnDocumentError_is_run_when_a_document_has_an_error_during_creation()
+        public void OnDocumentError_is_run_when_a_document_has_an_error_during_creation()
         {
             var onDocumentErrorActionRun = false;
             var document = new TestDocument(Generate.Bytes());
@@ -252,16 +248,16 @@ namespace Waives.Pipelines.Tests
                 .Throws(exception);
 
             _rateLimiter
-                .RateLimited<Document>(Arg.Any<IObservable<Document>>())
+                .RateLimited(Arg.Any<IObservable<Document>>())
                 .Returns(source);
 
             _sut.WithDocumentsFrom(source)
-                .OnDocumentError(pe =>
+                .OnDocumentError(err =>
                 {
-                    Assert.Same(document, pe.Document);
-                    Assert.NotNull(pe.Exception);
-                    Assert.Null(pe.Exception.InnerException);
-                    Assert.Equal(pe.Exception.Message, exception.Message);
+                    Assert.Same(document, err.Document);
+                    Assert.NotNull(err.Exception);
+                    Assert.Null(err.Exception.InnerException);
+                    Assert.Equal(err.Exception.Message, exception.Message);
                     onDocumentErrorActionRun = true;
                 })
                 .Start();
