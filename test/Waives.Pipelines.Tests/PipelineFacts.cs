@@ -4,11 +4,10 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Responses;
-using Waives.Pipelines;
 using Waives.Pipelines.HttpAdapters;
 using Xunit;
 
-namespace Waives.Reactive.Tests
+namespace Waives.Pipelines.Tests
 {
     public class PipelineFacts
     {

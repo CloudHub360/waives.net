@@ -1,8 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
-using Waives.Pipelines;
 
-namespace Waives.Reactive.Tests
+namespace Waives.Pipelines.Tests
 {
     internal class TestDocument : Document
     {
