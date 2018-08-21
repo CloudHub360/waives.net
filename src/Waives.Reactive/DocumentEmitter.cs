@@ -57,6 +57,7 @@ namespace Waives.Reactive
         /// The process for emitting events.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// This method will be run in a task on the task pool. Returning from
         /// this method indicates nothing to the <see cref="Pipeline"/> about the
         /// completion of the source, unless <see cref="Completed"/> is called
@@ -65,6 +66,12 @@ namespace Waives.Reactive
         /// In the case of a long-running task, like a polling activity, you should
         /// check whether the <paramref name="token"/> has been cancelled, call
         /// <see cref="Completed"/> and return from this method.
+        /// </para>
+        /// <para>
+        /// When a document is ready to be sent to the pipeline, call
+        /// <see cref="EmitDocument"/> with your <see cref="Document"/> instance to
+        /// ensure it is emitted correctly.
+        /// </para>
         /// </remarks>
         /// <param name="token"></param>
         /// <returns></returns>
