@@ -186,7 +186,7 @@ namespace Waives.Pipelines
             return observer.SubscribeTo(_pipeline);
         }
 
-        private async Task OnDocumentCreationError(ProcessingError<Document> error)
+        private void OnDocumentCreationError(ProcessingError<Document> error)
         {
             Console.WriteLine($"An error occurred during creation {error.Document.SourceId}. " +
                                 $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
