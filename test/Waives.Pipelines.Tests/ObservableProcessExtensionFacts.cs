@@ -18,8 +18,6 @@ namespace Waives.Pipelines.Tests
         private readonly WaivesDocument[] _documents;
         private readonly IObservable<WaivesDocument> _documentsObservable;
         private readonly Exception _errorDocumentError;
-        private readonly Exception[] _errors;
-        private readonly IObservable<Exception> _errorsObservable;
 
         public ObservableProcessExtensionFacts()
         {
@@ -38,7 +36,7 @@ namespace Waives.Pipelines.Tests
             };
 
             _errorDocumentError = new NullReferenceException("testError");
-            _errors = new[]
+            var errors = new[]
             {
                 _errorDocumentError
             };
@@ -50,23 +48,19 @@ namespace Waives.Pipelines.Tests
                 .ToArray());
 
 
-            _errorsObservable = _scheduler.CreateColdObservable(
-                _errors.Select(e =>
-                    new Recorded<Notification<Exception>>(0,
-                        Notification.CreateOnNext(e)))
-                .ToArray());
-        }
-
-        private async Task OnProcessingError(ProcessingError<WaivesDocument> value)
-        {
+            _scheduler.CreateColdObservable(
+                errors.Select(e =>
+                        new Recorded<Notification<Exception>>(0,
+                            Notification.CreateOnNext(e)))
+                    .ToArray());
         }
 
         [Fact]
         public void Returns_only_documents_where_process_action_succeeds()
         {
             var documents = _documentsObservable.Process(
-                ProcessAndThrowForErrorDocument,
-                OnProcessingError);
+                ThrowIfErrorDocument,
+                e => Task.CompletedTask);
 
             var documentsObserver = _scheduler.Start(() => documents);
 
@@ -88,8 +82,8 @@ namespace Waives.Pipelines.Tests
             var errorActionCalledFor = new List<ProcessingError<WaivesDocument>>();
 
             var documents = _documentsObservable.Process(
-                ProcessAndThrowForErrorDocument,
-                (e) =>
+                ThrowIfErrorDocument,
+                e =>
                 {
                     errorActionCalledFor.Add(e);
                     return Task.CompletedTask;
@@ -98,8 +92,8 @@ namespace Waives.Pipelines.Tests
             _scheduler.Start(() => documents);
 
             Assert.Equal(1, errorActionCalledFor.Count);
-            Assert.False(errorActionCalledFor.Any(pe =>
-                ReferenceEquals(pe.Document, _successfulDocument) ));
+            Assert.False(errorActionCalledFor.Any(err =>
+                ReferenceEquals(err.Document, _successfulDocument) ));
         }
 
         [Fact]
@@ -108,8 +102,8 @@ namespace Waives.Pipelines.Tests
             var errorActionCalledFor = new List<ProcessingError<WaivesDocument>>();
 
             var documents = _documentsObservable.Process(
-                ProcessAndThrowForErrorDocument,
-                (e) =>
+                ThrowIfErrorDocument,
+                e =>
                 {
                     errorActionCalledFor.Add(e);
                     return Task.CompletedTask;
@@ -118,24 +112,18 @@ namespace Waives.Pipelines.Tests
             _scheduler.Start(() => documents);
 
             Assert.Equal(1, errorActionCalledFor.Count);
-            Assert.True(errorActionCalledFor.Any(pe =>
-                ReferenceEquals(pe.Document, _errorDocument)));
+            Assert.True(errorActionCalledFor.Any(err =>
+                ReferenceEquals(err.Document, _errorDocument)));
         }
 
-        /// <summary>
-        /// Process a WaivesDocument and throw an exception if it
-        /// is the _errorDocument
-        /// </summary>
-        /// <param name="document"></param>
-        /// <returns></returns>
-        private async Task<WaivesDocument> ProcessAndThrowForErrorDocument(WaivesDocument document)
+        private Task<WaivesDocument> ThrowIfErrorDocument(WaivesDocument document)
         {
             if (ReferenceEquals(document, _errorDocument))
             {
-                throw _errorDocumentError;
+                return Task.FromException<WaivesDocument>(_errorDocumentError);
             }
 
-            return document;
+            return Task.FromResult(document);
         }
     }
 }
