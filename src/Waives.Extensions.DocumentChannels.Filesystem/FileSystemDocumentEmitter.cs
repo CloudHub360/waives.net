@@ -7,6 +7,11 @@ using Waives.Reactive;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem
 {
+    /// <inheritdoc cref="DocumentEmitter" />
+    /// <summary>
+    /// Watches the provided path for new files being created and emits them via
+    /// the <see cref="DocumentEmitter.NewDocument"/> event.
+    /// </summary>
     public sealed class FileSystemDocumentEmitter : DocumentEmitter, IDisposable
     {
         private readonly FileSystemWatcher _filesystemWatcher;
@@ -20,6 +25,13 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
             };
         }
 
+        /// <inheritdoc />
+        /// <remarks>
+        /// Emits any existing files in the watched directory before subscribing to
+        /// <see cref="FileSystemWatcher.Created"/> to emit notifications of new
+        /// documents via <see cref="DocumentEmitter.EmitDocument"/>. Ensures this
+        /// emitter is completed when the <paramref name="token"/> is cancelled.
+        /// </remarks>
         protected override Task EmitDocuments(CancellationToken token)
         {
             // Identify and emit existing files in the directory
@@ -40,6 +52,10 @@ namespace Waives.Extensions.DocumentChannels.Filesystem
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
+        /// <remarks>
+        /// Enable or disable the underlying <see cref="FileSystemWatcher"/>.
+        /// </remarks>
         public override bool EnableRaisingEvents
         {
             get => _filesystemWatcher.EnableRaisingEvents;
