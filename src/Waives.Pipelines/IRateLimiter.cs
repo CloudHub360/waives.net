@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     public interface IRateLimiter
     {

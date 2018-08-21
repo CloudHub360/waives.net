@@ -3,10 +3,10 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http;
-using Waives.Reactive.HttpAdapters;
+using Waives.Pipelines.HttpAdapters;
 
 [assembly: InternalsVisibleTo("Waives.Reactive.Tests")]
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     public static class WaivesApi
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DocoptNet;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Waives.Reactive;
+using Waives.Pipelines;
 
 namespace BlobStorageProcessor
 {

@@ -4,7 +4,8 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Responses;
-using Waives.Reactive.HttpAdapters;
+using Waives.Pipelines;
+using Waives.Pipelines.HttpAdapters;
 using Xunit;
 
 namespace Waives.Reactive.Tests

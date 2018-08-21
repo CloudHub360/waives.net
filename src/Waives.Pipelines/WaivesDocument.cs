@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
-using Waives.Reactive.HttpAdapters;
+using Waives.Pipelines.HttpAdapters;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     /// <summary>
     /// Represents a document within the Waives API.

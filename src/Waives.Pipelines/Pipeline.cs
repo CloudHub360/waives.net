@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Waives.Reactive.HttpAdapters;
+using Waives.Pipelines.HttpAdapters;
 
-namespace Waives.Reactive
+namespace Waives.Pipelines
 {
     /// <summary>
     /// Configures a new document-processing pipeline.

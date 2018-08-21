@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Waives.Http.Responses;
 
 [assembly: InternalsVisibleTo("Waives.Http.Tests")]
-[assembly: InternalsVisibleTo("Waives.Reactive")]
+[assembly: InternalsVisibleTo("Waives.Pipelines")]
 namespace Waives.Http
 {
     public class WaivesClient

@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Waives.Reactive\Waives.Reactive.csproj" />
+    <ProjectReference Include="..\Waives.Pipelines\Waives.Pipelines.csproj" />
   </ItemGroup>
 
 </Project>

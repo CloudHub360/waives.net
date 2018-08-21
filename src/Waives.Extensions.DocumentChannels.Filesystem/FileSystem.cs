@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading;
-using Waives.Reactive;
+using Waives.Pipelines;
 
 namespace Waives.Extensions.DocumentChannels.Filesystem
 {

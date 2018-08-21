@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Waives.Extensions.DocumentChannels.Filesystem;
-using Waives.Reactive;
+using Waives.Pipelines;
 
 namespace FileSorter
 {
