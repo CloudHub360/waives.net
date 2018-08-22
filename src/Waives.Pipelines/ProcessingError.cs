@@ -10,10 +10,11 @@ namespace Waives.Pipelines
     /// either <see cref="WaivesDocument"/> or <see cref="Document"/></typeparam>
     internal class ProcessingError<T>
     {
-        public T Document { get; }
-        public Exception Exception { get; }
+        internal T Document { get; }
 
-        public ProcessingError(T document, Exception exception)
+        internal Exception Exception { get; }
+
+        internal ProcessingError(T document, Exception exception)
         {
             Document = document;
             Exception = exception;
