@@ -185,7 +185,7 @@ namespace Waives.Pipelines
             return observer.SubscribeTo(_pipeline);
         }
 
-        private void OnDocumentCreationError(ProcessingError<Document> error)
+        private Task OnDocumentCreationError(ProcessingError<Document> error)
         {
             Console.WriteLine($"An error occurred during creation {error.Document.SourceId}. " +
                                 $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
@@ -193,6 +193,8 @@ namespace Waives.Pipelines
             _rateLimiter.MakeDocumentSlotAvailable();
 
             _onDocumentError(new DocumentError(error.Document, error.Exception));
+
+            return Task.CompletedTask;
         }
 
         private async Task OnProcessingError(ProcessingError<WaivesDocument> error)
