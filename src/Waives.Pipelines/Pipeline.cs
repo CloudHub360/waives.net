@@ -187,7 +187,7 @@ namespace Waives.Pipelines
 
         private Task OnDocumentCreationError(ProcessingError<Document> error)
         {
-            Console.WriteLine($"An error occurred during creation {error.Document.SourceId}. " +
+            Console.WriteLine($"An error occurred during creation {error.Document}. " +
                                 $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
 
             _rateLimiter.MakeDocumentSlotAvailable();
@@ -199,7 +199,7 @@ namespace Waives.Pipelines
 
         private async Task OnProcessingError(ProcessingError<WaivesDocument> error)
         {
-            Console.WriteLine($"An error occurred during processing of {error.Document.Source.SourceId}. " +
+            Console.WriteLine($"An error occurred during processing of {error.Document.Source}. " +
                               $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
 
             await DeleteDocumentAndNotifyRateLimiter(error.Document).ConfigureAwait(false);
