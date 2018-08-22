@@ -89,6 +89,12 @@ namespace Waives.Pipelines
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// The default implementation of this method will just return the <see cref="SourceId"/>
+        /// value. This won't necessarily be a useful value to see in log messages, error messages,
+        /// etc., so it is recommended to override this implementation of <see cref="ToString"/>
+        /// with something which will provide clearer information in those contexts.
+        /// </remarks>
         public override string ToString()
         {
             return SourceId;
