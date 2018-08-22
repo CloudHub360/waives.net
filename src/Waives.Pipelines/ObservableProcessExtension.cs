@@ -27,5 +27,17 @@ namespace Waives.Pipelines
 
             return results.Select(r => r.Document);
         }
+
+        private class ProcessingResult
+        {
+            public WaivesDocument Document { get; }
+            public bool ProcessedSuccessfully { get; }
+
+            public ProcessingResult(WaivesDocument document, bool processedSuccessfully)
+            {
+                Document = document;
+                ProcessedSuccessfully = processedSuccessfully;
+            }
+        }
     }
 }
