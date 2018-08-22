@@ -153,7 +153,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnDocumentError(Action<DocumentError> action)
         {
-            _onDocumentError = action ?? throw new ArgumentNullException(nameof(action));
+            _onDocumentError = action ?? (err => { });
             return this;
         }
 
