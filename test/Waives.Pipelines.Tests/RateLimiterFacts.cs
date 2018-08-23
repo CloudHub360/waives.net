@@ -18,13 +18,13 @@ namespace Waives.Pipelines.Tests
 
             // Schedule one more document than the maximum concurrency, all to be scheduled immediately
             var source = scheduler
-                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.MaximumConcurrentDocuments + 1));
+                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.DefaultMaximumConcurrentDocuments + 1));
 
             var rateLimitedDocuments = sut.RateLimited(source);
 
             var testObserver = scheduler.Start(() => rateLimitedDocuments);
 
-            Assert.Equal(RateLimiter.MaximumConcurrentDocuments, testObserver.Messages.Count);
+            Assert.Equal(RateLimiter.DefaultMaximumConcurrentDocuments, testObserver.Messages.Count);
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Waives.Pipelines.Tests
             var sut = new RateLimiter(scheduler);
 
             var source = scheduler
-                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.MaximumConcurrentDocuments + 1));
+                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.DefaultMaximumConcurrentDocuments + 1));
 
             scheduler.ScheduleAbsolute(sut, TimeSpan.FromSeconds(3).Ticks, (_, rateLimiter) =>
             {

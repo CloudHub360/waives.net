@@ -12,17 +12,18 @@ namespace Waives.Pipelines
     {
         private readonly IScheduler _scheduler;
         private long _availableDocumentSlots;
-        public const byte MaximumConcurrentDocuments = 10;
+        private readonly int _maxAvailableDocumentSlots;
+        public const byte DefaultMaximumConcurrentDocuments = 10;
 
-        public RateLimiter(IScheduler scheduler = null)
+        public RateLimiter(IScheduler scheduler = null, int docSlotsToUse = DefaultMaximumConcurrentDocuments)
         {
             _scheduler = scheduler ?? Scheduler.Default;
-            _availableDocumentSlots = MaximumConcurrentDocuments;
+            _availableDocumentSlots = _maxAvailableDocumentSlots = docSlotsToUse;
         }
 
         public void MakeDocumentSlotAvailable()
         {
-            if (Interlocked.Read(ref _availableDocumentSlots) < MaximumConcurrentDocuments)
+            if (Interlocked.Read(ref _availableDocumentSlots) < _maxAvailableDocumentSlots)
             {
                 Interlocked.Increment(ref _availableDocumentSlots);
             }
@@ -32,7 +33,7 @@ namespace Waives.Pipelines
         /// Transforms an observable sequence of documents into one where the documents are only
         /// emitted to the observer when slots are available within the maximum concurrency limit.
         /// </summary>
-        /// <param name="sourceDocuments">An observable sequence of documents to be rate limited</param>
+        /// <param name="source">An observable sequence of documents to be rate limited</param>
         /// <returns>An observable sequence of documents which is rate limited to maximum concurrency</returns>
         public IObservable<TSource> RateLimited<TSource>(IObservable<TSource> source)
         {
