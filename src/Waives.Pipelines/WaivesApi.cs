@@ -130,12 +130,12 @@ namespace Waives.Pipelines
         /// Defaults to <c>true</c>.</param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static Pipeline CreatePipeline(bool deleteExistingDocuments = true)
+        public static Pipeline CreatePipeline(bool deleteExistingDocuments = true, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
         {
             var documentFactory = Task.Run(() => HttpDocumentFactory.Create(ApiClient, deleteExistingDocuments)).Result;
             return new Pipeline(
                 documentFactory,
-                new RateLimiter());
+                new RateLimiter(null, maxConcurrency));
         }
     }
 }
