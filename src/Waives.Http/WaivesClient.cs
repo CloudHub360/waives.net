@@ -44,9 +44,10 @@ namespace Waives.Http
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(this, behaviours);
+            var document = new Document(this, behaviours, id);
 
             Logger.Log(LogLevel.Info, "Created document");
             return document;
@@ -61,9 +62,10 @@ namespace Waives.Http
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(this, behaviours);
+            var document = new Document(this, behaviours, id);
 
             Logger.Log(LogLevel.Info, $"Created document from '{path}'");
             return document;
@@ -117,7 +119,7 @@ namespace Waives.Http
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
-            var documents =  responseContent.Documents.Select(d => new Document(this, d.Links));
+            var documents =  responseContent.Documents.Select(d => new Document(this, d.Links, d.Id));
 
             Logger.Log(LogLevel.Info, "Retrieved details of all current documents");
             return documents;
