@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Waives.Http.Logging;
 using Waives.Http.Responses;
 
 [assembly: InternalsVisibleTo("Waives.Http.Tests")]
@@ -13,13 +14,24 @@ namespace Waives.Http
 {
     public class WaivesClient
     {
+        internal ILogger Logger { get; }
         internal HttpClient HttpClient { get; }
+        private const string DefaultUrl = "https://api.waives.io";
 
-        public WaivesClient() : this(new HttpClient { BaseAddress = new Uri("https://api.waives.io") }) { }
+        public WaivesClient() : this(new HttpClient { BaseAddress = new Uri(DefaultUrl)}, Loggers.NoopLogger)
+        { }
 
-        internal WaivesClient(HttpClient httpClient)
+        public WaivesClient(ILogger logger) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger)
+        {
+        }
+
+        internal WaivesClient(HttpClient httpClient) : this(httpClient, Loggers.NoopLogger)
+        { }
+
+        private WaivesClient(HttpClient httpClient, ILogger logger)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)
