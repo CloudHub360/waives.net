@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
@@ -52,17 +54,20 @@ namespace Waives.Pipelines
     public class Pipeline : IObservable<WaivesDocument>
     {
         private readonly IHttpDocumentFactory _documentFactory;
-        private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
-        private Action _onPipelineCompleted;
+        private readonly int _maxConcurrency;
+        private IObservable<WaivesDocument> _docSource = Observable.Empty<WaivesDocument>();
+        private Action _onPipelineCompleted = () => { };
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
-        private readonly IRateLimiter _rateLimiter;
         private readonly ILogger _logger;
 
-        internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter, ILogger logger)
+        private readonly List<Func<WaivesDocument, Task<WaivesDocument>>> _docActions =
+            new List<Func<WaivesDocument, Task<WaivesDocument>>>();
+
+        internal Pipeline(IHttpDocumentFactory documentFactory, ILogger logger, int maxConcurrency)
         {
             _documentFactory = documentFactory;
-            _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
+            _maxConcurrency = maxConcurrency;
             _logger = logger ?? new NoopLogger();
 
             _onDocumentError = err =>
@@ -71,7 +76,6 @@ namespace Waives.Pipelines
                     $"An error occurred during processing of document '{err.Document.SourceId}'. " +
                     $"'{err.Exception.GetType().Name}' '{err.Exception.Message}'");
 
-                _rateLimiter.MakeDocumentSlotAvailable();
                 _userErrorAction(err);
             };
 
@@ -89,14 +93,14 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            var rateLimitedDocuments = _rateLimiter.RateLimited(documentSource);
-
-            _pipeline = rateLimitedDocuments.Process(async d =>
+            _docSource = documentSource.SelectMany(
+                async d =>
                 {
                     _logger.Log(LogLevel.Info, $"Started processing '{d.SourceId}'");
-                    return new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false));
-                },
-                _onDocumentError);
+
+                    return new WaivesDocument(d,
+                        await _documentFactory.CreateDocument(d).ConfigureAwait(false));
+                });
 
             return this;
         }
@@ -108,13 +112,15 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ClassifyWith(string classifierName)
         {
-            _pipeline = _pipeline.Process(async d =>
+            _docActions.Add(async d =>
             {
-                var document = await d.Classify(classifierName).ConfigureAwait(false);
-                _logger.Log(LogLevel.Info, $"Classified document '{d.Source}'");
-                return document;
-            }, _onDocumentError);
+                var document = await d.Classify(classifierName)
+                    .ConfigureAwait(false);
 
+                _logger.Log(LogLevel.Info, $"Classified document '{d.Source}'");
+
+                return document;
+            });
             return this;
         }
 
@@ -126,24 +132,12 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ExtractWith(string extractorName)
         {
-            _pipeline = _pipeline.Process(async d =>
+            _docActions.Add(async d =>
             {
                 var document = await d.Extract(extractorName).ConfigureAwait(false);
                 _logger.Log(LogLevel.Info, $"Extracted data from document '{d.Source}");
                 return document;
-            }, _onDocumentError);
-
-            return this;
-        }
-
-        /// <summary>
-        /// Run an arbitrary transform on each document, doing something with results for example
-        /// </summary>
-        /// <param name="func"></param>
-        /// <returns>The modified <see cref="Pipeline"/>.</returns>
-        public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> func)
-        {
-            _pipeline = _pipeline.Process(func, _onDocumentError);
+            });
 
             return this;
         }
@@ -155,11 +149,11 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Action<WaivesDocument> action)
         {
-            _pipeline = _pipeline.Process(d =>
+            _docActions.Add(document =>
             {
-                action(d);
-                return Task.FromResult(d);
-            }, _onDocumentError);
+                action(document);
+                return Task.FromResult(document);
+            });
 
             return this;
         }
@@ -171,11 +165,23 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task> action)
         {
-            _pipeline = _pipeline.Process(async d =>
+            _docActions.Add(async d =>
             {
-                await action(d).ConfigureAwait(false);
+                await action(d);
                 return d;
-            }, _onDocumentError);
+            });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Run an arbitrary action on each document, doing something with results for example
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> action)
+        {
+            _docActions.Add(async d => await action(d));
 
             return this;
         }
@@ -187,15 +193,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnPipelineCompleted(Action action)
         {
-            var userAction = action ?? (() => { });
-
-            var previousAction = _onPipelineCompleted;
-            _onPipelineCompleted = () =>
-            {
-                previousAction();
-                userAction();
-            };
-
+            _onPipelineCompleted = action ?? (() => { });
             return this;
         }
 
@@ -226,26 +224,28 @@ namespace Waives.Pipelines
         /// this object.</returns>
         public IDisposable Start()
         {
-            _pipeline = _pipeline.SelectMany(async d =>
+            _docActions.Add(async d =>
             {
-                await d.HttpDocument.Delete(() =>
-                {
-                    _rateLimiter.MakeDocumentSlotAvailable();
-                    _logger.Log(LogLevel.Info, $"Completed processing '{d.Source.SourceId}' and deleted Waives document");
-                }).ConfigureAwait(false);
+                await d.HttpDocument.Delete(() => { });
+
+                _logger.Log(LogLevel.Info, $"Completed processing '{d.Source.SourceId}' and deleted Waives document");
 
                 return d;
             });
 
             _logger.Log(LogLevel.Info, "Pipeline started");
-            var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
-            return pipelineObserver.SubscribeTo(_pipeline);
+            var pipelineObserver = new ConcurrentPipelineObserver(_docActions,
+                _onPipelineCompleted,
+                _onDocumentError,
+                _maxConcurrency);
+
+            return pipelineObserver.SubscribeTo(_docSource);
         }
 
         /// <inheritdoc />
         public IDisposable Subscribe(IObserver<WaivesDocument> observer)
         {
-            return observer.SubscribeTo(_pipeline);
+            return observer.SubscribeTo(_docSource);
         }
     }
 }
