@@ -60,7 +60,7 @@ namespace Waives.Pipelines.Tests
         {
             var documents = _documentsObservable.Process(
                 ThrowIfErrorDocument,
-                e => Task.CompletedTask);
+                e => { });
 
             var documentsObserver = _scheduler.Start(() => documents);
 
@@ -79,14 +79,13 @@ namespace Waives.Pipelines.Tests
         [Fact]
         public void Does_not_call_error_action_for_documents_where_process_action_succeeds()
         {
-            var errorActionCalledFor = new List<ProcessingError<WaivesDocument>>();
+            var errorActionCalledFor = new List<DocumentError>();
 
             var documents = _documentsObservable.Process(
                 ThrowIfErrorDocument,
                 e =>
                 {
                     errorActionCalledFor.Add(e);
-                    return Task.CompletedTask;
                 });
 
             _scheduler.Start(() => documents);
@@ -99,21 +98,22 @@ namespace Waives.Pipelines.Tests
         [Fact]
         public void Calls_error_action_for_documents_where_process_action_throws()
         {
-            var errorActionCalledFor = new List<ProcessingError<WaivesDocument>>();
+            var errorActionCalledFor = new List<DocumentError>();
 
             var documents = _documentsObservable.Process(
                 ThrowIfErrorDocument,
                 e =>
                 {
                     errorActionCalledFor.Add(e);
-                    return Task.CompletedTask;
                 });
 
             _scheduler.Start(() => documents);
 
             Assert.Equal(1, errorActionCalledFor.Count);
             Assert.True(errorActionCalledFor.Any(err =>
-                ReferenceEquals(err.Document, _errorDocument)));
+                ReferenceEquals(_errorDocument.Source, err.Document)));
+            Assert.True(errorActionCalledFor.Any(err =>
+                ReferenceEquals(_errorDocumentError, err.Exception)));
         }
 
         private Task<WaivesDocument> ThrowIfErrorDocument(WaivesDocument document)

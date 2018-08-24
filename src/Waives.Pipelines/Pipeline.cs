@@ -53,13 +53,21 @@ namespace Waives.Pipelines
         private readonly IHttpDocumentFactory _documentFactory;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
         private Action _onPipelineCompleted = () => { };
-        private Action<DocumentError> _onDocumentError = err => { };
+        private readonly Action<DocumentError> _onDocumentError;
+        private Action<DocumentError> _userErrorAction = err => { };
         private readonly IRateLimiter _rateLimiter;
 
         internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter)
         {
             _documentFactory = documentFactory;
             _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
+            _onDocumentError = err =>
+            {
+                Console.WriteLine($"An error occurred during processing of {err.Document}. " +
+                                  $"The error was: {err.Exception.GetType().Name} {err.Exception.Message}");
+                _rateLimiter.MakeDocumentSlotAvailable();
+                _userErrorAction(err);
+            };
         }
 
         /// <summary>
@@ -74,7 +82,7 @@ namespace Waives.Pipelines
 
             _pipeline = rateLimitedDocuments.Process(async d =>
                 new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false)),
-                OnDocumentCreationError);
+                _onDocumentError);
 
             return this;
         }
@@ -86,7 +94,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ClassifyWith(string classifierName)
         {
-            _pipeline = _pipeline.Process(async d => await d.Classify(classifierName).ConfigureAwait(false), OnProcessingError);
+            _pipeline = _pipeline.Process(async d => await d.Classify(classifierName).ConfigureAwait(false), _onDocumentError);
 
             return this;
         }
@@ -98,7 +106,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> func)
         {
-            _pipeline = _pipeline.Process(func, OnProcessingError);
+            _pipeline = _pipeline.Process(func, _onDocumentError);
 
             return this;
         }
@@ -114,7 +122,7 @@ namespace Waives.Pipelines
             {
                 action(d);
                 return d;
-            }, OnProcessingError);
+            }, _onDocumentError);
 
             return this;
         }
@@ -130,7 +138,7 @@ namespace Waives.Pipelines
             {
                 await action(d).ConfigureAwait(false);
                 return d;
-            }, OnProcessingError);
+            }, _onDocumentError);
 
             return this;
         }
@@ -153,7 +161,15 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnDocumentError(Action<DocumentError> action)
         {
-            _onDocumentError = action ?? (err => { });
+            var userAction = action ?? (err => { });
+
+            var previousAction = _userErrorAction;
+            _userErrorAction = err =>
+            {
+                previousAction(err);
+                userAction(err);
+            };
+
             return this;
         }
 
@@ -183,36 +199,6 @@ namespace Waives.Pipelines
         public IDisposable Subscribe(IObserver<WaivesDocument> observer)
         {
             return observer.SubscribeTo(_pipeline);
-        }
-
-        private Task OnDocumentCreationError(ProcessingError<Document> error)
-        {
-            Console.WriteLine($"An error occurred during creation {error.Document}. " +
-                                $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
-
-            _rateLimiter.MakeDocumentSlotAvailable();
-
-            _onDocumentError(new DocumentError(error.Document, error.Exception));
-
-            return Task.CompletedTask;
-        }
-
-        private async Task OnProcessingError(ProcessingError<WaivesDocument> error)
-        {
-            Console.WriteLine($"An error occurred during processing of {error.Document.Source}. " +
-                              $"The error was: {error.Exception.GetType().Name} {error.Exception.Message}");
-
-            await DeleteDocumentAndNotifyRateLimiter(error.Document).ConfigureAwait(false);
-
-            _onDocumentError(new DocumentError(error.Document.Source, error.Exception));
-        }
-
-        private async Task DeleteDocumentAndNotifyRateLimiter(WaivesDocument document)
-        {
-            await document.HttpDocument.Delete(() =>
-            {
-                _rateLimiter.MakeDocumentSlotAvailable();
-            }).ConfigureAwait(false);
         }
     }
 }
