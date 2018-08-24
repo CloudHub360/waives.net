@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Waives.Http.Logging;
 using Waives.Http.Responses;
 
 namespace Waives.Http
@@ -11,11 +12,13 @@ namespace Waives.Http
     {
         private readonly WaivesClient _waivesClient;
         private readonly IDictionary<string, HalUri> _behaviours;
+        private readonly string _id;
 
-        internal Document(WaivesClient httpClient, IDictionary<string, HalUri> behaviours)
+        internal Document(WaivesClient httpClient, IDictionary<string, HalUri> behaviours, string id)
         {
             _waivesClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
+            _id = id ?? throw new ArgumentNullException(nameof(id));
         }
 
         public async Task Read(string resultsFilename, string contentType = null)
@@ -50,6 +53,7 @@ namespace Waives.Http
 
         public async Task Delete()
         {
+            _waivesClient.Logger.Log(LogLevel.Info, $"Deleting document {_id}");
             var response = await _waivesClient.HttpClient.DeleteAsync(_behaviours["self"].CreateUri()).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
