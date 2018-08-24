@@ -128,6 +128,7 @@ namespace Waives.Pipelines
         /// <param name="deleteExistingDocuments">If set to <c>true</c>, it will (immediately) delete all documents
         /// in existence in the Waives account; if set to <c>false</c>, no such clean up will be completed.
         /// Defaults to <c>true</c>.</param>
+        /// <param name="maxConcurrency">The maximum number of documents to process concurrently.</param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
         public static Pipeline CreatePipeline(bool deleteExistingDocuments = true, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
