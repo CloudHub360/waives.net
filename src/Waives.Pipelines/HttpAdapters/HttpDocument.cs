@@ -37,19 +37,9 @@ namespace Waives.Pipelines.HttpAdapters
 
         public async Task Delete(Action afterDeletedAction)
         {
-            try
-            {
-                await _documentClient.Delete().ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-            finally
-            {
-                afterDeletedAction();
-            }
+            await _documentClient.Delete().ConfigureAwait(false);
 
+            afterDeletedAction();
         }
     }
 }

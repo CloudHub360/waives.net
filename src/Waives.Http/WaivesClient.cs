@@ -30,6 +30,7 @@ namespace Waives.Http
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
+            Console.WriteLine($"Created doc: {behaviours["self"].CreateUri()}");
 
             return new Document(this, behaviours);
         }
