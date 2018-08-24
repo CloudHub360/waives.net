@@ -49,7 +49,7 @@ namespace Waives.Http
 
             var document = new Document(this, behaviours, id);
 
-            Logger.Log(LogLevel.Info, "Created document");
+            Logger.Log(LogLevel.Info, $"Created document with id '{id}'");
             return document;
         }
 
@@ -67,7 +67,7 @@ namespace Waives.Http
 
             var document = new Document(this, behaviours, id);
 
-            Logger.Log(LogLevel.Info, $"Created document from '{path}'");
+            Logger.Log(LogLevel.Info, $"Created document with id '{id}' from '{path}'");
             return document;
         }
 
