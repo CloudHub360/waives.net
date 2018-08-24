@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -263,6 +264,40 @@ namespace Waives.Pipelines.Tests
                 .Start();
 
                 Assert.True(onDocumentErrorActionRun);
+        }
+
+        [Fact]
+        public void OnDocumentError_is_run_multiple_times_in_correct_order_if_specified()
+        {
+            var onDocumentErrorCalledFor = new List<(DocumentError error, int sequence)>();
+            var document = new TestDocument(Generate.Bytes());
+            var exception = new Exception("Could not create document");
+            var source = Observable.Repeat(document, 1);
+
+            _documentFactory
+                .CreateDocument(Arg.Any<Document>())
+                .Throws(exception);
+
+            _rateLimiter
+                .RateLimited(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            _sut.WithDocumentsFrom(source)
+                .OnDocumentError(err =>
+                {
+                    onDocumentErrorCalledFor.Add(
+                        (error: err, sequence: 1));
+                })
+                .OnDocumentError(err =>
+                {
+                    onDocumentErrorCalledFor.Add(
+                        (error: err, sequence: 2));
+                })
+                .Start();
+
+            Assert.Equal(2, onDocumentErrorCalledFor.Count);
+            Assert.Equal(1, onDocumentErrorCalledFor.First().sequence);
+            Assert.Equal(2, onDocumentErrorCalledFor.Last().sequence);
         }
 
         private class FakeRateLimiter : IRateLimiter
