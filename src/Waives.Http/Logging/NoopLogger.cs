@@ -1,4 +1,4 @@
-﻿namespace Waives.Http
+﻿namespace Waives.Http.Logging
 {
 
     internal class NoopLogger : ILogger
