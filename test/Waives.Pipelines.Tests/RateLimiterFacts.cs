@@ -27,14 +27,18 @@ namespace Waives.Pipelines.Tests
             Assert.Equal(RateLimiter.DefaultMaximumConcurrentDocuments, testObserver.Messages.Count);
         }
 
-        [Fact]
-        public void Outputs_the_documents_as_slots_become_free()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
+        [InlineData(10)]
+        public void Outputs_the_documents_as_slots_become_free(int maxConcurrency)
         {
             var scheduler = new TestScheduler();
-            var sut = new RateLimiter(scheduler);
+            var sut = new RateLimiter(scheduler, maxConcurrency);
 
+            var expectedDocsCount = maxConcurrency + 1;
             var source = scheduler
-                .CreateColdObservable(AnArrayOfDocumentNotifications(RateLimiter.DefaultMaximumConcurrentDocuments + 1));
+                .CreateColdObservable(AnArrayOfDocumentNotifications(expectedDocsCount));
 
             scheduler.ScheduleAbsolute(sut, TimeSpan.FromSeconds(3).Ticks, (_, rateLimiter) =>
             {
@@ -45,7 +49,7 @@ namespace Waives.Pipelines.Tests
             var testObserver = scheduler.Start(() => sut.RateLimited(source),
                 created: 0, subscribed: 0, disposed: TimeSpan.FromSeconds(5).Ticks);
 
-            Assert.Equal(11, testObserver.Messages.Count);
+            Assert.Equal(expectedDocsCount, testObserver.Messages.Count);
         }
 
         /// <summary>
