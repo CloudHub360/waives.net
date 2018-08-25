@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -26,14 +27,11 @@ namespace Waives.Http
             contentType = contentType ?? ContentTypes.WaivesReadResults;
 
             var requestUri = _behaviours["document:read"].CreateUri();
-
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Sending PUT request to {requestUri}");
-
-            var readResponse = await _waivesClient.HttpClient.PutAsync(
-                requestUri,
-                new StringContent(string.Empty)).ConfigureAwait(false);
-
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Received response from PUT {requestUri} ({readResponse.StatusCode})");
+            var readRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
+            {
+                Content = new StringContent(string.Empty)
+            };
+            var readResponse = await _waivesClient.SendRequest(readRequest).ConfigureAwait(false);
             if (!readResponse.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed initiating read on document.");
@@ -42,11 +40,7 @@ namespace Waives.Http
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Add("Accept", contentType);
 
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Sending GET request to {requestUri}");
-
-            var response = await _waivesClient.HttpClient.SendAsync(request).ConfigureAwait(false);
-
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Received response from GET {requestUri} ({readResponse.StatusCode})");
+            var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed retrieving document read results.");
@@ -62,12 +56,10 @@ namespace Waives.Http
 
         public async Task Delete()
         {
-            var requestUri = _behaviours["self"].CreateUri();
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Sending DELETE request to {requestUri}");
+            var request = new HttpRequestMessage(HttpMethod.Delete,
+                _behaviours["self"].CreateUri());
 
-            var response = await _waivesClient.HttpClient.DeleteAsync(requestUri).ConfigureAwait(false);
-
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Received response from DELETE {requestUri} ({response.StatusCode})");
+            var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed to delete the document.");
@@ -76,16 +68,13 @@ namespace Waives.Http
 
         public async Task<ClassificationResult> Classify(string classifierName)
         {
-            var requestUri = _behaviours["document:classify"].CreateUri(new
-            {
-                classifier_name = classifierName
-            });
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                _behaviours["document:classify"].CreateUri(new
+                {
+                    classifier_name = classifierName
+                }));
 
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Sending POST request to {requestUri}");
-
-            var response = await _waivesClient.HttpClient.PostAsync(requestUri, null).ConfigureAwait(false);
-
-            _waivesClient.Logger.Log(LogLevel.Trace, $"Received response from POST {requestUri} ({response.StatusCode})");
+            var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WaivesApiException($"Failed to classify the document with classifier '{classifierName}'");
