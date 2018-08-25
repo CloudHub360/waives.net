@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -36,11 +37,13 @@ namespace Waives.Http
 
         public async Task<Document> CreateDocument(Stream documentSource)
         {
-            var requestBody = new StreamContent(documentSource);
-            Logger.Log(LogLevel.Trace, "Sending POST request to /documents");
-            var response = await HttpClient.PostAsync("/documents", requestBody).ConfigureAwait(false);
-            Logger.Log(LogLevel.Trace, $"Received response from POST /documents ({response.StatusCode})");
+            var request =
+                new HttpRequestMessage(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                {
+                    Content = new StreamContent(documentSource)
+                };
 
+            var response = await SendRequest(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -55,10 +58,13 @@ namespace Waives.Http
 
         public async Task<Document> CreateDocument(string path)
         {
-            Logger.Log(LogLevel.Trace, "Sending POST request to /documents");
-            var response = await HttpClient.PostAsync("/documents", new StreamContent(File.OpenRead(path))).ConfigureAwait(false);
-            Logger.Log(LogLevel.Trace, $"Received response from POST /documents ({response.StatusCode})");
+            var request =
+                new HttpRequestMessage(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                {
+                    Content = new StreamContent(File.OpenRead(path))
+                };
 
+            var response = await SendRequest(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -70,10 +76,8 @@ namespace Waives.Http
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
         {
-            Logger.Log(LogLevel.Trace, $"Sending POST request to /classifiers/{name}");
-            var response = await HttpClient.PostAsync($"/classifiers/{name}", null).ConfigureAwait(false);
-            Logger.Log(LogLevel.Trace, $"Received response from POST /classifiers/{name} ({response.StatusCode})");
-
+            var request = new HttpRequestMessage(HttpMethod.Post, new Uri($"/classifiers/{name}", UriKind.Relative));
+            var response = await SendRequest(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -91,10 +95,8 @@ namespace Waives.Http
 
         public async Task<Classifier> GetClassifier(string name)
         {
-            Logger.Log(LogLevel.Trace, $"Sending GET request to /classifiers/{name}");
-            var response = await HttpClient.GetAsync($"/classifiers/{name}").ConfigureAwait(false);
-            Logger.Log(LogLevel.Trace, $"Received response from GET /classifiers/{name} ({response.StatusCode})");
-
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"/classifiers/{name}", UriKind.Relative));
+            var response = await SendRequest(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -105,10 +107,8 @@ namespace Waives.Http
 
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
-            Logger.Log(LogLevel.Trace, "Sending GET request to /documents");
-            var response = await HttpClient.GetAsync("/documents").ConfigureAwait(false);
-            Logger.Log(LogLevel.Trace, $"Received response from GET /documents ({response.StatusCode})");
-
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
+            var response = await SendRequest(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
@@ -118,14 +118,17 @@ namespace Waives.Http
         public async Task Login(string clientId, string clientSecret)
         {
             Logger.Log(LogLevel.Info, $"Logging in to Waives at {HttpClient.BaseAddress}");
-            Logger.Log(LogLevel.Trace, "Sending POST request to /oauth/token");
-            var response = await HttpClient.PostAsync("/oauth/token", new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "client_id", clientId },
-                { "client_secret", clientSecret },
-            })).ConfigureAwait(false);
-            Logger.Log(LogLevel.Trace, $"Received response from POST /oauth/token ({response.StatusCode})");
 
+            var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
+            {
+                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    {"client_id", clientId},
+                    {"client_secret", clientSecret}
+                })
+            };
+
+            var response = await SendRequest(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
@@ -133,6 +136,20 @@ namespace Waives.Http
 
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
             Logger.Log(LogLevel.Info, "Logged in.");
+        }
+
+        internal async Task<HttpResponseMessage> SendRequest(HttpRequestMessage request)
+        {
+            var stopWatch = new Stopwatch();
+            Logger.Log(LogLevel.Trace, $"Sending {request.Method} request to {request.RequestUri}");
+
+            stopWatch.Start();
+            var response = await HttpClient.SendAsync(request).ConfigureAwait(false);
+            stopWatch.Stop();
+
+            Logger.Log(LogLevel.Trace, $"Received response from {request.Method} {request.RequestUri} ({response.StatusCode}) ({stopWatch.ElapsedMilliseconds} ms)");
+
+            return response;
         }
 
         private static async Task EnsureSuccessStatus(HttpResponseMessage response)
