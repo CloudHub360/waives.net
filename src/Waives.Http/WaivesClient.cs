@@ -49,7 +49,7 @@ namespace Waives.Http
 
             var document = new Document(this, behaviours, id);
 
-            Logger.Log(LogLevel.Info, $"Created document with id '{id}'");
+            Logger.Log(LogLevel.Trace, $"Created Waives document {id}");
             return document;
         }
 
@@ -65,10 +65,7 @@ namespace Waives.Http
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(this, behaviours, id);
-
-            Logger.Log(LogLevel.Info, $"Created document with id '{id}' from '{path}'");
-            return document;
+            return new Document(this, behaviours, id);
         }
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
@@ -89,7 +86,6 @@ namespace Waives.Http
                 await classifier.AddSamplesFromZip(samplesPath).ConfigureAwait(false);
             }
 
-            Logger.Log(LogLevel.Info, $"Created classifier '{name}' from samples zip file '{samplesPath}'");
             return classifier;
         }
 
@@ -104,10 +100,7 @@ namespace Waives.Http
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var behaviours = responseContent.Links;
 
-            var classifier = new Classifier(this, name, behaviours);
-
-            Logger.Log(LogLevel.Info, $"Retrieved details of classifier '{name}'");
-            return classifier;
+            return new Classifier(this, name, behaviours);
         }
 
         public async Task<IEnumerable<Document>> GetAllDocuments()
@@ -119,14 +112,12 @@ namespace Waives.Http
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
-            var documents =  responseContent.Documents.Select(d => new Document(this, d.Links, d.Id));
-
-            Logger.Log(LogLevel.Info, "Retrieved details of all current documents");
-            return documents;
+            return responseContent.Documents.Select(d => new Document(this, d.Links, d.Id));
         }
 
         public async Task Login(string clientId, string clientSecret)
         {
+            Logger.Log(LogLevel.Info, $"Logging in to Waives at {HttpClient.BaseAddress}");
             Logger.Log(LogLevel.Trace, "Sending POST request to /oauth/token");
             var response = await HttpClient.PostAsync("/oauth/token", new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -141,8 +132,7 @@ namespace Waives.Http
             var accessToken = responseContent.Token;
 
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-
-            Logger.Log(LogLevel.Info, $"Logged in to Waives at '{HttpClient.BaseAddress}'");
+            Logger.Log(LogLevel.Info, "Logged in.");
         }
 
         private static async Task EnsureSuccessStatus(HttpResponseMessage response)
