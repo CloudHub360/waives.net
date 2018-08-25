@@ -25,6 +25,8 @@ namespace Waives.Pipelines.HttpAdapters
     {
         private readonly Http.Document _documentClient;
 
+        internal string Id => _documentClient.Id;
+
         internal HttpDocument(Http.Document documentClient)
         {
             _documentClient = documentClient;

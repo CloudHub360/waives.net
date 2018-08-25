@@ -12,13 +12,13 @@ namespace Waives.Http
     {
         private readonly WaivesClient _waivesClient;
         private readonly IDictionary<string, HalUri> _behaviours;
-        private readonly string _id;
+        internal readonly string Id;
 
         internal Document(WaivesClient httpClient, IDictionary<string, HalUri> behaviours, string id)
         {
             _waivesClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
-            _id = id ?? throw new ArgumentNullException(nameof(id));
+            Id = id ?? throw new ArgumentNullException(nameof(id));
         }
 
         public async Task Read(string resultsFilename, string contentType = null)
