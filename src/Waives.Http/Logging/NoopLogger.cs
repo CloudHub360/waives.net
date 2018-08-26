@@ -3,7 +3,7 @@
 
     internal class NoopLogger : ILogger
     {
-        public void Log(LogLevel waivesLogLevel, string message)
+        public void Log(LogLevel logLevel, string message)
         {
         }
     }
