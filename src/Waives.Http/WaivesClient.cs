@@ -15,7 +15,7 @@ namespace Waives.Http
 {
     public class WaivesClient
     {
-        internal ILogger Logger { get; }
+        internal ILogger Logger { get; set; }
         internal HttpClient HttpClient { get; }
         private const string DefaultUrl = "https://api.waives.io";
 

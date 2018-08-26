@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http;
+using Waives.Http.Logging;
 using Waives.Pipelines.HttpAdapters;
 
 [assembly: InternalsVisibleTo("Waives.Pipelines.Tests")]
@@ -128,15 +129,19 @@ namespace Waives.Pipelines
         /// <param name="deleteExistingDocuments">If set to <c>true</c>, it will (immediately) delete all documents
         /// in existence in the Waives account; if set to <c>false</c>, no such clean up will be completed.
         /// Defaults to <c>true</c>.</param>
+        /// <param name="logger">A logger that will receive log messages from the pipeline and the underlying <see cref="WaivesClient"/></param>
         /// <param name="maxConcurrency">The maximum number of documents to process concurrently.</param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static Pipeline CreatePipeline(bool deleteExistingDocuments = true, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
+        public static Pipeline CreatePipeline(bool deleteExistingDocuments = true, ILogger logger = null, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
         {
+            ApiClient.Logger = logger ?? Loggers.ConsoleLogger;
+
             var documentFactory = Task.Run(() => HttpDocumentFactory.Create(ApiClient, deleteExistingDocuments)).Result;
             return new Pipeline(
                 documentFactory,
-                new RateLimiter(null, maxConcurrency));
+                new RateLimiter(null, maxConcurrency),
+                ApiClient.Logger);
         }
     }
 }
