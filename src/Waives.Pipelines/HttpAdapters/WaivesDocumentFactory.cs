@@ -31,7 +31,7 @@ namespace Waives.Pipelines.HttpAdapters
             using (var documentStream = await source.OpenStream().ConfigureAwait(false))
             {
                 var httpDocument = new HttpDocument(await _apiClient.CreateDocument(documentStream).ConfigureAwait(false));
-                _apiClient.Logger.Log(LogLevel.Info, $"Created Waives document {httpDocument.Id} from {source.SourceId}");
+                _apiClient.Logger.Log(LogLevel.Info, $"Created Waives document {httpDocument.Id} from '{source.SourceId}'");
                 return httpDocument;
             }
         }
