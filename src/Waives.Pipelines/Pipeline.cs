@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Waives.Http;
+using Waives.Http.Logging;
 using Waives.Pipelines.HttpAdapters;
 
 namespace Waives.Pipelines
@@ -56,15 +58,23 @@ namespace Waives.Pipelines
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
         private readonly IRateLimiter _rateLimiter;
+        private readonly ILogger _logger;
 
-        internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter)
+        internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter) : this(documentFactory, rateLimiter, Loggers.NoopLogger)
+        { }
+
+        internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter, ILogger logger)
         {
             _documentFactory = documentFactory;
             _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
             _onDocumentError = err =>
             {
-                Console.WriteLine($"An error occurred during processing of {err.Document}. " +
-                                  $"The error was: {err.Exception.GetType().Name} {err.Exception.Message}");
+                _logger.Log(LogLevel.Error,
+                    $"An error occurred during processing of document '{err.Document.SourceId}'. " +
+                    $"The error was: '{err.Exception.GetType().Name}' '{err.Exception.Message}'");
+
                 _rateLimiter.MakeDocumentSlotAvailable();
                 _userErrorAction(err);
             };
@@ -81,7 +91,10 @@ namespace Waives.Pipelines
             var rateLimitedDocuments = _rateLimiter.RateLimited(documentSource);
 
             _pipeline = rateLimitedDocuments.Process(async d =>
-                new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false)),
+                {
+                    _logger.Log(LogLevel.Info, $"Started processing '{d.SourceId}'");
+                    return new WaivesDocument(d, await _documentFactory.CreateDocument(d).ConfigureAwait(false));
+                },
                 _onDocumentError);
 
             return this;
@@ -94,7 +107,12 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ClassifyWith(string classifierName)
         {
-            _pipeline = _pipeline.Process(async d => await d.Classify(classifierName).ConfigureAwait(false), _onDocumentError);
+            _pipeline = _pipeline.Process(async d =>
+            {
+                var document = await d.Classify(classifierName).ConfigureAwait(false);
+                _logger.Log(LogLevel.Info, $"Classified document '{d.Source}'");
+                return document;
+            }, _onDocumentError);
 
             return this;
         }
@@ -186,11 +204,13 @@ namespace Waives.Pipelines
                 await d.HttpDocument.Delete(() =>
                 {
                     _rateLimiter.MakeDocumentSlotAvailable();
+                    _logger.Log(LogLevel.Info, $"Completed processing '{d.Source.SourceId}' and deleted Waives document");
                 }).ConfigureAwait(false);
 
                 return d;
             });
 
+            _logger.Log(LogLevel.Info, "Started pipeline");
             var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
             return pipelineObserver.SubscribeTo(_pipeline);
         }
