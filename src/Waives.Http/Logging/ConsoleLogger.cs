@@ -2,7 +2,7 @@
 
 namespace Waives.Http.Logging
 {
-    public class ConsoleLogger : ILogger
+    internal class ConsoleLogger : ILogger
     {
         public void Log(LogLevel logLevel, string message)
         {
