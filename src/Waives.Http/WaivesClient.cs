@@ -18,6 +18,7 @@ namespace Waives.Http
         internal ILogger Logger { get; set; }
         internal HttpClient HttpClient { get; }
         private const string DefaultUrl = "https://api.waives.io";
+        private readonly RequestSender _requestSender;
 
         public WaivesClient(ILogger logger = null) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger)
         {
@@ -40,14 +41,14 @@ namespace Waives.Http
                     Content = new StreamContent(documentSource)
                 };
 
-            var response = await SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(this, id, behaviours);
+            var document = new Document(_requestSender, behaviours, id);
 
             Logger.Log(LogLevel.Trace, $"Created Waives document {id}");
             return document;
@@ -61,20 +62,20 @@ namespace Waives.Http
                     Content = new StreamContent(File.OpenRead(path))
                 };
 
-            var response = await SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            return new Document(this, id, behaviours);
+            return new Document(_requestSender, behaviours, id);
         }
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, new Uri($"/classifiers/{name}", UriKind.Relative));
-            var response = await SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -93,7 +94,7 @@ namespace Waives.Http
         public async Task<Classifier> GetClassifier(string name)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"/classifiers/{name}", UriKind.Relative));
-            var response = await SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
@@ -105,11 +106,11 @@ namespace Waives.Http
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
-            var response = await SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
-            return responseContent.Documents.Select(d => new Document(this, d.Id, d.Links));
+            return responseContent.Documents.Select(d => new Document(_requestSender, d.Links, d.Id));
         }
 
         public async Task Login(string clientId, string clientSecret)
@@ -125,7 +126,7 @@ namespace Waives.Http
                 })
             };
 
-            var response = await SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
@@ -133,20 +134,6 @@ namespace Waives.Http
 
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
             Logger.Log(LogLevel.Info, "Logged in.");
-        }
-
-        internal async Task<HttpResponseMessage> SendRequest(HttpRequestMessage request)
-        {
-            var stopWatch = new Stopwatch();
-            Logger.Log(LogLevel.Trace, $"Sending {request.Method} request to {request.RequestUri}");
-
-            stopWatch.Start();
-            var response = await HttpClient.SendAsync(request).ConfigureAwait(false);
-            stopWatch.Stop();
-
-            Logger.Log(LogLevel.Trace, $"Received response from {request.Method} {request.RequestUri} ({(int) response.StatusCode}, {response.ReasonPhrase}) ({stopWatch.ElapsedMilliseconds} ms)");
-
-            return response;
         }
 
         private static async Task EnsureSuccessStatus(HttpResponseMessage response)

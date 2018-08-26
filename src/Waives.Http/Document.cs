@@ -9,13 +9,13 @@ namespace Waives.Http
 {
     public class Document
     {
-        private readonly WaivesClient _waivesClient;
-        private readonly IDictionary<string, HalUri> _behaviours;
+        private readonly IHttpRequestSender _requestSender;
+        internal readonly IDictionary<string, HalUri> _behaviours;
         public string Id { get; }
 
-        internal Document(WaivesClient httpClient, string id, IDictionary<string, HalUri> behaviours)
+        internal Document(IHttpRequestSender httpClient, string id, IDictionary<string, HalUri> behaviours)
         {
-            _waivesClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _requestSender = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
             Id = id ?? throw new ArgumentNullException(nameof(id));
         }
@@ -29,7 +29,7 @@ namespace Waives.Http
             {
                 Content = new StringContent(string.Empty)
             };
-            var readResponse = await _waivesClient.SendRequest(readRequest).ConfigureAwait(false);
+            var readResponse = await _requestSender.Send(readRequest).ConfigureAwait(false);
             if (!readResponse.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed initiating read on document.");
@@ -38,7 +38,7 @@ namespace Waives.Http
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Add("Accept", contentType);
 
-            var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed retrieving document read results.");
@@ -59,7 +59,7 @@ namespace Waives.Http
             var request = new HttpRequestMessage(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
-            var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed to delete the document.");
@@ -76,7 +76,7 @@ namespace Waives.Http
                     classifier_name = classifierName
                 }));
 
-            var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new WaivesApiException($"Failed to classify the document with classifier '{classifierName}'");
