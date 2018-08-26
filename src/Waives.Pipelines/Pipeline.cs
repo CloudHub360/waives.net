@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Waives.Http;
 using Waives.Http.Logging;
 using Waives.Pipelines.HttpAdapters;
 
