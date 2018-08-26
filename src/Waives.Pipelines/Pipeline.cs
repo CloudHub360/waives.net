@@ -53,7 +53,7 @@ namespace Waives.Pipelines
     {
         private readonly IHttpDocumentFactory _documentFactory;
         private IObservable<WaivesDocument> _pipeline = Observable.Empty<WaivesDocument>();
-        private Action _onPipelineCompleted = () => { };
+        private Action _onPipelineCompleted;
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
         private readonly IRateLimiter _rateLimiter;
@@ -76,6 +76,11 @@ namespace Waives.Pipelines
 
                 _rateLimiter.MakeDocumentSlotAvailable();
                 _userErrorAction(err);
+            };
+
+            _onPipelineCompleted = () =>
+            {
+                _logger.Log(LogLevel.Info, "Completed pipeline");
             };
         }
 
@@ -167,7 +172,15 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnPipelineCompleted(Action action)
         {
-            _onPipelineCompleted = action ?? (() => {});
+            var userAction = action ?? (() => { });
+
+            var previousAction = _onPipelineCompleted;
+            _onPipelineCompleted = () =>
+            {
+                previousAction();
+                userAction();
+            };
+
             return this;
         }
 
