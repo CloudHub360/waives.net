@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Responses;
@@ -21,7 +19,7 @@ namespace Waives.Http.Tests
         private readonly string _selfUrl;
         private readonly string _classifierName;
         private readonly string _readResultsFilename;
-        private readonly string _readResultsResponseContent;
+        private readonly string _readResultsContent;
 
         public DocumentFacts()
         {
@@ -42,7 +40,7 @@ namespace Waives.Http.Tests
             _sut = new Document(_requestSender, behaviours, "id");
 
             _readResultsFilename = Path.GetTempFileName();
-            _readResultsResponseContent = "some text that was read";
+            _readResultsContent = "some text that was read";
         }
 
         [Fact]
@@ -50,7 +48,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse());
+                .Returns(Responses.Success());
 
             await _sut.Delete();
 
@@ -66,7 +64,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AnErrorResponse());
+                .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
             Assert.Equal("Failed to delete the document.", exception.Message);
@@ -77,7 +75,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse(), AGetReadResultsResponse());
+                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -93,7 +91,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse(), AGetReadResultsResponse());
+                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -109,7 +107,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse(), AGetReadResultsResponse());
+                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             var expectedContentType = "application/text";
 
@@ -127,7 +125,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse(), AGetReadResultsResponse());
+                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -143,13 +141,13 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse(), AGetReadResultsResponse());
+                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
             var fileContents = await File.ReadAllTextAsync(_readResultsFilename);
 
-            Assert.Equal(_readResultsResponseContent, fileContents);
+            Assert.Equal(_readResultsContent, fileContents);
         }
 
         [Fact]
@@ -157,7 +155,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AnErrorResponse(), AGetReadResultsResponse());
+                .Returns(Responses.ErrorWithMessage(), Responses.GetReadResults(_readResultsContent));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
             Assert.Equal("Failed initiating read on document.", exception.Message);
@@ -169,7 +167,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ASuccessResponse(), AnErrorResponse());
+                .Returns(Responses.Success(), Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
             Assert.Equal("Failed retrieving document read results.", exception.Message);
@@ -180,7 +178,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AClassifyResponse());
+                .Returns(Responses.Classify());
 
             await _sut.Classify(_classifierName);
 
@@ -196,7 +194,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AClassifyResponse());
+                .Returns(Responses.Classify());
 
             var result = await _sut.Classify(_classifierName);
 
@@ -213,7 +211,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AnErrorResponse());
+                .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
             Assert.Equal($"Failed to classify the document with classifier '{_classifierName}'",
@@ -227,71 +225,5 @@ namespace Waives.Http.Tests
                 File.Delete(_readResultsFilename);
             }
         }
-
-        private static HttpResponseMessage ASuccessResponse()
-        {
-            return new HttpResponseMessage(HttpStatusCode.OK);
-        }
-
-        private static HttpResponseMessage AnErrorResponse()
-        {
-            return new HttpResponseMessage(HttpStatusCode.NotFound);
-        }
-
-        private HttpResponseMessage AGetReadResultsResponse()
-        {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(_readResultsResponseContent)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("text/plain") }
-                    },
-                };
-        }
-
-        private static HttpResponseMessage AClassifyResponse()
-        {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(ClassifyResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    },
-                };
-        }
-
-        private const string ClassifyResponse = @"{
-	        ""document_id"": ""expectedDocumentId"",
-            ""classification_results"": {
-                ""document_type"": ""expectedDocumentType"",
-                ""relative_confidence"": 2.85512137,
-                ""is_confident"": true,
-                ""document_type_scores"": [
-                {
-                    ""document_type"": ""Assignment of Deed of Trust"",
-                    ""score"": 61.4187
-
-                },
-                {
-                    ""document_type"": ""Notice of Default"",
-                    ""score"": 32.94312
-                },
-                {
-                    ""document_type"": ""Correspondence"",
-                    ""score"": 28.2860489
-                },
-                {
-                    ""document_type"": ""Deed of Trust"",
-                    ""score"": 28.0011711
-                },
-                {
-                    ""document_type"": ""Notice of Lien"",
-                    ""score"": 27.9561481
-                }
-                ]
-            }
-        }";
     }
 }
