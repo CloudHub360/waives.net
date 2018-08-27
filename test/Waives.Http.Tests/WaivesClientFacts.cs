@@ -15,7 +15,6 @@ namespace Waives.Http.Tests
         private readonly IHttpRequestSender _requestSender;
         private readonly WaivesClient _sut;
         private readonly byte[] _documentContents;
-        private readonly string _expectedErrorMessage;
 
         public WaivesClientFacts()
         {
@@ -25,9 +24,6 @@ namespace Waives.Http.Tests
                 _requestSender);
 
             _documentContents = new byte[] { 0, 1, 2 };
-
-            // Corresponds to value in ErrorResponse constant
-            _expectedErrorMessage = "The error message";
         }
 
         [Fact]
@@ -35,7 +31,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ACreateDocumentResponse());
+                .Returns(Responses.CreateDocument());
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -54,7 +50,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ACreateDocumentResponse());
+                .Returns(Responses.CreateDocument());
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -74,7 +70,7 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ACreateDocumentResponse());
+                .Returns(Responses.CreateDocument());
 
             await _sut.CreateDocument(filePath);
 
@@ -89,7 +85,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(ACreateDocumentResponse());
+                .Returns(Responses.CreateDocument());
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -107,14 +103,14 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AnErrorResponse());
+                .Returns(Responses.ErrorWithMessage());
 
             using (var stream = new MemoryStream(_documentContents))
             {
                 var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                     _sut.CreateDocument(stream));
 
-                Assert.Equal(_expectedErrorMessage, exception.Message);
+                Assert.Equal(Responses.ErrorMessage, exception.Message);
             }
         }
 
@@ -123,7 +119,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AGetAllDocumentsResponse());
+                .Returns(Responses.GetAllDocuments());
 
             await _sut.GetAllDocuments();
 
@@ -139,7 +135,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AGetAllDocumentsResponse());
+                .Returns(Responses.GetAllDocuments());
 
             var documents = await _sut.GetAllDocuments();
 
@@ -155,12 +151,12 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AnErrorResponse());
+                .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.GetAllDocuments());
 
-            Assert.Equal(_expectedErrorMessage, exception.Message);
+            Assert.Equal(Responses.ErrorMessage, exception.Message);
         }
 
         [Fact]
@@ -171,7 +167,7 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AGetTokenResponse());
+                .Returns(Responses.GetToken());
 
             await _sut.Login(expectedClientId, expectedClientSecret);
 
@@ -187,12 +183,12 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
-                .Returns(AnErrorResponse());
+                .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Login("clientid", "clientsecret"));
 
-            Assert.Equal(_expectedErrorMessage, exception.Message);
+            Assert.Equal(Responses.ErrorMessage, exception.Message);
         }
 
         private bool IsFormWithClientCredentials(HttpContent content, string expectedClientId, string expectedClientSecret)
@@ -216,143 +212,5 @@ namespace Waives.Http.Tests
 
             return actualRequestContents.SequenceEqual(expectedContents);
         }
-
-        private static HttpResponseMessage AnErrorResponse()
-        {
-            return new HttpResponseMessage(HttpStatusCode.NotFound)
-            {
-                Content = new StringContent(ErrorResponse)
-                {
-                    Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                }
-            };
-        }
-
-        private static HttpResponseMessage ACreateDocumentResponse()
-        {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(CreateDocumentResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    }
-                };
-        }
-
-
-        private static HttpResponseMessage AGetAllDocumentsResponse()
-        {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(GetAllDocumentsResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    }
-                };
-        }
-
-        private static HttpResponseMessage AGetTokenResponse()
-        {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(GetTokenResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    },
-                };
-        }
-
-        private const string GetTokenResponse = @"{
-	        ""access_token"": ""token"",
-	        ""token_type"": ""Bearer"",
-	        ""expires_in"": 86400}";
-
-        private const string CreateDocumentResponse = @"{
-            ""id"": ""expectedDocumentId"",
-            ""_links"": {
-                ""document:read"": {
-                    ""href"": ""/documents/LAHV1hoYikqukLpuhiFpAw/reads""
-                },
-                ""document:classify"": {
-                    ""href"": ""/documents/LAHV1hoYikqukLpuhiFpAw/classify/{classifier_name}"",
-                    ""templated"": true
-                },
-                ""self"": {
-                    ""href"": ""/documents/LAHV1hoYikqukLpuhiFpAw""
-                }
-            },
-            ""_embedded"": {
-                ""files"": [
-                {
-                    ""id"": ""HEE7UnX680y7yecR-yXsPA"",
-                    ""file_type"": ""Image:TIFF"",
-                    ""size"": 41203,
-                    ""sha256"": ""eeea8dbbf4f0da70bf3dcc25ee0ecf5c6f8a4eae2817fe782a59589cbd4cb9fd""
-                }]
-            }
-        }";
-
-        private const string GetAllDocumentsResponse = @"{
-	        ""documents"": [
-              {
-                ""id"": ""expectedDocumentId1"",
-                ""_links"": {
-                    ""document:read"": {
-                        ""href"": ""/documents/expectedDocumentId1/reads""
-                    },
-                    ""document:classify"": {
-                        ""href"": ""/documents/expectedDocumentId1/classify/{classifier_name}"",
-                        ""templated"": true
-                    },
-                    ""self"": {
-                        ""href"": ""/documents/expectedDocumentId1""
-                    }
-                },
-                ""_embedded"": {
-                    ""files"": [
-                    {
-                        ""id"": ""HEE7UnX680y7yecR-yXsPA"",
-                        ""file_type"": ""Image:TIFF"",
-                        ""size"": 41203,
-                        ""sha256"": ""eeea8dbbf4f0da70bf3dcc25ee0ecf5c6f8a4eae2817fe782a59589cbd4cb9fd""
-
-                    }
-                    ]
-                 }
-               },
-               {
-                 ""id"": ""expectedDocumentId2"",
-                 ""_links"": {
-                    ""document:read"": {
-                        ""href"": ""/documents/expectedDocumentId2/reads""
-                    },
-                    ""document:classify"": {
-                        ""href"": ""/documents/expectedDocumentId2/classify/{classifier_name}"",
-                        ""templated"": true
-                    },
-                    ""self"": {
-                        ""href"": ""/documents/expectedDocumentId2""
-                    }
-                 },
-                 ""_embedded"": {
-                    ""files"": [
-                    {
-                        ""id"": ""YY-WZbHuukCOXMalCZ3rBA"",
-                        ""file_type"": ""Image:TIFF"",
-                        ""size"": 41203,
-                        ""sha256"": ""eeea8dbbf4f0da70bf3dcc25ee0ecf5c6f8a4eae2817fe782a59589cbd4cb9fd""
-                    }
-                    ]
-                }
-            }
-            ]
-        }";
-
-        private const string ErrorResponse = @"{
-	        ""message"": ""The error message""
-            }";
     }
 }
