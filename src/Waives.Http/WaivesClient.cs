@@ -46,6 +46,22 @@ namespace Waives.Http
                     Content = new StreamContent(documentSource)
                 };
 
+            return await CreateDocument(request).ConfigureAwait(false);
+        }
+
+        public async Task<Document> CreateDocument(string path)
+        {
+            var request =
+                new HttpRequestMessage(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                {
+                    Content = new StreamContent(File.OpenRead(path))
+                };
+
+            return await CreateDocument(request).ConfigureAwait(false);
+        }
+
+        private async Task<Document> CreateDocument(HttpRequestMessage request)
+        {
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
@@ -57,24 +73,6 @@ namespace Waives.Http
 
             Logger.Log(LogLevel.Trace, $"Created Waives document {id}");
             return document;
-        }
-
-        public async Task<Document> CreateDocument(string path)
-        {
-            var request =
-                new HttpRequestMessage(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
-                {
-                    Content = new StreamContent(File.OpenRead(path))
-                };
-
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-            await EnsureSuccessStatus(response).ConfigureAwait(false);
-
-            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
-            var id = responseContent.Id;
-            var behaviours = responseContent.Links;
-
-            return new Document(_requestSender, behaviours, id);
         }
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
