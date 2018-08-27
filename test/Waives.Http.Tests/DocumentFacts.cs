@@ -68,7 +68,8 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Returns(AnErrorResponse());
 
-            await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
+            Assert.Equal("Failed to delete the document.", exception.Message);
         }
 
         [Fact]
@@ -152,13 +153,14 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task Delete_throws_if_read_response_is_not_success_code()
+        public async Task Read_throws_if_read_response_is_not_success_code()
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Returns(AnErrorResponse(), AGetReadResultsResponse());
 
-            await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
+            Assert.Equal("Failed initiating read on document.", exception.Message);
         }
 
 
@@ -169,7 +171,8 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Returns(ASuccessResponse(), AnErrorResponse());
 
-            await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
+            Assert.Equal("Failed retrieving document read results.", exception.Message);
         }
 
         [Fact]
@@ -212,7 +215,9 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Returns(AnErrorResponse());
 
-            await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
+            Assert.Equal($"Failed to classify the document with classifier '{_classifierName}'",
+                exception.Message);
         }
 
         public void Dispose()
