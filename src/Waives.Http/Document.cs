@@ -10,31 +10,46 @@ namespace Waives.Http
     public class Document
     {
         private readonly IHttpRequestSender _requestSender;
-        internal readonly IDictionary<string, HalUri> _behaviours;
+        internal readonly IDictionary<string, HalUri> Behaviours;
         public string Id { get; }
 
         internal Document(IHttpRequestSender httpClient, string id, IDictionary<string, HalUri> behaviours)
         {
             _requestSender = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
+            Behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
             Id = id ?? throw new ArgumentNullException(nameof(id));
         }
 
         public async Task Read(string resultsFilename, string contentType = null)
         {
             contentType = contentType ?? ContentTypes.WaivesReadResults;
+            var requestUri = Behaviours["document:read"].CreateUri();
 
-            var requestUri = _behaviours["document:read"].CreateUri();
+            await DoRead(requestUri).ConfigureAwait(false);
+            var httpContent = await GetReadResults(requestUri, contentType).ConfigureAwait(false);
+
+            using (var fileStream = File.OpenWrite(resultsFilename))
+            {
+                await httpContent.CopyToAsync(fileStream).ConfigureAwait(false);
+            }
+        }
+
+        private async Task DoRead(Uri requestUri)
+        {
             var readRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
             {
                 Content = new StringContent(string.Empty)
             };
+
             var readResponse = await _requestSender.Send(readRequest).ConfigureAwait(false);
             if (!readResponse.IsSuccessStatusCode)
             {
                 throw new WaivesApiException("Failed initiating read on document.");
             }
+        }
 
+        private async Task<HttpContent> GetReadResults(Uri requestUri, string contentType)
+        {
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Add("Accept", contentType);
 
@@ -44,17 +59,12 @@ namespace Waives.Http
                 throw new WaivesApiException("Failed retrieving document read results.");
             }
 
-            var resultsStream = response.Content;
-
-            using (var fileStream = File.OpenWrite(resultsFilename))
-            {
-                await resultsStream.CopyToAsync(fileStream).ConfigureAwait(false);
-            }
+            return response.Content;
         }
 
         public async Task Delete()
         {
-            var selfUrl = _behaviours["self"];
+            var selfUrl = Behaviours["self"];
 
             var request = new HttpRequestMessage(HttpMethod.Delete,
                 selfUrl.CreateUri());
@@ -68,7 +78,7 @@ namespace Waives.Http
 
         public async Task<ClassificationResult> Classify(string classifierName)
         {
-            var classifyUrl = _behaviours["document:classify"];
+            var classifyUrl = Behaviours["document:classify"];
 
             var request = new HttpRequestMessage(HttpMethod.Post,
                 classifyUrl.CreateUri(new
