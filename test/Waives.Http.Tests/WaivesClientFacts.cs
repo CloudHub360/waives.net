@@ -15,6 +15,7 @@ namespace Waives.Http.Tests
         private readonly IHttpRequestSender _requestSender;
         private readonly WaivesClient _sut;
         private readonly byte[] _documentContents;
+        private readonly string _expectedErrorMessage;
 
         public WaivesClientFacts()
         {
@@ -24,6 +25,9 @@ namespace Waives.Http.Tests
                 _requestSender);
 
             _documentContents = new byte[] { 0, 1, 2 };
+
+            // Corresponds to value in ErrorResponse constant
+            _expectedErrorMessage = "The error message";
         }
 
         [Fact]
@@ -99,6 +103,22 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
+        public async Task CreateDocument_throws_if_response_is_not_success_code()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(AnErrorResponse());
+
+            using (var stream = new MemoryStream(_documentContents))
+            {
+                var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
+                    _sut.CreateDocument(stream));
+
+                Assert.Equal(_expectedErrorMessage, exception.Message);
+            }
+        }
+
+        [Fact]
         public async Task GetAllDocuments_sends_request_correct_url()
         {
             _requestSender
@@ -131,6 +151,19 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
+        public async Task GetAllDocuments_throws_if_response_is_not_success_code()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(AnErrorResponse());
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.GetAllDocuments());
+
+            Assert.Equal(_expectedErrorMessage, exception.Message);
+        }
+
+        [Fact]
         public async Task Login_sends_correct_request()
         {
             const string expectedClientId = "clientid";
@@ -147,6 +180,19 @@ namespace Waives.Http.Tests
                 .Send(Arg.Is<HttpRequestMessage>(m =>
                     m.Method == HttpMethod.Post &&
                     IsFormWithClientCredentials(m.Content, expectedClientId, expectedClientSecret)));
+        }
+
+        [Fact]
+        public async Task Login_throws_if_response_is_not_success_code()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(AnErrorResponse());
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.Login("clientid", "clientsecret"));
+
+            Assert.Equal(_expectedErrorMessage, exception.Message);
         }
 
         private bool IsFormWithClientCredentials(HttpContent content, string expectedClientId, string expectedClientSecret)
@@ -169,6 +215,17 @@ namespace Waives.Http.Tests
             var actualRequestContents = request.Content.ReadAsByteArrayAsync().Result;
 
             return actualRequestContents.SequenceEqual(expectedContents);
+        }
+
+        private static HttpResponseMessage AnErrorResponse()
+        {
+            return new HttpResponseMessage(HttpStatusCode.NotFound)
+            {
+                Content = new StringContent(ErrorResponse)
+                {
+                    Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+                }
+            };
         }
 
         private static HttpResponseMessage ACreateDocumentResponse()
@@ -293,5 +350,9 @@ namespace Waives.Http.Tests
             }
             ]
         }";
+
+        private const string ErrorResponse = @"{
+	        ""message"": ""The error message""
+            }";
     }
 }
