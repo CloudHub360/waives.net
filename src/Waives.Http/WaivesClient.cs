@@ -10,6 +10,7 @@ using Waives.Http.Logging;
 using Waives.Http.Responses;
 
 [assembly: InternalsVisibleTo("Waives.Http.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 [assembly: InternalsVisibleTo("Waives.Pipelines")]
 namespace Waives.Http
 {
@@ -18,7 +19,7 @@ namespace Waives.Http
         internal ILogger Logger { get; set; }
         internal HttpClient HttpClient { get; }
         private const string DefaultUrl = "https://api.waives.io";
-        private readonly RequestSender _requestSender;
+        private readonly IHttpRequestSender _requestSender;
 
         public WaivesClient(ILogger logger = null) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger)
         {
@@ -27,10 +28,14 @@ namespace Waives.Http
         internal WaivesClient(HttpClient httpClient) : this(httpClient, new NoopLogger())
         { }
 
-        private WaivesClient(HttpClient httpClient, ILogger logger)
+        private WaivesClient(HttpClient httpClient, ILogger logger) : this(httpClient, logger, new RequestSender(httpClient, logger))
+        { }
+
+        internal WaivesClient(HttpClient httpClient, ILogger logger, IHttpRequestSender requestSender)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             Logger = logger ?? new NoopLogger();
+            _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)
