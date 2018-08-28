@@ -13,9 +13,9 @@ namespace Waives.Http
         internal readonly IDictionary<string, HalUri> Behaviours;
         public string Id { get; }
 
-        internal Document(IHttpRequestSender httpClient, string id, IDictionary<string, HalUri> behaviours)
+        internal Document(IHttpRequestSender requestSender, string id, IDictionary<string, HalUri> behaviours)
         {
-            _requestSender = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
             Behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
             Id = id ?? throw new ArgumentNullException(nameof(id));
         }
