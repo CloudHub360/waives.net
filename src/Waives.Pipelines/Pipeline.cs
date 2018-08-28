@@ -72,7 +72,7 @@ namespace Waives.Pipelines
             {
                 _logger.Log(LogLevel.Error,
                     $"An error occurred during processing of document '{err.Document.SourceId}'. " +
-                    $"The error was: '{err.Exception.GetType().Name}' '{err.Exception.Message}'");
+                    $"'{err.Exception.GetType().Name}' '{err.Exception.Message}'");
 
                 _rateLimiter.MakeDocumentSlotAvailable();
                 _userErrorAction(err);
