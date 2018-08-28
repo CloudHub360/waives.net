@@ -13,6 +13,7 @@ namespace Waives.Pipelines.HttpAdapters
     {
         Task<ClassificationResult> Classify(string classifierName);
         Task Delete(Action afterDeletedAction);
+        string Id { get; }
     }
 
     /// <summary>
@@ -25,7 +26,7 @@ namespace Waives.Pipelines.HttpAdapters
     {
         private readonly Http.Document _documentClient;
 
-        internal string Id => _documentClient.Id;
+        public string Id => _documentClient.Id;
 
         internal HttpDocument(Http.Document documentClient)
         {

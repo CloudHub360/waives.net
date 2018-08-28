@@ -18,6 +18,8 @@ namespace Waives.Pipelines
             _waivesDocument = waivesDocument;
         }
 
+        public string Id => _waivesDocument.Id;
+
         public Document Source { get; }
 
         internal IHttpDocument HttpDocument => _waivesDocument;
