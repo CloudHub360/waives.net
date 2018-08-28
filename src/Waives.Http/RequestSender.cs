@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
 
@@ -14,6 +16,10 @@ namespace Waives.Http
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            // This is equivalent to the value used by NuGet
+            var productVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+            _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Waives.NET", productVersion));
         }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessage request)
