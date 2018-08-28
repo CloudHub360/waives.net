@@ -14,6 +14,8 @@ namespace Waives.Pipelines
         private bool _sourceComplete;
         private readonly SemaphoreSlim _semaphore;
 
+        private readonly TaskScheduler _mainTaskScheduler = TaskScheduler.Current;
+
         internal ConcurrentPipelineObserver(
             IEnumerable<Func<WaivesDocument, Task<WaivesDocument>>> docActions,
             Action onPipelineCompleted, Action<DocumentError> onDocumentError, int maxConcurrency)
@@ -27,6 +29,7 @@ namespace Waives.Pipelines
 
         public void OnCompleted()
         {
+            Console.WriteLine("OnComplete");
             _sourceComplete = true;
         }
 
@@ -37,6 +40,8 @@ namespace Waives.Pipelines
 
         public void OnNext(WaivesDocument doc)
         {
+            Console.WriteLine("OnNext");
+
             Task.Run(() => OnNextAsync(doc)).Wait();
         }
 
@@ -44,11 +49,17 @@ namespace Waives.Pipelines
         {
             await _semaphore.WaitAsync();
 
-            _ = PerformDocActions(doc)
-                .ContinueWith(t =>
-                {
-                    _onDocumentError(new DocumentError(doc.Source, t.Exception));
-                }, TaskContinuationOptions.OnlyOnFaulted)
+            Console.WriteLine("In progress: " + (_maxConcurrency - _semaphore.CurrentCount));
+
+            Task.Run(() => PerformDocActions(doc)
+                .ContinueWith(
+                    t =>
+                    {
+                        _onDocumentError(new DocumentError(doc.Source, t.Exception));
+                    },
+                    CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnFaulted,
+                    _mainTaskScheduler)
                 .ContinueWith(_ =>
                 {
                     _semaphore.Release();
@@ -57,10 +68,9 @@ namespace Waives.Pipelines
                 {
                     if (_sourceComplete && _semaphore.CurrentCount == _maxConcurrency)
                     {
-                        // TODO run on main thread
                         _onPipelineCompleted();
                     }
-                });
+                }, _mainTaskScheduler));
         }
 
         private async Task PerformDocActions(WaivesDocument doc)
