@@ -23,13 +23,13 @@ namespace Waives.Http
         {
         }
 
-        internal WaivesClient(HttpClient httpClient) : this(httpClient, Loggers.NoopLogger)
+        internal WaivesClient(HttpClient httpClient) : this(httpClient, new NoopLogger())
         { }
 
         private WaivesClient(HttpClient httpClient, ILogger logger)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            Logger = logger ?? Loggers.NoopLogger;
+            Logger = logger ?? new NoopLogger();
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)
