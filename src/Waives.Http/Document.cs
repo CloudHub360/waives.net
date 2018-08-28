@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Waives.Http.Logging;
 using Waives.Http.Responses;
 
 namespace Waives.Http
