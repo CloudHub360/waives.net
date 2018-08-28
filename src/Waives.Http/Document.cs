@@ -54,8 +54,10 @@ namespace Waives.Http
 
         public async Task Delete()
         {
+            var selfUrl = _behaviours["self"];
+
             var request = new HttpRequestMessage(HttpMethod.Delete,
-                _behaviours["self"].CreateUri());
+                selfUrl.CreateUri());
 
             var response = await _waivesClient.SendRequest(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
@@ -66,8 +68,10 @@ namespace Waives.Http
 
         public async Task<ClassificationResult> Classify(string classifierName)
         {
+            var classifyUrl = _behaviours["document:classify"];
+
             var request = new HttpRequestMessage(HttpMethod.Post,
-                _behaviours["document:classify"].CreateUri(new
+                classifyUrl.CreateUri(new
                 {
                     classifier_name = classifierName
                 }));
