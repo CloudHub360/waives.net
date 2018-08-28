@@ -147,7 +147,7 @@ namespace Waives.Http
             var response = await HttpClient.SendAsync(request).ConfigureAwait(false);
             stopWatch.Stop();
 
-            Logger.Log(LogLevel.Trace, $"Received response from {request.Method} {request.RequestUri} ({response.StatusCode}) ({stopWatch.ElapsedMilliseconds} ms)");
+            Logger.Log(LogLevel.Trace, $"Received response from {request.Method} {request.RequestUri} ({response.StatusCode.ToString()}) ({stopWatch.ElapsedMilliseconds} ms)");
 
             return response;
         }
