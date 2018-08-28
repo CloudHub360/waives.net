@@ -80,7 +80,7 @@ namespace Waives.Pipelines
 
             _onPipelineCompleted = () =>
             {
-                _logger.Log(LogLevel.Info, "Completed pipeline");
+                _logger.Log(LogLevel.Info, "Pipeline complete");
             };
         }
 
@@ -222,7 +222,7 @@ namespace Waives.Pipelines
                 return d;
             });
 
-            _logger.Log(LogLevel.Info, "Started pipeline");
+            _logger.Log(LogLevel.Info, "Pipeline started");
             var pipelineObserver = new PipelineObserver(_onPipelineCompleted);
             return pipelineObserver.SubscribeTo(_pipeline);
         }
