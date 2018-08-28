@@ -9,7 +9,7 @@ namespace Waives.Http.Responses
         internal string Id { get; }
 
         [JsonConstructor]
-        internal HalResponse([JsonProperty("_links")] IDictionary<string, HalUri> links, [JsonProperty("id")] string id)
+        internal HalResponse([JsonProperty("id")] string id, [JsonProperty("_links")] IDictionary<string, HalUri> links)
         {
             Links = links;
             Id = id;
