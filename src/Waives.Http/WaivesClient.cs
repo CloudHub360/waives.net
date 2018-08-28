@@ -19,10 +19,7 @@ namespace Waives.Http
         internal HttpClient HttpClient { get; }
         private const string DefaultUrl = "https://api.waives.io";
 
-        public WaivesClient() : this(new HttpClient { BaseAddress = new Uri(DefaultUrl)}, Loggers.NoopLogger)
-        { }
-
-        public WaivesClient(ILogger logger) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger)
+        public WaivesClient(ILogger logger = null) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger)
         {
         }
 
@@ -32,7 +29,7 @@ namespace Waives.Http
         private WaivesClient(HttpClient httpClient, ILogger logger)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Logger = logger ?? Loggers.NoopLogger;
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)
