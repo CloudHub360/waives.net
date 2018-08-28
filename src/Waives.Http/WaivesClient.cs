@@ -117,7 +117,7 @@ namespace Waives.Http
 
         public async Task Login(string clientId, string clientSecret)
         {
-            Logger.Log(LogLevel.Info, $"Logging in to Waives at {HttpClient.BaseAddress}");
+            Logger.Log(LogLevel.Debug, $"Authenticating with Waives at {HttpClient.BaseAddress}");
 
             var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
             {
