@@ -36,6 +36,18 @@ namespace Waives.Http
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             Logger = logger ?? new NoopLogger();
             _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
+            Timeout = 120;
+        }
+
+        /// <summary>
+        /// Gets or sets a duration on the underlying <see cref="HttpClient"/> to wait
+        /// until the requests time out. The timeout unit is seconds, and defaults to 120.
+        /// </summary>
+        /// <seealso cref="System.Net.Http.HttpClient.Timeout"/>
+        public int Timeout
+        {
+            get => HttpClient.Timeout.Seconds;
+            set => HttpClient.Timeout = TimeSpan.FromSeconds(value);
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)
