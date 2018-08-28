@@ -16,12 +16,20 @@ namespace Waives.Http
 {
     public class WaivesClient
     {
-        internal ILogger Logger { get; set; }
-        internal HttpClient HttpClient { get; }
         private const string DefaultUrl = "https://api.waives.io";
-        private readonly IHttpRequestSender _requestSender;
 
-        public WaivesClient(ILogger logger = null) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger ?? new NoopLogger())
+        internal ILogger Logger { get; set; }
+
+        internal HttpClient HttpClient { get; }
+
+        private readonly IHttpRequestSender _requestSender;
+        public WaivesClient(string apiUrl = DefaultUrl, ILogger logger = null)
+            : this(new HttpClient { BaseAddress = new Uri(apiUrl) }, logger)
+        {
+        }
+
+        public WaivesClient(Uri apiUrl = null, ILogger logger = null)
+            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger)
         {
         }
 
