@@ -23,7 +23,7 @@ namespace Waives.Http.Tests
 
         public DocumentFacts()
         {
-            var documentId = "id";
+            const string documentId = "id";
             _classifierName = "classifier";
 
             _readUrl = $"/documents/{documentId}/reads";
