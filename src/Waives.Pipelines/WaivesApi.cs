@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http;
@@ -11,7 +10,7 @@ namespace Waives.Pipelines
 {
     public static class WaivesApi
     {
-        internal static WaivesClient ApiClient { get; private set; } = new WaivesClient();
+        internal static WaivesClient ApiClient { get; private set; }
 
         /// <summary>
         /// Authenticate against the Waives API.
@@ -47,6 +46,7 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(apiUri));
             }
 
+            ApiClient = new WaivesClient(apiUri);
             return await Login(clientId, clientSecret, new Uri(apiUri)).ConfigureAwait(false);
         }
 
@@ -77,7 +77,7 @@ namespace Waives.Pipelines
         /// call the Waives API. This is provided for advanced use cases.</returns>
         public static async Task<WaivesClient> Login(string clientId, string clientSecret, Uri apiUri)
         {
-            ApiClient = new WaivesClient(new HttpClient { BaseAddress = apiUri });
+            ApiClient = new WaivesClient(apiUri);
             await ApiClient.Login(clientId, clientSecret).ConfigureAwait(false);
 
             return ApiClient;
