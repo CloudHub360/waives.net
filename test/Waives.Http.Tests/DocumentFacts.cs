@@ -37,7 +37,7 @@ namespace Waives.Http.Tests
                 { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) },
             };
 
-            _sut = new Document(_requestSender, behaviours, "id");
+            _sut = new Document(_requestSender, "id", behaviours);
 
             _readResultsFilename = Path.GetTempFileName();
             _readResultsContent = "some text that was read";

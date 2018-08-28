@@ -69,7 +69,7 @@ namespace Waives.Http
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(_requestSender, behaviours, id);
+            var document = new Document(_requestSender, id, behaviours);
 
             Logger.Log(LogLevel.Trace, $"Created Waives document {id}");
             return document;
@@ -113,7 +113,7 @@ namespace Waives.Http
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
-            return responseContent.Documents.Select(d => new Document(_requestSender, d.Links, d.Id));
+            return responseContent.Documents.Select(d => new Document(_requestSender, d.Id, d.Links));
         }
 
         public async Task Login(string clientId, string clientSecret)
