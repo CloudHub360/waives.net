@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
 using Xunit;
 using NSubstitute;
+using Waives.Http.Responses;
 
 namespace Waives.Http.Tests
 {
@@ -70,6 +72,10 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Returns(Responses.CreateDocument());
 
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessage>(m => m.RequestUri.ToString().Contains("/classify")))
+                .Returns(Responses.Classify());
+
             await _sut.CreateDocument(filePath);
 
             await _requestSender
@@ -79,7 +85,7 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task CreateDocument_returns_a_document_with_correct_properties_set()
+        public async Task CreateDocument_returns_a_document_that_can_be_used()
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
@@ -90,9 +96,18 @@ namespace Waives.Http.Tests
                 var document = await _sut.CreateDocument(stream);
 
                 Assert.Equal("expectedDocumentId", document.Id);
-                Assert.Equal(new[]
-                    { "document:read", "document:classify", "self" },
-                    document.Behaviours.Keys);
+
+                _requestSender
+                    .Send(Arg.Any<HttpRequestMessage>())
+                    .Returns(Responses.Classify());
+
+                await document.Classify("classifier");
+
+                _requestSender
+                    .Send(Arg.Any<HttpRequestMessage>())
+                    .Returns(Responses.Success());
+
+                await document.Delete();
             }
         }
 

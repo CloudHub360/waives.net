@@ -10,20 +10,20 @@ namespace Waives.Http
     public class Document
     {
         private readonly IHttpRequestSender _requestSender;
-        internal readonly IDictionary<string, HalUri> Behaviours;
+        private readonly IDictionary<string, HalUri> _behaviours;
         public string Id { get; }
 
         internal Document(IHttpRequestSender requestSender, string id, IDictionary<string, HalUri> behaviours)
         {
             _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
-            Behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
+            _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
             Id = id ?? throw new ArgumentNullException(nameof(id));
         }
 
         public async Task Read(string resultsFilename, string contentType = null)
         {
             contentType = contentType ?? ContentTypes.WaivesReadResults;
-            var requestUri = Behaviours["document:read"].CreateUri();
+            var requestUri = _behaviours["document:read"].CreateUri();
 
             await DoRead(requestUri).ConfigureAwait(false);
             var httpContent = await GetReadResults(requestUri, contentType).ConfigureAwait(false);
@@ -64,7 +64,7 @@ namespace Waives.Http
 
         public async Task Delete()
         {
-            var selfUrl = Behaviours["self"];
+            var selfUrl = _behaviours["self"];
 
             var request = new HttpRequestMessage(HttpMethod.Delete,
                 selfUrl.CreateUri());
@@ -78,7 +78,7 @@ namespace Waives.Http
 
         public async Task<ClassificationResult> Classify(string classifierName)
         {
-            var classifyUrl = Behaviours["document:classify"];
+            var classifyUrl = _behaviours["document:classify"];
 
             var request = new HttpRequestMessage(HttpMethod.Post,
                 classifyUrl.CreateUri(new
