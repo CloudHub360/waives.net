@@ -129,7 +129,7 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task GetAllDocuments_returns_a_correct_set_of_documents()
+        public async Task GetAllDocuments_returns_one_document_for_each_returned_by_the_API()
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
@@ -140,8 +140,6 @@ namespace Waives.Http.Tests
             var documentsArray = documents.ToArray();
             Assert.Equal("expectedDocumentId1", documentsArray.First().Id);
             Assert.Equal("expectedDocumentId2", documentsArray.Last().Id);
-            Assert.Equal(new[] { "document:read", "document:classify", "self" },
-                documentsArray.First().Behaviours.Keys);
         }
 
         [Fact]
