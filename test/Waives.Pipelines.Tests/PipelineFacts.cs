@@ -15,7 +15,6 @@ namespace Waives.Pipelines.Tests
     {
         private readonly IHttpDocumentFactory _documentFactory = Substitute.For<IHttpDocumentFactory>();
         private readonly Pipeline _sut;
-        private readonly IRateLimiter _rateLimiter = Substitute.For<IRateLimiter>();
 
         public PipelineFacts()
         {
@@ -27,7 +26,7 @@ namespace Waives.Pipelines.Tests
                 .CreateDocument(Arg.Any<Document>())
                 .Returns(httpDocument);
 
-            _sut = new Pipeline(_documentFactory, _rateLimiter);
+            _sut = new Pipeline(_documentFactory, 10);
         }
 
         [Fact]
@@ -42,27 +41,9 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public void WithDocumentsFrom_passes_the_document_source_to_the_ratelimiter()
-        {
-            var rateLimiter = Substitute.For<IRateLimiter>();
-            var sut = new Pipeline(_documentFactory, rateLimiter);
-            var source = Observable.Repeat<Document>(new TestDocument(Generate.Bytes()), 3);
-            sut.WithDocumentsFrom(source);
-
-            rateLimiter
-                .Received(1)
-                .RateLimited(Arg.Is<IObservable<Document>>(ds =>
-                    ReferenceEquals(ds, source)));
-        }
-
-        [Fact]
         public void WithDocumentsFrom_projects_the_rate_limited_documents_into_the_pipeline()
         {
             var expectedDocuments = Enumerable.Repeat<Document>(new TestDocument(Generate.Bytes()), 5).ToObservable();
-
-            _rateLimiter
-                .RateLimited(Arg.Any<IObservable<Document>>())
-                .Returns(expectedDocuments);
 
             var pipeline = _sut.WithDocumentsFrom(expectedDocuments);
 
@@ -89,10 +70,6 @@ namespace Waives.Pipelines.Tests
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             var classifierName = Generate.String();
-
-            _rateLimiter
-                .RateLimited(Arg.Any<IObservable<Document>>())
-                .Returns(source);
 
             var pipeline = _sut
                 .WithDocumentsFrom(source)
@@ -162,66 +139,12 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_finishes_its_processing()
-        {
-            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-
-            var fakeRateLimiter = new FakeRateLimiter();
-            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
-
-            sut.WithDocumentsFrom(source)
-                .Start();
-
-            Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
-        }
-
-        [Fact]
-        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_a_processing_error()
-        {
-            var source = Observable
-                .Repeat(new TestDocument(Generate.Bytes()), 1);
-
-            var fakeRateLimiter = new FakeRateLimiter();
-            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
-
-            sut.WithDocumentsFrom(source)
-                .Then(d => throw new Exception("An exception"))
-                .Start();
-
-            Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
-        }
-
-        [Fact]
-        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_an_error_during_creation()
-        {
-            var source = Observable
-                .Repeat(new TestDocument(Generate.Bytes()), 1);
-
-            _documentFactory
-                .CreateDocument(Arg.Any<Document>())
-                .Throws(new Exception("Could not create document"));
-
-            _rateLimiter
-                .RateLimited(Arg.Any<IObservable<Document>>())
-                .Returns(source);
-
-            _sut.WithDocumentsFrom(source)
-                .Start();
-
-            _rateLimiter.Received(1).MakeDocumentSlotAvailable();
-        }
-
-        [Fact]
         public void OnDocumentError_is_run_when_a_document_has_a_processing_error()
         {
             var onDocumentErrorActionRun = false;
             var document = new TestDocument(Generate.Bytes());
             var exception = new Exception("An exception");
             var source = Observable.Repeat(document, 1);
-
-            _rateLimiter
-                .RateLimited(Arg.Any<IObservable<Document>>())
-                .Returns(source);
 
             _sut.WithDocumentsFrom(source)
                 .Then(d => throw exception)
@@ -247,10 +170,6 @@ namespace Waives.Pipelines.Tests
             _documentFactory
                 .CreateDocument(Arg.Any<Document>())
                 .Throws(exception);
-
-            _rateLimiter
-                .RateLimited(Arg.Any<IObservable<Document>>())
-                .Returns(source);
 
             _sut.WithDocumentsFrom(source)
                 .OnDocumentError(err =>
@@ -278,10 +197,6 @@ namespace Waives.Pipelines.Tests
                 .CreateDocument(Arg.Any<Document>())
                 .Throws(exception);
 
-            _rateLimiter
-                .RateLimited(Arg.Any<IObservable<Document>>())
-                .Returns(source);
-
             _sut.WithDocumentsFrom(source)
                 .OnDocumentError(err =>
                 {
@@ -298,21 +213,6 @@ namespace Waives.Pipelines.Tests
             Assert.Equal(2, onDocumentErrorCalledFor.Count);
             Assert.Equal(1, onDocumentErrorCalledFor.First().sequence);
             Assert.Equal(2, onDocumentErrorCalledFor.Last().sequence);
-        }
-
-        private class FakeRateLimiter : IRateLimiter
-        {
-            public bool MakeDocumentSlotAvailableCalled { get; private set; }
-
-            public void MakeDocumentSlotAvailable()
-            {
-                MakeDocumentSlotAvailableCalled = true;
-            }
-
-            public IObservable<TSource> RateLimited<TSource>(IObservable<TSource> source)
-            {
-                return source;
-            }
         }
     }
 }

@@ -50,6 +50,7 @@ namespace Waives.Http
 
         public async Task Delete()
         {
+            Console.WriteLine($"Deleting doc: {_behaviours["self"].CreateUri()}");
             var response = await _waivesClient.HttpClient.DeleteAsync(_behaviours["self"].CreateUri()).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
@@ -59,6 +60,7 @@ namespace Waives.Http
 
         public async Task<ClassificationResult> Classify(string classifierName)
         {
+            Console.WriteLine($"Classifying doc: {_behaviours["self"].CreateUri()}");
             var requestUri = _behaviours["document:classify"].CreateUri(new
             {
                 classifier_name = classifierName
