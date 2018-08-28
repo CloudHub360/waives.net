@@ -25,7 +25,7 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task CreateDocument_sends_request_correct_url()
+        public async Task CreateDocument_sends_a_request_to_correct_url()
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
@@ -113,7 +113,7 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task GetAllDocuments_sends_request_correct_url()
+        public async Task GetAllDocuments_sends_a_request_to_correct_url()
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessage>())
@@ -158,7 +158,7 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task Login_sends_correct_request()
+        public async Task Login_sends_a_request_with_the_specified_credentials()
         {
             const string expectedClientId = "clientid";
             const string expectedClientSecret = "clientsecret";
