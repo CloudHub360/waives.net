@@ -11,7 +11,7 @@ namespace Waives.Http
     {
         private readonly WaivesClient _waivesClient;
         private readonly IDictionary<string, HalUri> _behaviours;
-        internal readonly string Id;
+        public string Id { get; }
 
         internal Document(WaivesClient httpClient, string id, IDictionary<string, HalUri> behaviours)
         {
