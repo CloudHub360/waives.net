@@ -50,7 +50,7 @@ namespace Waives.Http
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(this, behaviours, id);
+            var document = new Document(this, id, behaviours);
 
             Logger.Log(LogLevel.Trace, $"Created Waives document {id}");
             return document;
@@ -71,7 +71,7 @@ namespace Waives.Http
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            return new Document(this, behaviours, id);
+            return new Document(this, id, behaviours);
         }
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
@@ -112,7 +112,7 @@ namespace Waives.Http
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
-            return responseContent.Documents.Select(d => new Document(this, d.Links, d.Id));
+            return responseContent.Documents.Select(d => new Document(this, d.Id, d.Links));
         }
 
         public async Task Login(string clientId, string clientSecret)

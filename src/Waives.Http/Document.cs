@@ -13,7 +13,7 @@ namespace Waives.Http
         private readonly IDictionary<string, HalUri> _behaviours;
         internal readonly string Id;
 
-        internal Document(WaivesClient httpClient, IDictionary<string, HalUri> behaviours, string id)
+        internal Document(WaivesClient httpClient, string id, IDictionary<string, HalUri> behaviours)
         {
             _waivesClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
