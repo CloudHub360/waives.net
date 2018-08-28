@@ -29,6 +29,5 @@ namespace Waives.Http
 
             return response;
         }
-
     }
 }
