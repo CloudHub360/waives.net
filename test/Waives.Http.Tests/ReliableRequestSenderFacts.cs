@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -53,10 +54,7 @@ namespace Waives.Http.Tests
         }
 
         [Theory]
-        [InlineData(HttpStatusCode.Continue)]         //100
-        [InlineData(HttpStatusCode.OK)]               //200
-        [InlineData(HttpStatusCode.MultipleChoices)]  //300
-        [InlineData(HttpStatusCode.BadRequest)]       //400
+        [MemberData(nameof(NoRetryHttpStatusCodes))]
         public async Task Send_does_not_retry_on_satisfactory_responses(HttpStatusCode statusCode)
         {
             var sender = Substitute.For<IHttpRequestSender>();
@@ -145,6 +143,49 @@ namespace Waives.Http.Tests
             Assert.True(expectedContent.SequenceEqual(actualContent));
 
             return true;
+        }
+
+        public static IEnumerable<object[]> NoRetryHttpStatusCodes()
+        {
+            yield return new object[] { HttpStatusCode.Continue };
+            yield return new object[] { HttpStatusCode.SwitchingProtocols };
+            yield return new object[] { HttpStatusCode.OK };
+            yield return new object[] { HttpStatusCode.Created };
+            yield return new object[] { HttpStatusCode.Accepted };
+            yield return new object[] { HttpStatusCode.NonAuthoritativeInformation };
+            yield return new object[] { HttpStatusCode.NoContent };
+            yield return new object[] { HttpStatusCode.ResetContent };
+            yield return new object[] { HttpStatusCode.PartialContent };
+            yield return new object[] { HttpStatusCode.MultipleChoices };
+            yield return new object[] { HttpStatusCode.Ambiguous };
+            yield return new object[] { HttpStatusCode.MovedPermanently };
+            yield return new object[] { HttpStatusCode.Moved };
+            yield return new object[] { HttpStatusCode.Found };
+            yield return new object[] { HttpStatusCode.Redirect };
+            yield return new object[] { HttpStatusCode.SeeOther };
+            yield return new object[] { HttpStatusCode.NotModified };
+            yield return new object[] { HttpStatusCode.UseProxy };
+            yield return new object[] { HttpStatusCode.Unused };
+            yield return new object[] { HttpStatusCode.TemporaryRedirect };
+            yield return new object[] { HttpStatusCode.RedirectKeepVerb };
+            yield return new object[] { HttpStatusCode.BadRequest };
+            yield return new object[] { HttpStatusCode.Unauthorized };
+            yield return new object[] { HttpStatusCode.PaymentRequired };
+            yield return new object[] { HttpStatusCode.Forbidden };
+            yield return new object[] { HttpStatusCode.NotFound };
+            yield return new object[] { HttpStatusCode.MethodNotAllowed };
+            yield return new object[] { HttpStatusCode.NotAcceptable };
+            yield return new object[] { HttpStatusCode.ProxyAuthenticationRequired };
+            yield return new object[] { HttpStatusCode.Conflict };
+            yield return new object[] { HttpStatusCode.Gone };
+            yield return new object[] { HttpStatusCode.LengthRequired };
+            yield return new object[] { HttpStatusCode.PreconditionFailed };
+            yield return new object[] { HttpStatusCode.RequestEntityTooLarge };
+            yield return new object[] { HttpStatusCode.RequestUriTooLong };
+            yield return new object[] { HttpStatusCode.UnsupportedMediaType };
+            yield return new object[] { HttpStatusCode.RequestedRangeNotSatisfiable };
+            yield return new object[] { HttpStatusCode.ExpectationFailed };
+            yield return new object[] { HttpStatusCode.UpgradeRequired };
         }
 
         private class RetryLogger
