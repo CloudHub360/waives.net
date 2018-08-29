@@ -21,7 +21,7 @@ namespace Waives.Http
         private const string DefaultUrl = "https://api.waives.io";
         private readonly IHttpRequestSender _requestSender;
 
-        public WaivesClient(ILogger logger = null) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger)
+        public WaivesClient(ILogger logger = null) : this(new HttpClient { BaseAddress = new Uri(DefaultUrl) }, logger ?? new NoopLogger())
         {
         }
 
