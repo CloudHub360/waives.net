@@ -28,7 +28,6 @@ namespace Waives.Pipelines
 
         public void OnCompleted()
         {
-            Console.WriteLine("OnComplete");
             _sourceComplete = true;
         }
 
@@ -39,16 +38,12 @@ namespace Waives.Pipelines
 
         public void OnNext(T item)
         {
-            Console.WriteLine("OnNext");
-
             Task.Run(() => OnNextAsync(item)).Wait();
         }
 
         private async Task OnNextAsync(T item)
         {
             await _semaphore.WaitAsync();
-
-            Console.WriteLine("In progress: " + (_maxConcurrency - _semaphore.CurrentCount));
 
             Task.Run(() => _process(item)
                 .ContinueWith(
