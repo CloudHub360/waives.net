@@ -2,7 +2,7 @@
 
 namespace Waives.Http
 {
-    public class ExponentialBackoffSleepProvider
+    internal class ExponentialBackoffSleepProvider
     {
         private readonly Random _jitterer = new Random();
 
