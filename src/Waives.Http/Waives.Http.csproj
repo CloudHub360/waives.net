@@ -24,6 +24,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.6" />
     <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.1" />
+    <PackageReference Include="Polly" Version="6.1.0" />
+    <PackageReference Include="Polly.Extensions.Http" Version="2.0.1" />
   </ItemGroup>
 
 </Project>
