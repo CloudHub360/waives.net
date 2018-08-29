@@ -46,7 +46,7 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(apiUri));
             }
 
-            ApiClient = new WaivesClient(apiUri);
+            ApiClient = new WaivesClient(new Uri(apiUri));
             return await Login(clientId, clientSecret, new Uri(apiUri)).ConfigureAwait(false);
         }
 

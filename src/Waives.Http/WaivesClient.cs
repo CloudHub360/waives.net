@@ -23,13 +23,9 @@ namespace Waives.Http
         internal HttpClient HttpClient { get; }
 
         private readonly IHttpRequestSender _requestSender;
-        public WaivesClient(string apiUrl = DefaultUrl, ILogger logger = null)
-            : this(new HttpClient { BaseAddress = new Uri(apiUrl) }, logger)
-        {
-        }
 
         public WaivesClient(Uri apiUrl = null, ILogger logger = null)
-            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger)
+            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger ?? new NoopLogger())
         {
         }
 
