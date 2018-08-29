@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace Waives.Http
 {
-    public static class HttpRequestMessageExtensions
+    internal static class HttpRequestMessageExtensions
     {
-        public static async Task<HttpRequestMessage> CloneAsync(this HttpRequestMessage request)
+        internal static async Task<HttpRequestMessage> CloneAsync(this HttpRequestMessage request)
         {
             var clone = new HttpRequestMessage(request.Method, request.RequestUri)
             {
