@@ -45,21 +45,14 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Throws(expectedException);
 
-            try
-            {
-                await _sut.Send(_request);
-            }
-            catch (WaivesApiException e)
-            {
-                Assert.Same(expectedException, e);
-                return;
-            }
+            var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.Send(_request));
 
-            Assert.False(true);
+            Assert.Same(expectedException, actualException);
         }
 
         [Fact]
-        public async Task Logs_two_trace_messages_when_request_is_successful()
+        public async Task Logs_a_sending_request_message_when_request_is_successful()
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessage>())
@@ -72,29 +65,46 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task Logs_a_trace_and_an_error_message_when_wrapped_sender_throws_exception()
+        public async Task Logs_a_sending_request_message_when_request_is_not_successful()
         {
             var exception = new WaivesApiException("an error message");
             _sender
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Throws(exception);
 
-            try
-            {
-                await _sut.Send(_request);
-            }
-            catch (WaivesApiException)
-            {
-                _logger.Received(1)
-                    .Log(LogLevel.Trace, Arg.Any<string>());
+            await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.Send(_request));
+
+            _logger.Received(1)
+                .Log(LogLevel.Trace, Arg.Is<string>(m => m.Contains(_request.RequestUri.ToString())));
+        }
+
+        [Fact]
+        public async Task Logs_a_received_response_message_when_request_is_successful()
+        {
+            _sender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(Responses.Success());
+
+            await _sut.Send(_request);
+
+            _logger.Received(2)
+                .Log(LogLevel.Trace, Arg.Any<string>());
+        }
+
+        [Fact]
+        public async Task Logs_an_error_message_when_request_is_not_successful()
+        {
+            var exception = new WaivesApiException("an error message");
+            _sender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Throws(exception);
+
+            await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.Send(_request));
 
                 _logger.Received(1)
                     .Log(LogLevel.Error, Arg.Any<string>());
-
-                return;
-            }
-
-            Assert.False(true);
         }
 
         [Fact]
@@ -105,19 +115,11 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Throws(exception);
 
-            try
-            {
-                await _sut.Send(_request);
-            }
-            catch (WaivesApiException)
-            {
-                _logger.Received(1)
+            await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.Send(_request));
+
+            _logger.Received(1)
                     .Log(LogLevel.Error, Arg.Is<string>(m => m.Contains(exception.Message)));
-
-                return;
-            }
-
-            Assert.False(true);
         }
 
         [Fact]
@@ -130,19 +132,11 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessage>())
                 .Throws(exception);
 
-            try
-            {
-                await _sut.Send(_request);
-            }
-            catch (WaivesApiException)
-            {
-                _logger.Received(1)
+            await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.Send(_request));
+
+            _logger.Received(1)
                     .Log(LogLevel.Error, Arg.Is<string>(m => m.Contains(innerException.Message)));
-
-                return;
-            }
-
-            Assert.False(true);
         }
     }
 }
