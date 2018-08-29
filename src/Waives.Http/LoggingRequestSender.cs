@@ -35,9 +35,14 @@ namespace Waives.Http
             }
             catch (WaivesApiException e)
             {
-                Logger.Log(LogLevel.Error,
-                    e.InnerException != null ? $"{e.Message} Inner exception: {e.InnerException.Message}" : e.Message);
-
+                if (e.InnerException != null)
+                {
+                    Logger.Log(LogLevel.Error, $"{e.Message} Inner exception: {e.InnerException.Message}");
+                }
+                else
+                {
+                    Logger.Log(LogLevel.Error, e.Message);
+                }
                 throw;
             }
         }
