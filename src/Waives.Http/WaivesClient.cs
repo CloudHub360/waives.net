@@ -26,14 +26,11 @@ namespace Waives.Http
         private readonly IHttpRequestSender _requestSender;
 
         public WaivesClient(Uri apiUrl = null, ILogger logger = null)
-            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger ?? new NoopLogger())
+            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger ?? new NoopLogger(), null)
         {
         }
 
-        internal WaivesClient(HttpClient httpClient) : this(httpClient, new NoopLogger())
-        { }
-
-        private WaivesClient(HttpClient httpClient, ILogger logger) : this(httpClient, logger, new RequestSender(httpClient, logger))
+        internal WaivesClient(HttpClient httpClient) : this(httpClient, new NoopLogger(), null)
         { }
 
         internal WaivesClient(HttpClient httpClient, ILogger logger, IHttpRequestSender requestSender)
@@ -43,7 +40,7 @@ namespace Waives.Http
             _requestSender = requestSender ?? new ReliableRequestSender(RetryAction,
                                  new LoggingRequestSender(
                                      new ExceptionHandlingRequestSender(
-                                         new RequestSender(httpClient, logger)),
+                                         new RequestSender(httpClient)),
                                      logger));
             Timeout = 120;
         }
