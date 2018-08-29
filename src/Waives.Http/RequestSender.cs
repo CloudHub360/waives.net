@@ -22,15 +22,7 @@ namespace Waives.Http
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)
         {
-            var request = new HttpRequestMessage(template.Method, template.RequestUri)
-            {
-                Content = template.Content
-            };
-
-            foreach (var header in template.Headers)
-            {
-                request.Headers.Add(header.Key, header.Value);
-            }
+            var request = HttpRequestMessageBuilder.BuildRequest(template);
 
             return await _httpClient.SendAsync(request).ConfigureAwait(false);
         }
