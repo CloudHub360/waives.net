@@ -36,7 +36,7 @@ namespace Waives.Http
 
         private async Task DoRead(Uri requestUri)
         {
-            var readRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
+            var readRequest = new HttpRequestMessageTemplate(HttpMethod.Put, requestUri)
             {
                 Content = new StringContent(string.Empty)
             };
@@ -50,8 +50,8 @@ namespace Waives.Http
 
         private async Task<HttpContent> GetReadResults(Uri requestUri, string contentType)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Add("Accept", contentType);
+            var request = new HttpRequestMessageTemplate(HttpMethod.Get, requestUri);
+            request.Headers.Add(new KeyValuePair<string, string>("Accept", contentType));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
@@ -66,7 +66,7 @@ namespace Waives.Http
         {
             var selfUrl = _behaviours["self"];
 
-            var request = new HttpRequestMessage(HttpMethod.Delete,
+            var request = new HttpRequestMessageTemplate(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
@@ -80,7 +80,7 @@ namespace Waives.Http
         {
             var classifyUrl = _behaviours["document:classify"];
 
-            var request = new HttpRequestMessage(HttpMethod.Post,
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post,
                 classifyUrl.CreateUri(new
                 {
                     classifier_name = classifierName

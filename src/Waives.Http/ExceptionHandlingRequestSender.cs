@@ -19,7 +19,7 @@ namespace Waives.Http
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> Send(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             try
             {

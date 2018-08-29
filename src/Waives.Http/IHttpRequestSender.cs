@@ -5,6 +5,6 @@ namespace Waives.Http
 {
     internal interface IHttpRequestSender
     {
-        Task<HttpResponseMessage> Send(HttpRequestMessage request);
+        Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request);
     }
 }

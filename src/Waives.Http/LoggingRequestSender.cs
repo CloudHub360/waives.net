@@ -17,7 +17,7 @@ namespace Waives.Http
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             var stopWatch = new Stopwatch();
             Logger.Log(LogLevel.Trace, $"Sending {request.Method} request to {request.RequestUri}");

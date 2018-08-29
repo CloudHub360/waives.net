@@ -26,21 +26,12 @@ namespace Waives.Http
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             return await _policy
                 .ExecuteAsync(() =>
-                    SendClonedRequest(request))
+                    _wrappedRequestSender.Send(request))
                 .ConfigureAwait(false);
-        }
-
-        private async Task<HttpResponseMessage> SendClonedRequest(HttpRequestMessage request)
-        {
-            // HttpClient does not allow an HttpRequestMessage to be sent more than once,
-            // which would cause an issue if we retry, so clone the request first and send the
-            // clone to the wrapped sender.
-            var clonedRequest = await request.CloneAsync().ConfigureAwait(false);
-            return await _wrappedRequestSender.Send(clonedRequest).ConfigureAwait(false);
         }
     }
 }

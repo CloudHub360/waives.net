@@ -72,7 +72,7 @@ namespace Waives.Http
         public async Task<Document> CreateDocument(Stream documentSource)
         {
             var request =
-                new HttpRequestMessage(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
                 {
                     Content = new StreamContent(documentSource)
                 };
@@ -83,7 +83,7 @@ namespace Waives.Http
         public async Task<Document> CreateDocument(string path)
         {
             var request =
-                new HttpRequestMessage(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
                 {
                     Content = new StreamContent(File.OpenRead(path))
                 };
@@ -91,7 +91,7 @@ namespace Waives.Http
             return await CreateDocument(request).ConfigureAwait(false);
         }
 
-        private async Task<Document> CreateDocument(HttpRequestMessage request)
+        private async Task<Document> CreateDocument(HttpRequestMessageTemplate request)
         {
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
@@ -108,7 +108,7 @@ namespace Waives.Http
 
         public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, new Uri($"/classifiers/{name}", UriKind.Relative));
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/classifiers/{name}", UriKind.Relative));
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
@@ -127,7 +127,7 @@ namespace Waives.Http
 
         public async Task<Classifier> GetClassifier(string name)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"/classifiers/{name}", UriKind.Relative));
+            var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/classifiers/{name}", UriKind.Relative));
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
@@ -139,7 +139,7 @@ namespace Waives.Http
 
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
+            var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             await EnsureSuccessStatus(response).ConfigureAwait(false);
 
@@ -151,7 +151,7 @@ namespace Waives.Http
         {
             Logger.Log(LogLevel.Debug, $"Authenticating with Waives at {HttpClient.BaseAddress}");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
             {
                 Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {

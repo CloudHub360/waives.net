@@ -11,7 +11,7 @@ namespace Waives.Http.Tests
     public class ExceptionHandlingRequestSenderFacts
     {
         private readonly IHttpRequestSender _sender;
-        private readonly HttpRequestMessage _request;
+        private readonly HttpRequestMessageTemplate _request;
         private readonly ExceptionHandlingRequestSender _sut;
 
         public ExceptionHandlingRequestSenderFacts()
@@ -19,7 +19,7 @@ namespace Waives.Http.Tests
             _sender = Substitute.For<IHttpRequestSender>();
             _sut = new ExceptionHandlingRequestSender(_sender);
 
-            _request = new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
+            _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace Waives.Http.Tests
         {
             var expectedResponse = Responses.Success();
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(expectedResponse);
 
             var response = await _sut.Send(_request);
@@ -40,7 +40,7 @@ namespace Waives.Http.Tests
         public async Task Throws_WaivesApiException_if_wrapped_sender_times_out(Exception senderException)
         {
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(senderException);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -52,7 +52,7 @@ namespace Waives.Http.Tests
         public async Task Includes_request_details_in_exception_if_wrapped_sender_times_out(Exception senderException)
         {
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(senderException);
 
             var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -67,7 +67,7 @@ namespace Waives.Http.Tests
         {
             var expectedException = new Exception("an error message");
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(expectedException);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -79,7 +79,7 @@ namespace Waives.Http.Tests
         {
             var expectedException = new Exception("an error message");
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(expectedException);
 
             var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -93,7 +93,7 @@ namespace Waives.Http.Tests
         {
             var expectedException = new Exception("an error message");
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(expectedException);
 
             var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
