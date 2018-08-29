@@ -1,28 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Pipelines
 {
-    internal class ConcurrentPipelineObserver : IObserver<WaivesDocument>, IDisposable
+    internal class ConcurrentObserver<T> : IObserver<T>, IDisposable
     {
-        private readonly IEnumerable<Func<WaivesDocument, Task<WaivesDocument>>> _docActions;
+        private readonly Func<T, Task> _process;
         private readonly Action _onPipelineCompleted;
-        private readonly Action<DocumentError> _onDocumentError;
+        private readonly Action<T, Exception> _onError;
         private readonly int _maxConcurrency;
         private bool _sourceComplete;
         private readonly SemaphoreSlim _semaphore;
 
         private readonly TaskScheduler _mainTaskScheduler = TaskScheduler.Current;
 
-        internal ConcurrentPipelineObserver(
-            IEnumerable<Func<WaivesDocument, Task<WaivesDocument>>> docActions,
-            Action onPipelineCompleted, Action<DocumentError> onDocumentError, int maxConcurrency)
+        internal ConcurrentObserver(
+            Func<T, Task> process,
+            Action onPipelineCompleted, Action<T, Exception> onError, int maxConcurrency)
         {
-            _docActions = docActions;
+            _process = process;
             _onPipelineCompleted = onPipelineCompleted;
-            _onDocumentError = onDocumentError;
+            _onError = onError;
             _maxConcurrency = maxConcurrency;
             _semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
         }
@@ -38,24 +37,24 @@ namespace Waives.Pipelines
             throw new PipelineException(error);
         }
 
-        public void OnNext(WaivesDocument doc)
+        public void OnNext(T item)
         {
             Console.WriteLine("OnNext");
 
-            Task.Run(() => OnNextAsync(doc)).Wait();
+            Task.Run(() => OnNextAsync(item)).Wait();
         }
 
-        private async Task OnNextAsync(WaivesDocument doc)
+        private async Task OnNextAsync(T item)
         {
             await _semaphore.WaitAsync();
 
             Console.WriteLine("In progress: " + (_maxConcurrency - _semaphore.CurrentCount));
 
-            Task.Run(() => PerformDocActions(doc)
+            Task.Run(() => _process(item)
                 .ContinueWith(
                     t =>
                     {
-                        _onDocumentError(new DocumentError(doc.Source, t.Exception));
+                        _onError(item, t.Exception);
                     },
                     CancellationToken.None,
                     TaskContinuationOptions.OnlyOnFaulted,
@@ -71,15 +70,6 @@ namespace Waives.Pipelines
                         _onPipelineCompleted();
                     }
                 }, _mainTaskScheduler));
-        }
-
-        private async Task PerformDocActions(WaivesDocument doc)
-        {
-            foreach (var docAction in _docActions)
-            {
-                // mmm, curry.
-                doc = await docAction(doc);
-            }
         }
 
         public void Dispose()

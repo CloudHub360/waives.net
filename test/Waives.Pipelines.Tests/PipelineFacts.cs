@@ -40,47 +40,47 @@ namespace Waives.Pipelines.Tests
             Assert.True(pipelineCompleted);
         }
 
-        [Fact]
-        public void WithDocumentsFrom_projects_the_rate_limited_documents_into_the_pipeline()
-        {
-            var expectedDocuments = Enumerable.Repeat<Document>(new TestDocument(Generate.Bytes()), 5).ToObservable();
+//        [Fact]
+//        public void WithDocumentsFrom_projects_the_rate_limited_documents_into_the_pipeline()
+//        {
+//            var expectedDocuments = Enumerable.Repeat<Document>(new TestDocument(Generate.Bytes()), 5).ToObservable();
+//
+//            var pipeline = _sut.WithDocumentsFrom(expectedDocuments);
+//
+//            Assert.Equal(
+//                expectedDocuments.ToEnumerable(),
+//                pipeline.Select(d => d.Source).ToEnumerable());
+//        }
 
-            var pipeline = _sut.WithDocumentsFrom(expectedDocuments);
+//        [Fact]
+//        public void WithDocumentsFrom_creates_each_document_with_Waives()
+//        {
+//            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+//
+//            var pipeline = _sut.WithDocumentsFrom(source);
+//
+//            pipeline.Subscribe(t =>
+//            {
+//                _documentFactory.Received(1).CreateDocument(t.Source);
+//            });
+//        }
 
-            Assert.Equal(
-                expectedDocuments.ToEnumerable(),
-                pipeline.Select(d => d.Source).ToEnumerable());
-        }
-
-        [Fact]
-        public void WithDocumentsFrom_creates_each_document_with_Waives()
-        {
-            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-
-            var pipeline = _sut.WithDocumentsFrom(source);
-
-            pipeline.Subscribe(t =>
-            {
-                _documentFactory.Received(1).CreateDocument(t.Source);
-            });
-        }
-
-        [Fact]
-        public void ClassifyWith_classifies_each_document_with_Waives()
-        {
-            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-            var classifierName = Generate.String();
-
-            var pipeline = _sut
-                .WithDocumentsFrom(source)
-                .ClassifyWith(classifierName);
-
-            pipeline.Subscribe(t =>
-            {
-                t.HttpDocument.Received(1).Classify(classifierName);
-                Assert.NotNull(t.ClassificationResults);
-            });
-        }
+//        [Fact]
+//        public void ClassifyWith_classifies_each_document_with_Waives()
+//        {
+//            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+//            var classifierName = Generate.String();
+//
+//            var pipeline = _sut
+//                .WithDocumentsFrom(source)
+//                .ClassifyWith(classifierName);
+//
+//            pipeline.Subscribe(t =>
+//            {
+//                t.HttpDocument.Received(1).Classify(classifierName);
+//                Assert.NotNull(t.ClassificationResults);
+//            });
+//        }
 
         [Fact]
         public void Then_invokes_the_supplied_Action()

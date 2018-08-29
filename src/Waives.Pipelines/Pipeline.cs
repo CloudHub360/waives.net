@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Waives.Pipelines.HttpAdapters;
@@ -50,14 +49,14 @@ namespace Waives.Pipelines
     /// }
     /// ]]>
     /// </example>
-    public class Pipeline : IObservable<WaivesDocument>
+    public class Pipeline : IObservable<Document>
     {
         private readonly IHttpDocumentFactory _documentFactory;
         private readonly int _maxConcurrency;
-        private IObservable<WaivesDocument> _docSource = Observable.Empty<WaivesDocument>();
+        private IObservable<Document> _docSource = Observable.Empty<Document>();
         private Action _onPipelineCompleted = () => { };
-        private readonly Action<DocumentError> _onDocumentError;
-        private Action<DocumentError> _userErrorAction = err => { };
+        private readonly Action<Document, Exception> _onDocumentError;
+        private Action<Document, Exception> _userErrorAction = (d, ex) => { };
 
         private readonly List<Func<WaivesDocument, Task<WaivesDocument>>> _docActions =
             new List<Func<WaivesDocument, Task<WaivesDocument>>>();
@@ -66,11 +65,11 @@ namespace Waives.Pipelines
         {
             _documentFactory = documentFactory;
             _maxConcurrency = maxConcurrency;
-            _onDocumentError = err =>
+            _onDocumentError = (doc, ex) =>
             {
-                Console.WriteLine($"An error occurred during processing of {err.Document}. " +
-                                  $"The error was: {err.Exception.GetType().Name} {err.Exception.Message}");
-                _userErrorAction(err);
+                Console.WriteLine($"An error occurred during processing of {doc}. " +
+                                  $"The error was: {ex.GetType().Name} {ex.Message}");
+                _userErrorAction(doc, ex);
             };
         }
 
@@ -82,9 +81,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            _docSource = documentSource.SelectMany(
-                async d => new WaivesDocument(d,
-                    await _documentFactory.CreateDocument(d).ConfigureAwait(false)));
+            _docSource = documentSource;
 
             return this;
         }
@@ -160,15 +157,15 @@ namespace Waives.Pipelines
         /// </summary>
         /// <param name="action">The action to execute when document has an error.</param>
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
-        public Pipeline OnDocumentError(Action<DocumentError> action)
+        public Pipeline OnDocumentError(Action<Document, Exception> action)
         {
-            var userAction = action ?? (err => { });
+            var userAction = action ?? ((doc, ex) => { });
 
             var previousAction = _userErrorAction;
-            _userErrorAction = err =>
+            _userErrorAction = (doc, ex) =>
             {
-                previousAction(err);
-                userAction(err);
+                previousAction(doc, ex);
+                userAction(doc, ex);
             };
 
             return this;
@@ -182,13 +179,23 @@ namespace Waives.Pipelines
         /// this object.</returns>
         public IDisposable Start()
         {
-            _docActions.Add(async d =>
+            async Task FullPipeline(Document d)
             {
-                await d.HttpDocument.Delete(() => { });
-                return d;
-            });
+                var waivesDoc = new WaivesDocument(d, await _documentFactory.CreateDocument(d));
+                try
+                {
+                    foreach (var docAction in _docActions)
+                    {
+                        waivesDoc = await docAction(waivesDoc);
+                    }
+                }
+                finally
+                {
+                    await waivesDoc.HttpDocument.Delete(() => { });
+                }
+            }
 
-            var pipelineObserver = new ConcurrentPipelineObserver(_docActions,
+            var pipelineObserver = new ConcurrentObserver<Document>(FullPipeline,
                 _onPipelineCompleted,
                 _onDocumentError,
                 _maxConcurrency);
@@ -197,7 +204,7 @@ namespace Waives.Pipelines
         }
 
         /// <inheritdoc />
-        public IDisposable Subscribe(IObserver<WaivesDocument> observer)
+        public IDisposable Subscribe(IObserver<Document> observer)
         {
             return observer.SubscribeTo(_docSource);
         }
