@@ -76,23 +76,6 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task Send_retries_on_http_exception()
-        {
-            var sender = Substitute.For<IHttpRequestSender>();
-
-            sender.Send(Arg.Any<HttpRequestMessage>())
-                .Returns(x => throw new HttpRequestException(), x => Responses.Success());
-
-            var sut = new ReliableRequestSender(
-                _retryLogger.RetryAction,
-                sender);
-
-            await sut.Send(_request);
-
-            Assert.True(_retryLogger.RetryActionCalled);
-        }
-
-        [Fact]
         public async Task Send_retries_on_waives_api_exception()
         {
             var sender = Substitute.For<IHttpRequestSender>();
