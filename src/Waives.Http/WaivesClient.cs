@@ -37,7 +37,8 @@ namespace Waives.Http
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             Logger = logger ?? new NoopLogger();
-            _requestSender = requestSender ?? new ReliableRequestSender(RetryAction,
+            _requestSender = requestSender ??
+                             new ReliableRequestSender(RetryAction,
                                  new LoggingRequestSender(
                                      new ExceptionHandlingRequestSender(
                                          new RequestSender(httpClient)),
