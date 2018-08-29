@@ -29,12 +29,12 @@ namespace Waives.Http
             {
                 // Either TaskCanceledException or OperationCanceledException may be thrown by HttpClient if a response
                 // is not received before the HttpClient's TimeOut expires
-                throw new WaivesApiException($"{request.Method} request to {request.RequestUri} timed-out (client-side)");
+                throw new WaivesApiException($"{request.Method} request to {request.RequestUri} timed-out.");
             }
             catch (Exception e)
             {
                 var message = $"An unexpected error occurred making {request.Method} request to {request.RequestUri}. " +
-                              "Please check the InnerException for more details.";
+                              $"The error was: {e.Message}.";
 
                 throw new WaivesApiException(message, e);
             }
