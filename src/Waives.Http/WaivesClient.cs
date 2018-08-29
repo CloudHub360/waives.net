@@ -19,11 +19,11 @@ namespace Waives.Http
     {
         private const string DefaultUrl = "https://api.waives.io";
 
-        internal ILogger Logger { get; set; }
-
         internal HttpClient HttpClient { get; }
 
         private readonly IHttpRequestSender _requestSender;
+        private readonly LoggingRequestSender _loggingRequestSender;
+        private ILogger _logger;
 
         public WaivesClient(Uri apiUrl = null, ILogger logger = null)
             : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger ?? new NoopLogger(), null)
@@ -36,13 +36,15 @@ namespace Waives.Http
         internal WaivesClient(HttpClient httpClient, ILogger logger, IHttpRequestSender requestSender)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _loggingRequestSender = new LoggingRequestSender(
+                new ExceptionHandlingRequestSender(
+                    new RequestSender(httpClient)),
+                logger);
             Logger = logger ?? new NoopLogger();
+
             _requestSender = requestSender ??
                              new ReliableRequestSender(RetryAction,
-                                 new LoggingRequestSender(
-                                     new ExceptionHandlingRequestSender(
-                                         new RequestSender(httpClient)),
-                                     logger));
+                                 _loggingRequestSender);
             Timeout = 120;
         }
 
@@ -55,6 +57,16 @@ namespace Waives.Http
         {
             get => HttpClient.Timeout.Seconds;
             set => HttpClient.Timeout = TimeSpan.FromSeconds(value);
+        }
+
+        internal ILogger Logger
+        {
+            get => _logger;
+            set
+            {
+                _logger = value;
+                _loggingRequestSender.Logger = value;
+            }
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)
