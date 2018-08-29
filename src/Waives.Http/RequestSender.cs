@@ -20,8 +20,18 @@ namespace Waives.Http
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Waives.NET", productVersion));
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)
         {
+            var request = new HttpRequestMessage(template.Method, template.RequestUri)
+            {
+                Content = template.Content
+            };
+
+            foreach (var header in template.Headers)
+            {
+                request.Headers.Add(header.Key, header.Value);
+            }
+
             return await _httpClient.SendAsync(request).ConfigureAwait(false);
         }
     }

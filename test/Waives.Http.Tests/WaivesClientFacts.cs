@@ -30,7 +30,7 @@ namespace Waives.Http.Tests
         public async Task CreateDocument_sends_a_request_to_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.CreateDocument());
 
             using (var stream = new MemoryStream(_documentContents))
@@ -40,7 +40,7 @@ namespace Waives.Http.Tests
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     m.RequestUri.ToString() == "/documents"));
         }
@@ -49,7 +49,7 @@ namespace Waives.Http.Tests
         public async Task CreateDocument_sends_the_supplied_stream_as_content()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.CreateDocument());
 
             using (var stream = new MemoryStream(_documentContents))
@@ -58,7 +58,7 @@ namespace Waives.Http.Tests
 
                 await _requestSender
                     .Received(1)
-                    .Send(Arg.Is<HttpRequestMessage>(m =>
+                    .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                         RequestContentEquals(m, _documentContents)));
             }
         }
@@ -69,18 +69,18 @@ namespace Waives.Http.Tests
             const string filePath = "DummyDocument.txt";
 
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.CreateDocument());
 
             _requestSender
-                .Send(Arg.Is<HttpRequestMessage>(m => m.RequestUri.ToString().Contains("/classify")))
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m => m.RequestUri.ToString().Contains("/classify")))
                 .Returns(Responses.Classify());
 
             await _sut.CreateDocument(filePath);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     RequestContentEquals(m, File.ReadAllBytes(filePath))));
         }
 
@@ -88,7 +88,7 @@ namespace Waives.Http.Tests
         public async Task CreateDocument_returns_a_document_that_can_be_used()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.CreateDocument());
 
             using (var stream = new MemoryStream(_documentContents))
@@ -98,13 +98,13 @@ namespace Waives.Http.Tests
                 Assert.Equal("expectedDocumentId", document.Id);
 
                 _requestSender
-                    .Send(Arg.Any<HttpRequestMessage>())
+                    .Send(Arg.Any<HttpRequestMessageTemplate>())
                     .Returns(Responses.Classify());
 
                 await document.Classify("classifier");
 
                 _requestSender
-                    .Send(Arg.Any<HttpRequestMessage>())
+                    .Send(Arg.Any<HttpRequestMessageTemplate>())
                     .Returns(Responses.Success());
 
                 await document.Delete();
@@ -115,7 +115,7 @@ namespace Waives.Http.Tests
         public async Task CreateDocument_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage());
 
             using (var stream = new MemoryStream(_documentContents))
@@ -131,14 +131,14 @@ namespace Waives.Http.Tests
         public async Task GetAllDocuments_sends_a_request_to_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.GetAllDocuments());
 
             await _sut.GetAllDocuments();
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Get &&
                     m.RequestUri.ToString() == "/documents"));
         }
@@ -147,7 +147,7 @@ namespace Waives.Http.Tests
         public async Task GetAllDocuments_returns_one_document_for_each_returned_by_the_API()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.GetAllDocuments());
 
             var documents = await _sut.GetAllDocuments();
@@ -161,7 +161,7 @@ namespace Waives.Http.Tests
         public async Task GetAllDocuments_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -177,14 +177,14 @@ namespace Waives.Http.Tests
             const string expectedClientSecret = "clientsecret";
 
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.GetToken());
 
             await _sut.Login(expectedClientId, expectedClientSecret);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     IsFormWithClientCredentials(m.Content, expectedClientId, expectedClientSecret)));
         }
@@ -193,7 +193,7 @@ namespace Waives.Http.Tests
         public async Task Login_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -217,7 +217,7 @@ namespace Waives.Http.Tests
             return true;
         }
 
-        private bool RequestContentEquals(HttpRequestMessage request, byte[] expectedContents)
+        private bool RequestContentEquals(HttpRequestMessageTemplate request, byte[] expectedContents)
         {
             var actualRequestContents = request.Content.ReadAsByteArrayAsync().Result;
 

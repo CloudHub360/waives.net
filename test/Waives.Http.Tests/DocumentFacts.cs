@@ -47,14 +47,14 @@ namespace Waives.Http.Tests
         public async Task Delete_sends_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success());
 
             await _sut.Delete();
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Delete &&
                     m.RequestUri.ToString() == _selfUrl));
         }
@@ -63,7 +63,7 @@ namespace Waives.Http.Tests
         public async Task Delete_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
@@ -74,14 +74,14 @@ namespace Waives.Http.Tests
         public async Task Read_sends_read_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Put &&
                     m.RequestUri.ToString() == _readUrl));
         }
@@ -90,14 +90,14 @@ namespace Waives.Http.Tests
         public async Task Read_sends_get_read_results_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Get &&
                     m.RequestUri.ToString() == _readUrl));
         }
@@ -106,7 +106,7 @@ namespace Waives.Http.Tests
         public async Task Read_sends_get_read_results_request_with_specified_content_type()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             var expectedContentType = "application/text";
@@ -115,32 +115,32 @@ namespace Waives.Http.Tests
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Get &&
-                    m.Headers.Accept.ToString() == expectedContentType));
+                    m.Headers.Contains(new KeyValuePair<string, string>("Accept", expectedContentType))));
         }
 
         [Fact]
         public async Task Read_gets_read_results_in_waives_format_if_content_type_is_not_specified()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Get &&
-                    m.Headers.Accept.ToString() == ContentTypes.WaivesReadResults));
+                    m.Headers.Contains(new KeyValuePair<string, string>("Accept", ContentTypes.WaivesReadResults))));
         }
 
         [Fact]
         public async Task Read_saves_contents_of_read_results_response_to_specified_file()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
@@ -154,7 +154,7 @@ namespace Waives.Http.Tests
         public async Task Read_throws_if_read_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage(), Responses.GetReadResults(_readResultsContent));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
@@ -166,7 +166,7 @@ namespace Waives.Http.Tests
         public async Task Delete_throws_if_get_read_results_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success(), Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
@@ -177,14 +177,14 @@ namespace Waives.Http.Tests
         public async Task Classify_sends_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Classify());
 
             await _sut.Classify(_classifierName);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     m.RequestUri.ToString() == _classifyUrl));
         }
@@ -193,7 +193,7 @@ namespace Waives.Http.Tests
         public async Task Classify_returns_a_result_with_correct_properties_set()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Classify());
 
             var result = await _sut.Classify(_classifierName);
@@ -210,7 +210,7 @@ namespace Waives.Http.Tests
         public async Task Classify_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));

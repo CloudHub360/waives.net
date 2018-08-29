@@ -13,7 +13,7 @@ namespace Waives.Http.Tests
         private readonly IHttpRequestSender _sender;
         private readonly ILogger _logger;
         private readonly LoggingRequestSender _sut;
-        private readonly HttpRequestMessage _request;
+        private readonly HttpRequestMessageTemplate _request;
 
         public LoggingRequestSenderFacts()
         {
@@ -21,7 +21,7 @@ namespace Waives.Http.Tests
             _logger = Substitute.For<ILogger>();
             _sut = new LoggingRequestSender(_sender, _logger);
 
-            _request = new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
+            _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Waives.Http.Tests
         {
             var expectedResponse = Responses.Success();
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(expectedResponse);
 
             var response = await _sut.Send(_request);
@@ -42,7 +42,7 @@ namespace Waives.Http.Tests
         {
             var expectedException = new WaivesApiException();
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(expectedException);
 
             var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -55,7 +55,7 @@ namespace Waives.Http.Tests
         public async Task Logs_a_sending_request_message_when_request_is_successful()
         {
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success());
 
             await _sut.Send(_request);
@@ -69,7 +69,7 @@ namespace Waives.Http.Tests
         {
             var exception = new WaivesApiException("an error message");
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(exception);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -83,7 +83,7 @@ namespace Waives.Http.Tests
         public async Task Logs_a_received_response_message_when_request_is_successful()
         {
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success());
 
             await _sut.Send(_request);
@@ -97,7 +97,7 @@ namespace Waives.Http.Tests
         {
             var exception = new WaivesApiException("an error message");
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(exception);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -112,7 +112,7 @@ namespace Waives.Http.Tests
         {
             var exception = new WaivesApiException("an error message");
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(exception);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>
@@ -129,7 +129,7 @@ namespace Waives.Http.Tests
             var exception = new WaivesApiException("an error message", innerException);
 
             _sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(exception);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>

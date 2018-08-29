@@ -14,12 +14,12 @@ namespace Waives.Http.Tests
     public class ReliableRequestSenderFacts
     {
         private readonly RetryLogger _retryLogger;
-        private readonly HttpRequestMessage _request;
+        private readonly HttpRequestMessageTemplate _request;
 
         public ReliableRequestSenderFacts()
         {
             _retryLogger = new RetryLogger();
-            _request = new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
+            _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
 
         [Theory]
@@ -39,7 +39,7 @@ namespace Waives.Http.Tests
         {
             var sender = Substitute.For<IHttpRequestSender>();
             sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     new HttpResponseMessage(statusCode),
                     Responses.Success());
@@ -59,7 +59,7 @@ namespace Waives.Http.Tests
         {
             var sender = Substitute.For<IHttpRequestSender>();
             sender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     new HttpResponseMessage(statusCode),
                     Responses.Success());
@@ -78,7 +78,7 @@ namespace Waives.Http.Tests
         {
             var sender = Substitute.For<IHttpRequestSender>();
 
-            sender.Send(Arg.Any<HttpRequestMessage>())
+            sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(x => throw new WaivesApiException(), x => Responses.Success());
 
             var sut = new ReliableRequestSender(
@@ -96,7 +96,7 @@ namespace Waives.Http.Tests
             var request = ARequestWithContentAndHeader();
 
             var sender = Substitute.For<IHttpRequestSender>();
-            sender.Send(Arg.Any<HttpRequestMessage>())
+            sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success());
 
             var sut = new ReliableRequestSender(
@@ -107,36 +107,31 @@ namespace Waives.Http.Tests
 
             await sender
                 .Received(1)
-                .Send(Arg.Any<HttpRequestMessage>());
+                .Send(Arg.Any<HttpRequestMessageTemplate>());
 
             await sender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     RequestsAreEqual(request, m)));
         }
 
-        private static HttpRequestMessage ARequestWithContentAndHeader()
+        private static HttpRequestMessageTemplate ARequestWithContentAndHeader()
         {
-            return new HttpRequestMessage(HttpMethod.Get, new Uri("/documents", UriKind.Relative))
+            return new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative))
             {
                 Content = new StringContent("some content")
                 {
                     Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                },
-                Properties =
-                {
-                    { "A property", "A property value"}
                 }
             };
         }
 
-        private bool RequestsAreEqual(HttpRequestMessage expectedRequest, HttpRequestMessage actualRequest)
+        private bool RequestsAreEqual(HttpRequestMessageTemplate expectedRequest, HttpRequestMessageTemplate actualRequest)
         {
             Assert.Equal(expectedRequest.Method, actualRequest.Method);
             Assert.Equal(expectedRequest.RequestUri, actualRequest.RequestUri);
 
             Assert.Equal(expectedRequest.Headers, actualRequest.Headers);
-            Assert.Equal(expectedRequest.Properties, actualRequest.Properties);
 
             var expectedContent = expectedRequest.Content.ReadAsByteArrayAsync().Result;
             var actualContent = actualRequest.Content.ReadAsByteArrayAsync().Result;
