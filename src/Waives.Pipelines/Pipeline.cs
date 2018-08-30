@@ -122,6 +122,24 @@ namespace Waives.Pipelines
         }
 
         /// <summary>
+        /// Extract data from documents using the specified extractor. The extractor must have
+        /// been created previously in your Waives account in order to be used here.
+        /// </summary>
+        /// <param name="extractorName">The name of the extractor to use.</param>
+        /// <returns>The modified <see cref="Pipeline"/>.</returns>
+        public Pipeline ExtractWith(string extractorName)
+        {
+            _pipeline = _pipeline.Process(async d =>
+            {
+                var document = await d.Extract(extractorName).ConfigureAwait(false);
+                _logger.Log(LogLevel.Info, $"Extracted data from document '{d.Source}");
+                return document;
+            }, _onDocumentError);
+
+            return this;
+        }
+
+        /// <summary>
         /// Run an arbitrary transform on each document, doing something with results for example
         /// </summary>
         /// <param name="func"></param>

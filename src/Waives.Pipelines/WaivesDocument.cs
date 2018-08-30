@@ -26,11 +26,23 @@ namespace Waives.Pipelines
 
         public ClassificationResult ClassificationResults { get; private set; }
 
+        public ExtractionResponse ExtractionResults { get; private set; }
+
         public async Task<WaivesDocument> Classify(string classifierName)
         {
             return new WaivesDocument(Source, _waivesDocument)
             {
-                ClassificationResults = await _waivesDocument.Classify(classifierName).ConfigureAwait(false)
+                ClassificationResults = await _waivesDocument.Classify(classifierName).ConfigureAwait(false),
+                ExtractionResults = ExtractionResults
+            };
+        }
+
+        public async Task<WaivesDocument> Extract(string extractorName)
+        {
+            return new WaivesDocument(Source, _waivesDocument)
+            {
+                ClassificationResults = ClassificationResults,
+                ExtractionResults = await _waivesDocument.Extract(extractorName).ConfigureAwait(false)
             };
         }
 

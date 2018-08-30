@@ -22,6 +22,7 @@ namespace Waives.Pipelines.Tests
         {
             var httpDocument = Substitute.For<IHttpDocument>();
             httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
+            httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResponse());
             httpDocument.Delete(Arg.Invoke());
 
             _documentFactory
@@ -103,6 +104,27 @@ namespace Waives.Pipelines.Tests
             {
                 t.HttpDocument.Received(1).Classify(classifierName);
                 Assert.NotNull(t.ClassificationResults);
+            });
+        }
+
+        [Fact]
+        public void ExtractWith_extracts_from_each_document_with_Waives()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var extractorName = Generate.String();
+
+            _rateLimiter
+                .RateLimited(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            var pipeline = _sut
+                .WithDocumentsFrom(source)
+                .ExtractWith(extractorName);
+
+            pipeline.Subscribe(t =>
+            {
+                t.HttpDocument.Received(1).Extract(extractorName);
+                Assert.NotNull(t.ExtractionResults);
             });
         }
 
