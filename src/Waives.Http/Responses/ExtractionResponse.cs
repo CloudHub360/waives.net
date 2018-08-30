@@ -3,13 +3,13 @@ using Newtonsoft.Json;
 
 namespace Waives.Http.Responses
 {
-    internal class ExtractionResponse
+    public class ExtractionResponse
     {
         [JsonProperty("field_results")]
         public IEnumerable<ExtractionResult> ExtractionResults { get; set; }
 
         [JsonProperty("document")]
-        public ExtractionDocument DocumentMetadata { get; set; }
+        public ExtractionDocumentMetadata DocumentMetadata { get; set; }
     }
 
     public class ExtractionResult
@@ -24,7 +24,7 @@ namespace Waives.Http.Responses
         public string RejectReason { get; set; }
 
         [JsonProperty("result")]
-        public ExtractionResult Result { get; set; }
+        public ExtractionResult FieldResult { get; set; }
 
         [JsonProperty("alternatives")]
         public IEnumerable<ExtractionResult> AlternativeMatches { get; set; }
@@ -36,13 +36,13 @@ namespace Waives.Http.Responses
         public string Value { get; set; }
 
         [JsonProperty("proximity_score")]
-        public string ProximityScore { get; set; }
+        public double ProximityScore { get; set; }
 
         [JsonProperty("match_score")]
-        public string MatchScore { get; set; }
+        public double MatchScore { get; set; }
 
         [JsonProperty("text_score")]
-        public string TextScore { get; set; }
+        public double TextScore { get; set; }
 
         [JsonProperty("areas")]
         public IEnumerable<ExtractionResultArea> ResultAreas { get; set; }
@@ -66,7 +66,7 @@ namespace Waives.Http.Responses
         public int PageNumber { get; set; }
     }
 
-    public class ExtractionDocument
+    public class ExtractionDocumentMetadata
     {
         [JsonProperty("page_count")]
         public int PageCount { get; set; }
