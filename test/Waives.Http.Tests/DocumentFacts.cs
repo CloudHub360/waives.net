@@ -272,6 +272,18 @@ namespace Waives.Http.Tests
             Assert.Equal(1, extractionResultArea.PageNumber);
         }
 
+        [Fact]
+        public async Task Extract_throws_if_response_is_not_success_code()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(Responses.ErrorWithMessage());
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Extract(_extractorName));
+            Assert.Equal($"Failed to extract data from the document using extractor '{_extractorName}'",
+                exception.Message);
+        }
+
         public void Dispose()
         {
             if (File.Exists(_readResultsFilename))
