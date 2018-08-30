@@ -99,7 +99,7 @@ namespace Waives.Http
         public async Task<ExtractionResponse> Extract(string extractorName)
         {
             var extractUrl = _behaviours["document:extract"];
-            var request = new HttpRequestMessage(HttpMethod.Post,
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post,
                 extractUrl.CreateUri(new
                 {
                     classifier_name = extractorName

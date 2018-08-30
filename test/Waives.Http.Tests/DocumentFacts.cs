@@ -227,14 +227,14 @@ namespace Waives.Http.Tests
         public async Task Extract_sends_request_with_correct_uri()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Extract());
 
             await _sut.Extract(_extractorName);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessage>(m =>
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     m.RequestUri.ToString() == _extractUrl));
         }
@@ -243,7 +243,7 @@ namespace Waives.Http.Tests
         public async Task Extract_returns_a_result_with_correct_properties_set()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Extract());
 
             var response = await _sut.Extract(_extractorName);
@@ -276,7 +276,7 @@ namespace Waives.Http.Tests
         public async Task Extract_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessage>())
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Extract(_extractorName));
