@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Waives.Http\Waives.Http.csproj" />
-    <ProjectReference Include="..\MockWaivesApi\MockWaivesApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
