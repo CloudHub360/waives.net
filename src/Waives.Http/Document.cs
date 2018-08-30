@@ -95,5 +95,24 @@ namespace Waives.Http
             var responseBody = await response.Content.ReadAsAsync<ClassificationResponse>().ConfigureAwait(false);
             return responseBody.ClassificationResults;
         }
+
+        public async Task<IEnumerable<ExtractionResult>> Extract(string extractorName)
+        {
+            var extractUrl = _behaviours["document:extract"];
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                extractUrl.CreateUri(new
+                {
+                    classifier_name = extractorName
+                }));
+
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new WaivesApiException($"Failed to extract data from the document using extractor '{extractorName}'");
+            }
+
+            var responseBody = await response.Content.ReadAsAsync<ExtractionResponse>().ConfigureAwait(false);
+            return responseBody.ExtractionResults;
+        }
     }
 }
