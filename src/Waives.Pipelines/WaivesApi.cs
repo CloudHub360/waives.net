@@ -39,7 +39,7 @@ namespace Waives.Pipelines
         {
             apiUri = apiUri ?? new Uri(WaivesClient.DefaultUrl);
 
-            var apiClient = new WaivesClient(apiUri);
+            var apiClient = new WaivesClient(apiUri, logger: null);
             await apiClient.Login(clientId, clientSecret).ConfigureAwait(false);
 
             return apiClient;
