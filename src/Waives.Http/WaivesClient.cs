@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -42,19 +41,17 @@ namespace Waives.Http
                          new ExceptionHandlingRequestSender(
                              new RequestSender(httpClient)),
                          logger));
-
-            Timeout = 120;
         }
 
         /// <summary>
-        /// Gets or sets a duration on the underlying <see cref="HttpClient"/> to wait
-        /// until the requests time out. The timeout unit is seconds, and defaults to 120.
+        /// Gets or sets a duration on the underlying <see cref="System.Net.Http.HttpClient"/>
+        /// to wait until the requests time out. The timeout unit is seconds, and defaults to 120.
         /// </summary>
         /// <seealso cref="System.Net.Http.HttpClient.Timeout"/>
         public int Timeout
         {
-            get => HttpClient.Timeout.Seconds;
-            set => HttpClient.Timeout = TimeSpan.FromSeconds(value);
+            get => _requestSender.Timeout;
+            set => _requestSender.Timeout = value;
         }
 
         public async Task<Document> CreateDocument(Stream documentSource)

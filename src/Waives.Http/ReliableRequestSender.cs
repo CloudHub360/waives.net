@@ -26,6 +26,12 @@ namespace Waives.Http
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
+        public int Timeout
+        {
+            get => _wrappedRequestSender.Timeout;
+            set => _wrappedRequestSender.Timeout = value;
+        }
+
         public void Authenticate(string accessToken)
         {
             _wrappedRequestSender.Authenticate(accessToken);

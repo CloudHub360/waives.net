@@ -17,6 +17,12 @@ namespace Waives.Http
             Logger = logger ?? new NoopLogger();
         }
 
+        public int Timeout
+        {
+            get => _wrappedRequestSender.Timeout;
+            set => _wrappedRequestSender.Timeout = value;
+        }
+
         public void Authenticate(string accessToken)
         {
             _wrappedRequestSender.Authenticate(accessToken);
