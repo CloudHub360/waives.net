@@ -35,14 +35,15 @@ namespace Waives.Pipelines.HttpAdapters
             }
         }
 
-        internal static async Task<HttpDocumentFactory> Create(WaivesClient apiClient, bool deleteOrphanedDocuments = true)
+        internal static async Task<IHttpDocumentFactory> Create(WaivesClient apiClient, ILogger logger, bool deleteOrphanedDocuments = true)
         {
             if (deleteOrphanedDocuments)
             {
                 await DeleteOrphanedDocuments(apiClient).ConfigureAwait(false);
+                logger.Log(LogLevel.Info, "Deleted all Waives documents");
             }
 
-            return new HttpDocumentFactory(apiClient);
+            return new LoggingDocumentFactory(logger, new HttpDocumentFactory(apiClient));
         }
 
         private static async Task DeleteOrphanedDocuments(WaivesClient apiClient)
