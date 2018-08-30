@@ -22,8 +22,8 @@ namespace Waives.Http
 
         private readonly IHttpRequestSender _requestSender;
 
-        public WaivesClient(Uri apiUrl = null)
-            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) })
+        public WaivesClient(Uri apiUrl = null, ILogger logger = null)
+            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger)
         {
         }
 
