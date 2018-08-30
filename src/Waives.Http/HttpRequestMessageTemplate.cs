@@ -4,7 +4,7 @@ using System.Net.Http;
 
 namespace Waives.Http
 {
-    public class HttpRequestMessageTemplate
+    internal class HttpRequestMessageTemplate
     {
         public HttpRequestMessageTemplate(HttpMethod method, Uri requestUri)
         {
