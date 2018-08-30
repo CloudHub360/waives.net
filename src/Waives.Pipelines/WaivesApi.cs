@@ -37,46 +37,10 @@ namespace Waives.Pipelines
         /// https://api.waives.io/, the hosted Waives API.</param>
         /// <returns>A new <see cref="WaivesClient"/> instance, with which you can directly
         /// call the Waives API. This is provided for advanced use cases.</returns>
-        public static async Task<WaivesClient> Login(
-            string clientId, string clientSecret,
-            string apiUri = "https://api.waives.io/")
+        public static async Task<WaivesClient> Login(string clientId, string clientSecret, Uri apiUri = null)
         {
-            if (string.IsNullOrWhiteSpace(apiUri))
-            {
-                throw new ArgumentNullException(nameof(apiUri));
-            }
+            apiUri = apiUri ?? new Uri(WaivesClient.DefaultUrl);
 
-            ApiClient = new WaivesClient(new Uri(apiUri));
-            return await Login(clientId, clientSecret, new Uri(apiUri)).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Authenticate against the Waives API.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The values for the client ID and secret parameters can be obtained from the Waives
-        /// Dashboard, at https://dashboard.waives.io/. These should be treated like a username-
-        /// password pair, where the client ID is equivalent to a username, and the client
-        /// secret is equivalent to a password. Your client secret MUST be kept secret, and your
-        /// client ID SHOULD be kept secret.
-        /// </para>
-        /// <para>
-        /// By default, this library will communicate with the public hosted Waives API at
-        /// https://api.waives.io/.  You only need to change this if you are hosting your own
-        /// copy of the Waives API.
-        /// </para>
-        /// </remarks>
-        /// <param name="clientId">The ID of the client used to authenticate with the Waives
-        /// API.</param>
-        /// <param name="clientSecret">The secret of the client used to authentication with the
-        /// Waives API.</param>
-        /// <param name="apiUri">The instance of the Waives API you wish to use. Defaults to
-        /// https://api.waives.io/, the hosted Waives API.</param>
-        /// <returns>A new <see cref="WaivesClient"/> instance, with which you can directly
-        /// call the Waives API. This is provided for advanced use cases.</returns>
-        public static async Task<WaivesClient> Login(string clientId, string clientSecret, Uri apiUri)
-        {
             ApiClient = new WaivesClient(apiUri);
             await ApiClient.Login(clientId, clientSecret).ConfigureAwait(false);
 
