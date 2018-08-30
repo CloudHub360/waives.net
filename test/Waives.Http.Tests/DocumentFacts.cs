@@ -239,6 +239,39 @@ namespace Waives.Http.Tests
                     m.RequestUri.ToString() == _extractUrl));
         }
 
+        [Fact]
+        public async Task Extract_returns_a_result_with_correct_properties_set()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(Responses.Extract());
+
+            var response = await _sut.Extract(_extractorName);
+
+
+            var extractionPage = response.DocumentMetadata.Pages.First();
+            Assert.Equal(1, response.DocumentMetadata.PageCount);
+            Assert.Equal(1, extractionPage.PageNumber);
+            Assert.Equal(611.0, extractionPage.Width);
+            Assert.Equal(1008.0, extractionPage.Height);
+
+            var extractionResult = response.ExtractionResults.First();
+            Assert.Equal("Amount", extractionResult.FieldName);
+            Assert.False(extractionResult.Rejected);
+            Assert.Equal("None", extractionResult.RejectReason);
+            Assert.Equal("$5.50", extractionResult.FieldResult.Text);
+            Assert.Equal(100.0, extractionResult.FieldResult.ProximityScore);
+            Assert.Equal(100.0, extractionResult.FieldResult.MatchScore);
+            Assert.Equal(100.0, extractionResult.FieldResult.TextScore);
+
+            var extractionResultArea = extractionResult.FieldResult.ResultAreas.First();
+            Assert.Equal(558.7115, extractionResultArea.Top);
+            Assert.Equal(276.48, extractionResultArea.Left);
+            Assert.Equal(571.1989, extractionResultArea.Bottom);
+            Assert.Equal(298.58, extractionResultArea.Right);
+            Assert.Equal(1, extractionResultArea.PageNumber);
+        }
+
         public void Dispose()
         {
             if (File.Exists(_readResultsFilename))

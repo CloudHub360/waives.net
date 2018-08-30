@@ -96,7 +96,7 @@ namespace Waives.Http
             return responseBody.ClassificationResults;
         }
 
-        public async Task<IEnumerable<ExtractionResult>> Extract(string extractorName)
+        public async Task<ExtractionResponse> Extract(string extractorName)
         {
             var extractUrl = _behaviours["document:extract"];
             var request = new HttpRequestMessage(HttpMethod.Post,
@@ -112,7 +112,7 @@ namespace Waives.Http
             }
 
             var responseBody = await response.Content.ReadAsAsync<ExtractionResponse>().ConfigureAwait(false);
-            return responseBody.ExtractionResults;
+            return responseBody;
         }
     }
 }
