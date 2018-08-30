@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Polly;
 using Waives.Http.Logging;
 using Waives.Http.Responses;
 
@@ -31,14 +30,19 @@ namespace Waives.Http
         internal WaivesClient(HttpClient httpClient, ILogger logger = null, IHttpRequestSender requestSender = null)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            Logger = logger ?? new NoopLogger();
+            logger = logger ?? new NoopLogger();
+            Logger = logger;
 
             _requestSender = requestSender ??
-                 new ReliableRequestSender(RetryAction,
+                 new ReliableRequestSender(
+                     (result, timeSpan, retryCount, ctx) =>
+                     {
+                         logger.Log(LogLevel.Warn, $"Request failed. Retry {retryCount} will happen in {timeSpan.TotalMilliseconds} ms");
+                     },
                      new LoggingRequestSender(
                          new ExceptionHandlingRequestSender(
                              new RequestSender(httpClient)),
-                         Logger));
+                         logger));
 
             Timeout = 120;
         }
@@ -172,11 +176,6 @@ namespace Waives.Http
             }
 
             throw new WaivesApiException($"Unknown Waives error occured: {(int)response.StatusCode} {response.ReasonPhrase}");
-        }
-
-        private void RetryAction(DelegateResult<HttpResponseMessage> delegateResult, TimeSpan timeSpan, int retryCount, Context context)
-        {
-            Logger.Log(LogLevel.Warn, $"Request failed. Retry {retryCount} will happen in {timeSpan.TotalMilliseconds} ms");
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Waives.Http
         public LoggingRequestSender(IHttpRequestSender wrappedRequestSender, ILogger logger)
         {
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Logger = logger ?? new NoopLogger();
         }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
