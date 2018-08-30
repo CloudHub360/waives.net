@@ -10,8 +10,6 @@ namespace Waives.Pipelines
 {
     public static class WaivesApi
     {
-        internal static WaivesClient ApiClient { get; private set; }
-
         /// <summary>
         /// Authenticate against the Waives API.
         /// </summary>
@@ -41,10 +39,10 @@ namespace Waives.Pipelines
         {
             apiUri = apiUri ?? new Uri(WaivesClient.DefaultUrl);
 
-            ApiClient = new WaivesClient(apiUri);
-            await ApiClient.Login(clientId, clientSecret).ConfigureAwait(false);
+            var apiClient = new WaivesClient(apiUri);
+            await apiClient.Login(clientId, clientSecret).ConfigureAwait(false);
 
-            return ApiClient;
+            return apiClient;
         }
 
         /// <summary>
@@ -90,6 +88,8 @@ namespace Waives.Pipelines
         /// }
         /// ]]>
         /// </example>
+        /// <param name="waivesClient">The <see cref="WaivesClient"/> instance to use when sending
+        /// requests to the Waives API.</param>
         /// <param name="deleteExistingDocuments">If set to <c>true</c>, it will (immediately) delete all documents
         /// in existence in the Waives account; if set to <c>false</c>, no such clean up will be completed.
         /// Defaults to <c>true</c>.</param>
@@ -97,9 +97,9 @@ namespace Waives.Pipelines
         /// <param name="maxConcurrency">The maximum number of documents to process concurrently.</param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static Pipeline CreatePipeline(bool deleteExistingDocuments = true, ILogger logger = null, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
+        public static Pipeline CreatePipeline(WaivesClient waivesClient, bool deleteExistingDocuments = true, ILogger logger = null, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
         {
-            var documentFactory = Task.Run(() => HttpDocumentFactory.Create(ApiClient, logger, deleteExistingDocuments)).Result;
+            var documentFactory = Task.Run(() => HttpDocumentFactory.Create(waivesClient, logger, deleteExistingDocuments)).Result;
             return new Pipeline(
                 documentFactory,
                 new RateLimiter(null, maxConcurrency),

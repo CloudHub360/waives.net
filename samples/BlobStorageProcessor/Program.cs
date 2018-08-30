@@ -56,7 +56,7 @@ namespace BlobStorageProcessor
             var blobs = (await Task.WhenAll(containers.Select(c => c.GetBlobs()))).SelectMany(c => c);
 
             // Log in to Waives
-            await WaivesApi.Login("clientId", "clientSecret");
+            var client = await WaivesApi.Login("clientId", "clientSecret");
 
             // Create an Enumerable of Waives documents from the blobs
             var blobStorageDocuments = blobs.Select(b => new BlobStorageDocument(b));
@@ -65,7 +65,7 @@ namespace BlobStorageProcessor
             var blobStorage = new EnumerableDocumentSource(blobStorageDocuments);
 
             var writer = CreateResultWriter(options["--output"].ToString());
-            var pipeline = WaivesApi.CreatePipeline()
+            var pipeline = WaivesApi.CreatePipeline(client)
                 .WithDocumentsFrom(blobStorage)
                 .ClassifyWith(options["--classifier"].ToString())
                 .Then(d => writer.Write(d));
