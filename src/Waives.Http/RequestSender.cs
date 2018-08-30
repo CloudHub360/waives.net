@@ -18,6 +18,14 @@ namespace Waives.Http
             // This is equivalent to the value used by NuGet
             var productVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Waives.NET", productVersion));
+
+            Timeout = 120;
+        }
+
+        public int Timeout
+        {
+            get => _httpClient.Timeout.Seconds;
+            set => _httpClient.Timeout = TimeSpan.FromSeconds(value);
         }
 
         public void Authenticate(string accessToken)
