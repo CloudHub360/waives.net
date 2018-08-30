@@ -129,6 +129,38 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
+        public void Results_are_preserved_when_performing_classification_and_extraction_in_the_same_pipeline()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+
+            _rateLimiter
+                .RateLimited(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            _sut
+                .WithDocumentsFrom(source)
+                .ClassifyWith(Generate.String())
+                .ExtractWith(Generate.String())
+                .Subscribe(t =>
+                {
+                    Assert.NotNull(t.ExtractionResults);
+                    Assert.NotNull(t.ClassificationResults);
+                });
+
+            // Extract and classify in opposite order to ensure the results
+            // are preserved in both directions
+            _sut
+                .WithDocumentsFrom(source)
+                .ExtractWith(Generate.String())
+                .ClassifyWith(Generate.String())
+                .Subscribe(t =>
+                {
+                    Assert.NotNull(t.ExtractionResults);
+                    Assert.NotNull(t.ClassificationResults);
+                });
+        }
+
+        [Fact]
         public void Then_invokes_the_supplied_Action()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
