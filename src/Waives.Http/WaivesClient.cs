@@ -31,7 +31,6 @@ namespace Waives.Http
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             logger = logger ?? new NoopLogger();
-            Logger = logger;
 
             _requestSender = requestSender ??
                  new ReliableRequestSender(
@@ -57,8 +56,6 @@ namespace Waives.Http
             get => HttpClient.Timeout.Seconds;
             set => HttpClient.Timeout = TimeSpan.FromSeconds(value);
         }
-
-        internal ILogger Logger { get; set; }
 
         public async Task<Document> CreateDocument(Stream documentSource)
         {
@@ -93,7 +90,6 @@ namespace Waives.Http
 
             var document = new Document(_requestSender, id, behaviours);
 
-            Logger.Log(LogLevel.Trace, $"Created Waives document {id}");
             return document;
         }
 
@@ -140,8 +136,6 @@ namespace Waives.Http
 
         public async Task Login(string clientId, string clientSecret)
         {
-            Logger.Log(LogLevel.Debug, $"Authenticating with Waives at {HttpClient.BaseAddress}");
-
             var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
             {
                 Content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -158,7 +152,6 @@ namespace Waives.Http
             var accessToken = responseContent.Token;
 
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-            Logger.Log(LogLevel.Info, "Logged in.");
         }
 
         private static async Task EnsureSuccessStatus(HttpResponseMessage response)

@@ -31,7 +31,6 @@ namespace Waives.Pipelines.HttpAdapters
             using (var documentStream = await source.OpenStream().ConfigureAwait(false))
             {
                 var httpDocument = new HttpDocument(await _apiClient.CreateDocument(documentStream).ConfigureAwait(false));
-                _apiClient.Logger.Log(LogLevel.Info, $"Created Waives document {httpDocument.Id} from '{source.SourceId}'");
                 return httpDocument;
             }
         }
@@ -50,8 +49,6 @@ namespace Waives.Pipelines.HttpAdapters
         {
             var orphanedDocuments = await apiClient.GetAllDocuments().ConfigureAwait(false);
             await Task.WhenAll(orphanedDocuments.Select(d => d.Delete())).ConfigureAwait(false);
-
-            apiClient.Logger.Log(LogLevel.Info, "Deleted all Waives documents");
         }
     }
 }
