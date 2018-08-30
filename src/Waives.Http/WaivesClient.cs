@@ -17,18 +17,15 @@ namespace Waives.Http
     {
         internal const string DefaultUrl = "https://api.waives.io";
 
-        private HttpClient HttpClient { get; }
-
         private readonly IHttpRequestSender _requestSender;
 
         public WaivesClient(Uri apiUrl = null, ILogger logger = null)
-            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger)
+            : this(apiUrl, logger, null)
         {
         }
 
-        internal WaivesClient(HttpClient httpClient, ILogger logger = null, IHttpRequestSender requestSender = null)
+        internal WaivesClient(Uri apiUrl = null, ILogger logger = null, IHttpRequestSender requestSender = null)
         {
-            HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             logger = logger ?? new NoopLogger();
 
             _requestSender = requestSender ??
@@ -39,7 +36,11 @@ namespace Waives.Http
                      },
                      new LoggingRequestSender(
                          new ExceptionHandlingRequestSender(
-                             new RequestSender(httpClient)),
+                             new RequestSender(
+                                 new HttpClient
+                                 {
+                                     BaseAddress = apiUrl ?? new Uri(DefaultUrl)
+                                 })),
                          logger));
         }
 

@@ -1,12 +1,9 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Waives.Http.Logging;
 using Xunit;
 using NSubstitute;
-using Waives.Http.Responses;
 
 namespace Waives.Http.Tests
 {
@@ -19,9 +16,7 @@ namespace Waives.Http.Tests
         public WaivesClientFacts()
         {
             _requestSender = Substitute.For<IHttpRequestSender>();
-            _sut = new WaivesClient(new HttpClient(),
-                Substitute.For<ILogger>(),
-                _requestSender);
+            _sut = new WaivesClient(requestSender: _requestSender);
 
             _documentContents = new byte[] { 0, 1, 2 };
         }
