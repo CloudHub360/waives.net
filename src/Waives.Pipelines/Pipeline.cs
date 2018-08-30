@@ -59,14 +59,11 @@ namespace Waives.Pipelines
         private readonly IRateLimiter _rateLimiter;
         private readonly ILogger _logger;
 
-        internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter) : this(documentFactory, rateLimiter, new NoopLogger())
-        { }
-
         internal Pipeline(IHttpDocumentFactory documentFactory, IRateLimiter rateLimiter, ILogger logger)
         {
             _documentFactory = documentFactory;
             _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger ?? new NoopLogger();
 
             _onDocumentError = err =>
             {
