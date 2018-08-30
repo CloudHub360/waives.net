@@ -18,7 +18,7 @@ namespace Waives.Http
     {
         internal const string DefaultUrl = "https://api.waives.io";
 
-        internal HttpClient HttpClient { get; }
+        private HttpClient HttpClient { get; }
 
         private readonly IHttpRequestSender _requestSender;
 
@@ -120,7 +120,7 @@ namespace Waives.Http
             var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
             var accessToken = responseContent.Token;
 
-            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            _requestSender.Authenticate(accessToken);
         }
 
         private static async Task EnsureSuccessStatus(HttpResponseMessage response)

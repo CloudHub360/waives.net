@@ -17,6 +17,11 @@ namespace Waives.Http
             Logger = logger ?? new NoopLogger();
         }
 
+        public void Authenticate(string accessToken)
+        {
+            _wrappedRequestSender.Authenticate(accessToken);
+        }
+
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             var stopWatch = new Stopwatch();
