@@ -12,7 +12,11 @@ namespace Waives.Pipelines.HttpAdapters
     internal interface IHttpDocument
     {
         Task<ClassificationResult> Classify(string classifierName);
+
+        Task<ExtractionResponse> Extract(string extractorName);
+
         Task Delete(Action afterDeletedAction);
+
         string Id { get; }
     }
 
@@ -36,6 +40,11 @@ namespace Waives.Pipelines.HttpAdapters
         public async Task<ClassificationResult> Classify(string classifierName)
         {
             return await _documentClient.Classify(classifierName).ConfigureAwait(false);
+        }
+
+        public async Task<ExtractionResponse> Extract(string extractorName)
+        {
+            return await _documentClient.Extract(extractorName).ConfigureAwait(false);
         }
 
         public async Task Delete(Action afterDeletedAction)
