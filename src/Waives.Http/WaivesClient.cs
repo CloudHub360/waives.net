@@ -17,34 +17,29 @@ namespace Waives.Http
 {
     public class WaivesClient
     {
-        private const string DefaultUrl = "https://api.waives.io";
+        internal const string DefaultUrl = "https://api.waives.io";
 
         internal HttpClient HttpClient { get; }
 
         private readonly IHttpRequestSender _requestSender;
-        private readonly LoggingRequestSender _loggingRequestSender;
-        private ILogger _logger;
 
-        public WaivesClient(Uri apiUrl = null, ILogger logger = null)
-            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) }, logger ?? new NoopLogger(), null)
+        public WaivesClient(Uri apiUrl = null)
+            : this(new HttpClient { BaseAddress = apiUrl ?? new Uri(DefaultUrl) })
         {
         }
 
-        internal WaivesClient(HttpClient httpClient) : this(httpClient, new NoopLogger(), null)
-        { }
-
-        internal WaivesClient(HttpClient httpClient, ILogger logger, IHttpRequestSender requestSender)
+        internal WaivesClient(HttpClient httpClient, ILogger logger = null, IHttpRequestSender requestSender = null)
         {
             HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _loggingRequestSender = new LoggingRequestSender(
-                new ExceptionHandlingRequestSender(
-                    new RequestSender(httpClient)),
-                logger);
             Logger = logger ?? new NoopLogger();
 
             _requestSender = requestSender ??
-                             new ReliableRequestSender(RetryAction,
-                                 _loggingRequestSender);
+                 new ReliableRequestSender(RetryAction,
+                     new LoggingRequestSender(
+                         new ExceptionHandlingRequestSender(
+                             new RequestSender(httpClient)),
+                         Logger));
+
             Timeout = 120;
         }
 
@@ -59,15 +54,7 @@ namespace Waives.Http
             set => HttpClient.Timeout = TimeSpan.FromSeconds(value);
         }
 
-        internal ILogger Logger
-        {
-            get => _logger;
-            set
-            {
-                _logger = value;
-                _loggingRequestSender.Logger = value;
-            }
-        }
+        internal ILogger Logger { get; set; }
 
         public async Task<Document> CreateDocument(Stream documentSource)
         {
