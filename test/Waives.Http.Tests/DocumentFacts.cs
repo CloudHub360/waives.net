@@ -16,8 +16,10 @@ namespace Waives.Http.Tests
         private readonly Document _sut;
         private readonly string _readUrl;
         private readonly string _classifyUrl;
+        private readonly string _extractUrl;
         private readonly string _selfUrl;
         private readonly string _classifierName;
+        private readonly string _extractorName;
         private readonly string _readResultsFilename;
         private readonly string _readResultsContent;
 
@@ -25,15 +27,18 @@ namespace Waives.Http.Tests
         {
             const string documentId = "id";
             _classifierName = "classifier";
+            _extractorName = "extractor";
 
             _readUrl = $"/documents/{documentId}/reads";
             _classifyUrl = $"/documents/{documentId}/classify/{_classifierName}";
+            _extractUrl = $"/documents/{documentId}/extract/{_extractorName}";
             _selfUrl = $"/documents/{documentId}";
 
             IDictionary<string, HalUri> behaviours = new Dictionary<string, HalUri>
             {
                 { "document:read", new HalUri(new Uri(_readUrl, UriKind.Relative), false) },
                 { "document:classify", new HalUri(new Uri(_classifyUrl, UriKind.Relative), true) },
+                { "document:extract", new HalUri(new Uri(_extractUrl, UriKind.Relative), true) },
                 { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) },
             };
 
@@ -216,6 +221,22 @@ namespace Waives.Http.Tests
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
             Assert.Equal($"Failed to classify the document with classifier '{_classifierName}'",
                 exception.Message);
+        }
+
+        [Fact]
+        public async Task Extract_sends_request_with_correct_uri()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessage>())
+                .Returns(Responses.Extract());
+
+            await _sut.Extract(_extractorName);
+
+            await _requestSender
+                .Received(1)
+                .Send(Arg.Is<HttpRequestMessage>(m =>
+                    m.Method == HttpMethod.Post &&
+                    m.RequestUri.ToString() == _extractUrl));
         }
 
         public void Dispose()
