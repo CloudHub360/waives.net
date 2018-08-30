@@ -93,37 +93,6 @@ namespace Waives.Http
             return document;
         }
 
-        public async Task<Classifier> CreateClassifier(string name, string samplesPath = null)
-        {
-            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/classifiers/{name}", UriKind.Relative));
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-            await EnsureSuccessStatus(response).ConfigureAwait(false);
-
-            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
-            var behaviours = responseContent.Links;
-
-            var classifier = new Classifier(this, name, behaviours);
-
-            if (!string.IsNullOrWhiteSpace(samplesPath))
-            {
-                await classifier.AddSamplesFromZip(samplesPath).ConfigureAwait(false);
-            }
-
-            return classifier;
-        }
-
-        public async Task<Classifier> GetClassifier(string name)
-        {
-            var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/classifiers/{name}", UriKind.Relative));
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-            await EnsureSuccessStatus(response).ConfigureAwait(false);
-
-            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
-            var behaviours = responseContent.Links;
-
-            return new Classifier(this, name, behaviours);
-        }
-
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
