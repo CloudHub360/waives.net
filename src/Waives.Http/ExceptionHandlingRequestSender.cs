@@ -13,6 +13,11 @@ namespace Waives.Http
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
+        public void Authenticate(string accessToken)
+        {
+            _wrappedRequestSender.Authenticate(accessToken);
+        }
+
         /// <summary>
         /// Send a request to the wrapped IHttpRequestSender and make sure that any exception is transformed
         /// into a WaivesApiException.

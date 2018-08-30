@@ -26,6 +26,11 @@ namespace Waives.Http
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
+        public void Authenticate(string accessToken)
+        {
+            _wrappedRequestSender.Authenticate(accessToken);
+        }
+
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             return await _policy

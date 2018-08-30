@@ -20,6 +20,11 @@ namespace Waives.Http
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Waives.NET", productVersion));
         }
 
+        public void Authenticate(string accessToken)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {accessToken}");
+        }
+
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)
         {
             var request = HttpRequestMessageBuilder.BuildRequest(template);
