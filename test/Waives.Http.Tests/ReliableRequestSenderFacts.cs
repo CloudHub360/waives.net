@@ -6,19 +6,18 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using NSubstitute;
-using Polly;
+using Waives.Http.Logging;
 using Xunit;
 
 namespace Waives.Http.Tests
 {
     public class ReliableRequestSenderFacts
     {
-        private readonly RetryLogger _retryLogger;
+        private readonly ILogger _retryLogger = Substitute.For<ILogger>();
         private readonly HttpRequestMessageTemplate _request;
 
         public ReliableRequestSenderFacts()
         {
-            _retryLogger = new RetryLogger();
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
 
@@ -44,13 +43,11 @@ namespace Waives.Http.Tests
                     new HttpResponseMessage(statusCode),
                     Responses.Success());
 
-            var sut = new ReliableRequestSender(
-                _retryLogger.RetryAction,
-                sender);
+            var sut = new ReliableRequestSender(_retryLogger, sender);
 
             await sut.Send(_request);
 
-            Assert.True(_retryLogger.RetryActionCalled);
+            _retryLogger.Received(1).Log(LogLevel.Warn, Arg.Any<string>());
         }
 
         [Theory]
@@ -64,13 +61,11 @@ namespace Waives.Http.Tests
                     new HttpResponseMessage(statusCode),
                     Responses.Success());
 
-            var sut = new ReliableRequestSender(
-                _retryLogger.RetryAction,
-                sender);
+            var sut = new ReliableRequestSender(_retryLogger, sender);
 
             await sut.Send(_request);
 
-            Assert.False(_retryLogger.RetryActionCalled);
+            _retryLogger.DidNotReceiveWithAnyArgs().Log(Arg.Any<LogLevel>(), Arg.Any<string>());
         }
 
         [Fact]
@@ -81,13 +76,11 @@ namespace Waives.Http.Tests
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(x => throw new WaivesApiException(), x => Responses.Success());
 
-            var sut = new ReliableRequestSender(
-                _retryLogger.RetryAction,
-                sender);
+            var sut = new ReliableRequestSender(_retryLogger, sender);
 
             await sut.Send(_request);
 
-            Assert.True(_retryLogger.RetryActionCalled);
+            _retryLogger.Received(1).Log(LogLevel.Warn, Arg.Any<string>());
         }
 
         [Fact]
@@ -99,9 +92,7 @@ namespace Waives.Http.Tests
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(Responses.Success());
 
-            var sut = new ReliableRequestSender(
-                _retryLogger.RetryAction,
-                sender);
+            var sut = new ReliableRequestSender(_retryLogger, sender);
 
             await sut.Send(request);
 
@@ -181,16 +172,6 @@ namespace Waives.Http.Tests
             yield return new object[] { HttpStatusCode.RequestedRangeNotSatisfiable };
             yield return new object[] { HttpStatusCode.ExpectationFailed };
             yield return new object[] { HttpStatusCode.UpgradeRequired };
-        }
-
-        private class RetryLogger
-        {
-            internal bool RetryActionCalled { get; private set; }
-
-            internal void RetryAction(DelegateResult<HttpResponseMessage> delegateResult, TimeSpan timeSpan, int counter, Context context)
-            {
-                RetryActionCalled = true;
-            }
         }
     }
 }
