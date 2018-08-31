@@ -41,11 +41,7 @@ namespace Waives.Http
                 Content = new StringContent(string.Empty)
             };
 
-            var readResponse = await _requestSender.Send(readRequest).ConfigureAwait(false);
-            if (!readResponse.IsSuccessStatusCode)
-            {
-                throw new WaivesApiException("Failed initiating read on document.");
-            }
+            await _requestSender.Send(readRequest).ConfigureAwait(false);
         }
 
         private async Task<HttpContent> GetReadResults(Uri requestUri, string contentType)
@@ -54,11 +50,6 @@ namespace Waives.Http
             request.Headers.Add(new KeyValuePair<string, string>("Accept", contentType));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new WaivesApiException("Failed retrieving document read results.");
-            }
-
             return response.Content;
         }
 
@@ -69,11 +60,7 @@ namespace Waives.Http
             var request = new HttpRequestMessageTemplate(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new WaivesApiException("Failed to delete the document.");
-            }
+            await _requestSender.Send(request).ConfigureAwait(false);
         }
 
         public async Task<ClassificationResult> Classify(string classifierName)
@@ -87,11 +74,6 @@ namespace Waives.Http
                 }));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new WaivesApiException($"Failed to classify the document with classifier '{classifierName}'");
-            }
-
             var responseBody = await response.Content.ReadAsAsync<ClassificationResponse>().ConfigureAwait(false);
             return responseBody.ClassificationResults;
         }
@@ -106,11 +88,6 @@ namespace Waives.Http
                 }));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new WaivesApiException($"Failed to extract data from the document using extractor '{extractorName}'");
-            }
-
             var responseBody = await response.Content.ReadAsAsync<ExtractionResponse>().ConfigureAwait(false);
             return responseBody;
         }
