@@ -26,10 +26,7 @@ namespace Waives.Http
 
             return new WaivesClient(
                 new ReliableRequestSender(
-                    (result, timeSpan, retryCount, ctx) =>
-                    {
-                        logger.Log(LogLevel.Warn, $"Request failed. Retry {retryCount} will happen in {timeSpan.TotalMilliseconds} ms");
-                    },
+                    logger,
                     new LoggingRequestSender(
                         new ExceptionHandlingRequestSender(
                             new RequestSender(
