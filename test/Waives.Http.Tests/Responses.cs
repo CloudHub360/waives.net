@@ -73,15 +73,12 @@ namespace Waives.Http.Tests
             });
         }
 
-        public static HttpResponseMessage Extract()
+        public static HttpResponseMessage Extract(HttpRequestMessageTemplate requestTemplate)
         {
-            return new HttpResponseMessage(HttpStatusCode.OK)
+            return From(HttpStatusCode.OK, requestTemplate, new StringContent(ExtractResponse)
             {
-                Content = new StringContent(ExtractResponse)
-                {
-                    Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                }
-            };
+                Headers = {ContentType = new MediaTypeHeaderValue("application/json")}
+            });
         }
 
         private const string ClassifyResponse = @"{

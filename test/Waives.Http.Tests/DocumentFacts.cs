@@ -242,7 +242,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Extract());
+                .Returns(ci => Responses.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Extract(_extractorName);
 
@@ -258,7 +258,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Extract());
+                .Returns(ci => Responses.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             var response = await _sut.Extract(_extractorName);
 
