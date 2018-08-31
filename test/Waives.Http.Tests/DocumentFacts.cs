@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Waives.Http.Responses;
 using Xunit;
 
@@ -67,12 +68,13 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Delete_throws_if_response_is_not_success_code()
         {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
-            Assert.Equal("Failed to delete the document.", exception.Message);
+            Assert.Equal(exceptionMessage, exception.Message);
         }
 
         [Fact]
@@ -168,28 +170,30 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Read_throws_if_read_response_is_not_success_code()
         {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => throw new WaivesApiException(exceptionMessage),
                     ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
-            Assert.Equal("Failed initiating read on document.", exception.Message);
+            Assert.Equal(exceptionMessage, exception.Message);
         }
 
 
         [Fact]
         public async Task Delete_throws_if_get_read_results_response_is_not_success_code()
         {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                    ci => throw new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
-            Assert.Equal("Failed retrieving document read results.", exception.Message);
+            Assert.Equal(exceptionMessage, exception.Message);
         }
 
         [Fact]
@@ -228,18 +232,19 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Classify_throws_if_response_is_not_success_code()
         {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
-            Assert.Equal($"Failed to classify the document with classifier '{_classifierName}'",
-                exception.Message);
+            Assert.Equal(exceptionMessage, exception.Message);
         }
 
         [Fact]
         public async Task Extract_sends_request_with_correct_uri()
         {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Responses.Extract(ci.Arg<HttpRequestMessageTemplate>()));
@@ -289,13 +294,13 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Extract_throws_if_response_is_not_success_code()
         {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Extract(_extractorName));
-            Assert.Equal($"Failed to extract data from the document using extractor '{_extractorName}'",
-                exception.Message);
+            Assert.Equal(exceptionMessage, exception.Message);
         }
 
         public void Dispose()
