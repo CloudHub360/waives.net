@@ -50,7 +50,25 @@ namespace Waives.Http
 
         private Task LogRetryAttempt(DelegateResult<HttpResponseMessage> result, TimeSpan timeSpan, int retryCount, Context context)
         {
-            _retryLogger.Log(LogLevel.Warn, $"Request failed. Retry {retryCount} will happen in {timeSpan.TotalMilliseconds} ms");
+            var response = result.Result;
+            if (response != null)
+            {
+                _retryLogger.Log(
+                    LogLevel.Warn,
+                    $"Request to '{response.RequestMessage.RequestUri}' failed: " +
+                    $"{(int)response.StatusCode} {response.ReasonPhrase}. Retry {retryCount} " +
+                    $"will happen in {timeSpan.TotalMilliseconds} ms");
+            }
+
+            var exception = result.Exception;
+            if (exception != null)
+            {
+                _retryLogger.Log(
+                    LogLevel.Warn,
+                    $"Request failed: {exception.Message}. Retry {retryCount} " +
+                    $"will happen in {timeSpan.TotalMilliseconds} ms");
+            }
+
             return Task.CompletedTask;
         }
     }
