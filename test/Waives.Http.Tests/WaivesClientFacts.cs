@@ -100,7 +100,7 @@ namespace Waives.Http.Tests
 
                 _requestSender
                     .Send(Arg.Any<HttpRequestMessageTemplate>())
-                    .Returns(Responses.Success());
+                    .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
                 await document.Delete();
             }

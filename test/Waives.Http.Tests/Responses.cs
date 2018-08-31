@@ -14,7 +14,7 @@ namespace Waives.Http.Tests
             };
         }
 
-        public static HttpResponseMessage Success(HttpRequestMessageTemplate requestTemplate = null)
+        public static HttpResponseMessage Success(HttpRequestMessageTemplate requestTemplate)
         {
             return From(HttpStatusCode.OK, requestTemplate);
         }
