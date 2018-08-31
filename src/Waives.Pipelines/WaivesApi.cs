@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http;
-using Waives.Http.Logging;
 using Waives.Pipelines.HttpAdapters;
 
 [assembly: InternalsVisibleTo("Waives.Pipelines.Tests")]
@@ -10,41 +9,6 @@ namespace Waives.Pipelines
 {
     public static class WaivesApi
     {
-        /// <summary>
-        /// Authenticate against the Waives API.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The values for the client ID and secret parameters can be obtained from the Waives
-        /// Dashboard, at https://dashboard.waives.io/. These should be treated like a username-
-        /// password pair, where the client ID is equivalent to a username, and the client
-        /// secret is equivalent to a password. Your client secret MUST be kept secret, and your
-        /// client ID SHOULD be kept secret.
-        /// </para>
-        /// <para>
-        /// By default, this library will communicate with the public hosted Waives API at
-        /// https://api.waives.io/.  You only need to change this if you are hosting your own
-        /// copy of the Waives API.
-        /// </para>
-        /// </remarks>
-        /// <param name="clientId">The ID of the client used to authenticate with the Waives
-        /// API.</param>
-        /// <param name="clientSecret">The secret of the client used to authentication with the
-        /// Waives API.</param>
-        /// <param name="apiUri">The instance of the Waives API you wish to use. Defaults to
-        /// https://api.waives.io/, the hosted Waives API.</param>
-        /// <returns>A new <see cref="WaivesClient"/> instance, with which you can directly
-        /// call the Waives API. This is provided for advanced use cases.</returns>
-        public static async Task<WaivesClient> Login(string clientId, string clientSecret, Uri apiUri = null)
-        {
-            apiUri = apiUri ?? new Uri(WaivesClient.DefaultUrl);
-
-            var apiClient = new WaivesClient(apiUri, logger: null);
-            await apiClient.Login(clientId, clientSecret).ConfigureAwait(false);
-
-            return apiClient;
-        }
-
         /// <summary>
         /// Configure a new document-processing pipeline.
         /// </summary>
@@ -66,8 +30,11 @@ namespace Waives.Pipelines
         ///
         ///         public static async Task MainAsync(string[] args)
         ///         {
-        ///             await WaivesApi.Login("clientId", "clientSecret");
-        ///             var pipeline = WaivesApi.CreatePipeline();
+        ///             var pipeline = WaivesApi.CreatePipeline(new WaivesOptions
+        ///             {
+        ///                 ClientId = "clientId",
+        ///                 ClientSecret = "clientSecret"
+        ///             });
         ///
         ///             pipeline
         ///                 .WithDocumentsFrom(FileSystemSource.Create(@"C:\temp\inbox"))
@@ -88,22 +55,29 @@ namespace Waives.Pipelines
         /// }
         /// ]]>
         /// </example>
-        /// <param name="waivesClient">The <see cref="WaivesClient"/> instance to use when sending
-        /// requests to the Waives API.</param>
-        /// <param name="deleteExistingDocuments">If set to <c>true</c>, it will (immediately) delete all documents
-        /// in existence in the Waives account; if set to <c>false</c>, no such clean up will be completed.
-        /// Defaults to <c>true</c>.</param>
-        /// <param name="logger">A logger that will receive log messages from the pipeline and the underlying <see cref="WaivesClient"/></param>
-        /// <param name="maxConcurrency">The maximum number of documents to process concurrently.</param>
+        /// <param name="options"></param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static Pipeline CreatePipeline(WaivesClient waivesClient, bool deleteExistingDocuments = true, ILogger logger = null, int maxConcurrency = RateLimiter.DefaultMaximumConcurrentDocuments)
+        public static async Task<Pipeline> CreatePipeline(WaivesOptions options)
         {
-            var documentFactory = Task.Run(() => HttpDocumentFactory.Create(waivesClient, logger, deleteExistingDocuments)).Result;
+            var waivesClient = await CreateAuthenticatedWaivesClient(options).ConfigureAwait(false);
+
+            var documentFactory = await HttpDocumentFactory.Create(
+                waivesClient,
+                options.Logger,
+                options.DeleteExistingDocuments).ConfigureAwait(false);
+
             return new Pipeline(
                 documentFactory,
-                new RateLimiter(null, maxConcurrency),
-                logger);
+                new RateLimiter(null, options.MaxConcurrency),
+                options.Logger);
+        }
+
+        private static async Task<WaivesClient> CreateAuthenticatedWaivesClient(WaivesOptions options)
+        {
+            var client = new WaivesClient(new Uri(options.ApiUrl), options.Logger);
+            await client.Login(options.ClientId, options.ClientSecret).ConfigureAwait(false);
+            return client;
         }
     }
 }
