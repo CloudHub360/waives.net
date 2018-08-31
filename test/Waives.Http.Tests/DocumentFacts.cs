@@ -69,7 +69,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage());
+                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
             Assert.Equal("Failed to delete the document.", exception.Message);
@@ -170,7 +170,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage(), Responses.GetReadResults(_readResultsContent));
+                .Returns(
+                    ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.GetReadResults(_readResultsContent));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
             Assert.Equal("Failed initiating read on document.", exception.Message);
@@ -184,7 +186,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.ErrorWithMessage());
+                    ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
             Assert.Equal("Failed retrieving document read results.", exception.Message);
@@ -228,7 +230,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage());
+                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
             Assert.Equal($"Failed to classify the document with classifier '{_classifierName}'",
@@ -289,7 +291,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage());
+                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Extract(_extractorName));
             Assert.Equal($"Failed to extract data from the document using extractor '{_extractorName}'",

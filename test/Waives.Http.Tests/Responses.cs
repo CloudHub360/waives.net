@@ -6,10 +6,14 @@ namespace Waives.Http.Tests
 {
     internal static class Responses
     {
-        public static HttpResponseMessage From(HttpStatusCode statusCode, HttpRequestMessageTemplate requestTemplate)
+        public static HttpResponseMessage From(
+            HttpStatusCode statusCode,
+            HttpRequestMessageTemplate requestTemplate,
+            HttpContent content = null)
         {
             return new HttpResponseMessage(statusCode)
             {
+                Content = content,
                 RequestMessage = requestTemplate?.CreateRequest()
             };
         }
@@ -21,15 +25,12 @@ namespace Waives.Http.Tests
 
         public const string ErrorMessage = "The error message";
 
-        public static HttpResponseMessage ErrorWithMessage()
+        public static HttpResponseMessage ErrorWithMessage(HttpRequestMessageTemplate requestTemplate)
         {
-            return new HttpResponseMessage(HttpStatusCode.NotFound)
+            return From(HttpStatusCode.NotFound, requestTemplate, new StringContent(ErrorResponse)
             {
-                Content = new StringContent(ErrorResponse)
-                {
-                    Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                }
-            };
+                Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+            });
         }
 
         public static HttpResponseMessage CreateDocument()
