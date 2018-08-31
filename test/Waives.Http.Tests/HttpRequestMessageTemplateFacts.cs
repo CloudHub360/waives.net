@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using Xunit;
 
 namespace Waives.Http.Tests
 {
-    public class HttpRequestMessageBuilderFacts
+    public class HttpRequestMessageTemplateFacts
     {
         [Theory]
         [MemberData(nameof(TemplateInputs))]
@@ -16,7 +15,7 @@ namespace Waives.Http.Tests
                 method,
                 uri);
 
-            var request = HttpRequestMessageBuilder.BuildRequest(template);
+            var request = template.CreateRequest();
 
             Assert.Equal(method, request.Method);
             Assert.Equal(uri, request.RequestUri);
@@ -31,7 +30,7 @@ namespace Waives.Http.Tests
                 Content = new StringContent(expectedContents)
             };
 
-            var request = HttpRequestMessageBuilder.BuildRequest(template);
+            var request = template.CreateRequest();
 
             var actualContents = request.Content.ReadAsStringAsync().Result;
 
@@ -47,11 +46,10 @@ namespace Waives.Http.Tests
             var template = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/some-url", UriKind.Relative));
             template.Headers.Add(new KeyValuePair<string, string>(headerKey, headerValue));
 
-            var request = HttpRequestMessageBuilder.BuildRequest(template);
+            var request = template.CreateRequest();
 
             Assert.Single(request.Headers);
         }
-
 
         public static IEnumerable<object[]> TemplateInputs()
         {
