@@ -65,7 +65,7 @@ pipeline.WithDocumentsFrom(myDocumentSource)
 try
 {
     // Run the pipeline
-    pipline.Start();
+    pipeline.Start();
 }
 catch (PipelineException ex)
 {
