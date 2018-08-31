@@ -25,7 +25,7 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Returns_response_from_wrapped_sender()
         {
-            var expectedResponse = Responses.Success();
+            var expectedResponse = Responses.Success(_request);
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(expectedResponse);

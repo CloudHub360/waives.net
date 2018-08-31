@@ -53,7 +53,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success());
+                .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Delete();
 
@@ -80,7 +80,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
+                .Returns(
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -96,7 +98,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
+                .Returns(
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -112,7 +116,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
+                .Returns(
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.GetReadResults(_readResultsContent));
 
             var expectedContentType = "application/text";
 
@@ -130,7 +136,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
+                .Returns(
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -146,7 +154,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success(), Responses.GetReadResults(_readResultsContent));
+                .Returns(
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.GetReadResults(_readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -172,7 +182,9 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success(), Responses.ErrorWithMessage());
+                .Returns(
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.ErrorWithMessage());
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
             Assert.Equal("Failed retrieving document read results.", exception.Message);

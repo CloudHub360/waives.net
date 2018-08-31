@@ -27,7 +27,7 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Returns_response_from_wrapped_sender()
         {
-            var expectedResponse = Responses.Success();
+            var expectedResponse = Responses.Success(_request);
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(expectedResponse);
@@ -56,7 +56,7 @@ namespace Waives.Http.Tests
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success());
+                .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Send(_request);
 
@@ -84,7 +84,7 @@ namespace Waives.Http.Tests
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Success());
+                .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Send(_request);
 
