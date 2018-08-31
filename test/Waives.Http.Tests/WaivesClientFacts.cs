@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Waives.Http.Tests
 {
@@ -111,7 +112,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                .Throws(new WaivesApiException(Responses.ErrorMessage));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -157,7 +158,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                .Throws(new WaivesApiException(Responses.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.GetAllDocuments());
@@ -189,7 +190,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
+                .Throws(new WaivesApiException(Responses.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Login("clientid", "clientsecret"));
