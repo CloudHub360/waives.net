@@ -173,7 +173,7 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.GetToken());
+                .Returns(ci => Responses.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Login(expectedClientId, expectedClientSecret);
 
