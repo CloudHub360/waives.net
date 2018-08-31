@@ -49,14 +49,15 @@ pipeline's execution order.
 To get started with this API, simply:
 
 ```csharp
-// Authenticate with the Waives API, using a client ID and secret from your
-// account in the Waives Dashboard, https://dashboard.waives.io/.
-await WaivesApi.Login("clientId", "clientSecret");
-
 // Define a pipeline that classifies each document and writes its classification
-// to the console
-var pipeline = WaivesApi.CreatePipeline()
-    .WithDocumentsFrom(myDocumentSource)
+// to the console. This will also authenticate with the Waives API.
+var pipeline = WaivesApi.CreatePipeline(new WaivesOptions
+{
+    ClientId = "clientId",
+    ClientSecret = "clientSecret"
+});
+
+pipeline.WithDocumentsFrom(myDocumentSource)
     .ClassifyWith("mortgages")
     .Then(d => Console.WriteLine(d.ClassificationResults.DocumentType))
     .OnPipelineCompleted(() => Console.WriteLine("Classification complete"));
@@ -76,9 +77,26 @@ catch (PipelineException ex)
 ### Waives.Http
 
 Waives.Http is a lower-level client which makes the HTTP requests against the
-Waives API. This is provided for completeness for advanced scenarios that may
-not fit the pipeline model nicely, but is generally considered an implementation
-detail of Waives.Pipelines.
+Waives API. This is provided for more advanced scenarios which do not fit the
+pipeline model so cleanly.
+
+To get started with this API:
+
+```csharp
+var client = WaivesClient.Create();
+client.Login("clientId", "clientSecret");
+
+try
+{
+    var document = await client.CreateDocument(@"C:\path\to\my\document.pdf");
+    var classification = await document.Classify("mortgages");
+}
+finally
+{
+    // Ensure the document is deleted after use
+    await document.Delete();
+}
+```
 
 ### Extension packages
 
