@@ -26,7 +26,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.CreateDocument());
+                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -45,7 +45,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.CreateDocument());
+                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -65,7 +65,7 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.CreateDocument());
+                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             _requestSender
                 .Send(Arg.Is<HttpRequestMessageTemplate>(m => m.RequestUri.ToString().Contains("/classify")))
@@ -84,7 +84,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.CreateDocument());
+                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -127,7 +127,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.GetAllDocuments());
+                .Returns(ci => Responses.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.GetAllDocuments();
 
@@ -143,7 +143,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.GetAllDocuments());
+                .Returns(ci => Responses.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
 
             var documents = await _sut.GetAllDocuments();
 
