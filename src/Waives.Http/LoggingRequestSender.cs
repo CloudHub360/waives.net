@@ -9,12 +9,12 @@ namespace Waives.Http
     internal class LoggingRequestSender : IHttpRequestSender
     {
         private readonly IHttpRequestSender _wrappedRequestSender;
-        internal ILogger Logger;
+        private readonly ILogger _logger;
 
         public LoggingRequestSender(IHttpRequestSender wrappedRequestSender, ILogger logger)
         {
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
-            Logger = logger ?? new NoopLogger();
+            _logger = logger ?? new NoopLogger();
         }
 
         public int Timeout
@@ -31,7 +31,7 @@ namespace Waives.Http
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             var stopWatch = new Stopwatch();
-            Logger.Log(LogLevel.Trace, $"Sending {request.Method} request to {request.RequestUri}");
+            _logger.Log(LogLevel.Trace, $"Sending {request.Method} request to {request.RequestUri}");
 
             try
             {
@@ -39,7 +39,7 @@ namespace Waives.Http
                 var response = await _wrappedRequestSender.Send(request).ConfigureAwait(false);
                 stopWatch.Stop();
 
-                Logger.Log(LogLevel.Trace,
+                _logger.Log(LogLevel.Trace,
                     $"Received response from {request.Method} {request.RequestUri} ({response.StatusCode}) ({stopWatch.ElapsedMilliseconds} ms)");
 
                 return response;
@@ -48,11 +48,11 @@ namespace Waives.Http
             {
                 if (e.InnerException != null)
                 {
-                    Logger.Log(LogLevel.Error, $"{e.Message} Inner exception: {e.InnerException.Message}");
+                    _logger.Log(LogLevel.Error, $"{e.Message} Inner exception: {e.InnerException.Message}");
                 }
                 else
                 {
-                    Logger.Log(LogLevel.Error, e.Message);
+                    _logger.Log(LogLevel.Error, e.Message);
                 }
                 throw;
             }
