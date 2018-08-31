@@ -40,8 +40,8 @@ namespace Waives.Http.Tests
             sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    new HttpResponseMessage(statusCode),
-                    Responses.Success());
+                    ci => Responses.From(statusCode, ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(_retryLogger, sender);
 
@@ -74,7 +74,9 @@ namespace Waives.Http.Tests
             var sender = Substitute.For<IHttpRequestSender>();
 
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(x => throw new WaivesApiException(), x => Responses.Success());
+                .Returns(
+                    x => throw new WaivesApiException(),
+                    x => Responses.Success(x.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(_retryLogger, sender);
 
