@@ -69,7 +69,7 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Is<HttpRequestMessageTemplate>(m => m.RequestUri.ToString().Contains("/classify")))
-                .Returns(Responses.Classify());
+                .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.CreateDocument(filePath);
 
@@ -94,7 +94,7 @@ namespace Waives.Http.Tests
 
                 _requestSender
                     .Send(Arg.Any<HttpRequestMessageTemplate>())
-                    .Returns(Responses.Classify());
+                    .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
                 await document.Classify("classifier");
 
