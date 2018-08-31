@@ -14,11 +14,11 @@ bit of configuration of NuGet:
 
    ```xml
    <?xml version="1.0" encoding="utf-8"?>
-     <configuration>
-       <packageSources>
-         <add key="Waives Pre-release" value="" protocolVersion="" />
-       </packageSources>
-     </configuration>
+   <configuration>
+     <packageSources>
+       <add key="Waives Pre-release" value="" protocolVersion="" />
+     </packageSources>
+   </configuration>
    ```
 
 3. Set the `value` and `protocolVersion` attributes as follows:
