@@ -57,16 +57,12 @@ namespace Waives.Http.Tests
             });
         }
 
-        public static HttpResponseMessage GetReadResults(string content)
+        public static HttpResponseMessage GetReadResults(HttpRequestMessageTemplate requestTemplate, string content)
         {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(content)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("text/plain") }
-                    },
-                };
+            return From(HttpStatusCode.OK, requestTemplate, new StringContent(content)
+            {
+                Headers = {ContentType = new MediaTypeHeaderValue("text/plain")}
+            });
         }
 
         public static HttpResponseMessage Classify()
