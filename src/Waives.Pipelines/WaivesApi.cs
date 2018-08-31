@@ -75,7 +75,7 @@ namespace Waives.Pipelines
 
         private static async Task<WaivesClient> CreateAuthenticatedWaivesClient(WaivesOptions options)
         {
-            var client = new WaivesClient(new Uri(options.ApiUrl), options.Logger);
+            var client = WaivesClient.Create(new Uri(options.ApiUrl), options.Logger);
             await client.Login(options.ClientId, options.ClientSecret).ConfigureAwait(false);
             return client;
         }

@@ -19,29 +19,30 @@ namespace Waives.Http
 
         private readonly IHttpRequestSender _requestSender;
 
-        public WaivesClient(Uri apiUrl = null, ILogger logger = null)
-            : this(apiUrl, logger, null)
+        public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
         {
-        }
-
-        internal WaivesClient(Uri apiUrl = null, ILogger logger = null, IHttpRequestSender requestSender = null)
-        {
+            apiUri = apiUri ?? new Uri(DefaultUrl);
             logger = logger ?? new NoopLogger();
 
-            _requestSender = requestSender ??
-                 new ReliableRequestSender(
-                     (result, timeSpan, retryCount, ctx) =>
-                     {
-                         logger.Log(LogLevel.Warn, $"Request failed. Retry {retryCount} will happen in {timeSpan.TotalMilliseconds} ms");
-                     },
-                     new LoggingRequestSender(
-                         new ExceptionHandlingRequestSender(
-                             new RequestSender(
-                                 new HttpClient
-                                 {
-                                     BaseAddress = apiUrl ?? new Uri(DefaultUrl)
-                                 })),
-                         logger));
+            return new WaivesClient(
+                new ReliableRequestSender(
+                    (result, timeSpan, retryCount, ctx) =>
+                    {
+                        logger.Log(LogLevel.Warn, $"Request failed. Retry {retryCount} will happen in {timeSpan.TotalMilliseconds} ms");
+                    },
+                    new LoggingRequestSender(
+                        new ExceptionHandlingRequestSender(
+                            new RequestSender(
+                                new HttpClient
+                                {
+                                    BaseAddress = apiUri
+                                })),
+                        logger)));
+        }
+
+        internal WaivesClient(IHttpRequestSender requestSender)
+        {
+            _requestSender = requestSender;
         }
 
         /// <summary>
