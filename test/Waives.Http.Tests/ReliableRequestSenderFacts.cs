@@ -52,7 +52,8 @@ namespace Waives.Http.Tests
                 .Received(1)
                 .Log(
                     LogLevel.Warn,
-                    Arg.Is<string>(m => m.Contains(_request.RequestUri.ToString()) &&
+                    Arg.Is<string>(m => m.Contains(_request.Method.ToString()) &&
+                                        m.Contains(_request.RequestUri.ToString()) &&
                                         m.Contains(((int)statusCode).ToString()) &&
                                         m.Contains(statusCode.ToReasonPhrase())));
         }

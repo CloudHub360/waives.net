@@ -53,9 +53,10 @@ namespace Waives.Http
             var response = result.Result;
             if (response != null)
             {
+                var request = response.RequestMessage;
                 _retryLogger.Log(
                     LogLevel.Warn,
-                    $"Request to '{response.RequestMessage.RequestUri}' failed: " +
+                    $"Request '{request.Method} {request.RequestUri}' failed: " +
                     $"{(int)response.StatusCode} {response.ReasonPhrase}. Retry {retryCount} " +
                     $"will happen in {timeSpan.TotalMilliseconds} ms");
             }
