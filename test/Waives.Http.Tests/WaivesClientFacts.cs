@@ -111,7 +111,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage());
+                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -157,7 +157,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage());
+                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.GetAllDocuments());
@@ -189,7 +189,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.ErrorWithMessage());
+                .Returns(ci => Responses.ErrorWithMessage(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Login("clientid", "clientsecret"));
