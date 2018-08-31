@@ -33,28 +33,20 @@ namespace Waives.Http.Tests
             });
         }
 
-        public static HttpResponseMessage CreateDocument()
+        public static HttpResponseMessage CreateDocument(HttpRequestMessageTemplate requestTemplate)
         {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(CreateDocumentResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    }
-                };
+            return From(HttpStatusCode.OK, requestTemplate, new StringContent(CreateDocumentResponse)
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+            });
         }
 
-        public static HttpResponseMessage GetAllDocuments()
+        public static HttpResponseMessage GetAllDocuments(HttpRequestMessageTemplate requestTemplate)
         {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(GetAllDocumentsResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    }
-                };
+            return From(HttpStatusCode.OK, requestTemplate, new StringContent(GetAllDocumentsResponse)
+            {
+                Headers = {ContentType = new MediaTypeHeaderValue("application/json")}
+            });
         }
 
         public static HttpResponseMessage GetToken()
