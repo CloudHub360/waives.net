@@ -47,8 +47,6 @@ namespace FileSorter
             EnsureDirectoryExists(outbox);
             EnsureDirectoryExists(errorbox);
 
-            var client = await WaivesApi.Login("clientId", "clientSecret");
-
             var cancellation = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
             {
@@ -63,8 +61,13 @@ namespace FileSorter
             // inbox path.
             var filesystem = FileSystem.WatchForChanges(inbox, cancellation.Token);
 
-            var pipeline = WaivesApi.CreatePipeline(client)
-                .WithDocumentsFrom(filesystem)
+            var pipeline = await WaivesApi.CreatePipeline(new WaivesOptions
+            {
+                ClientId = "clientId",
+                ClientSecret = "clientSecret"
+            });
+
+            pipeline.WithDocumentsFrom(filesystem)
                 .ClassifyWith(options["<classifier>"].ToString())
                 .Then(d => fileSorter.MoveDocument(d))
                 .OnPipelineCompleted(() => Console.WriteLine("Processing completed, press any key to exit."));
