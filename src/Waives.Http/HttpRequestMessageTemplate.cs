@@ -17,5 +17,20 @@ namespace Waives.Http
         public Uri RequestUri { get; set; }
         public HttpContent Content { get; set; }
         public List<KeyValuePair<string, string>> Headers { get; }
+
+        public HttpRequestMessage CreateRequest()
+        {
+            var request = new HttpRequestMessage(Method, RequestUri)
+            {
+                Content = Content
+            };
+
+            foreach (var header in Headers)
+            {
+                request.Headers.Add(header.Key, header.Value);
+            }
+
+            return request;
+        }
     }
 }
