@@ -1,16 +1,22 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using Xunit.Sdk;
 
 namespace Waives.Http.Tests
 {
-    public static class Responses
+    internal static class Responses
     {
-        public static HttpResponseMessage Success()
+        public static HttpResponseMessage From(HttpStatusCode statusCode, HttpRequestMessageTemplate requestTemplate)
         {
-            return new HttpResponseMessage(HttpStatusCode.OK);
+            return new HttpResponseMessage(statusCode)
+            {
+                RequestMessage = requestTemplate?.CreateRequest()
+            };
+        }
+
+        public static HttpResponseMessage Success(HttpRequestMessageTemplate requestTemplate = null)
+        {
+            return From(HttpStatusCode.OK, requestTemplate);
         }
 
         public const string ErrorMessage = "The error message";
