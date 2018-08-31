@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Logging;
@@ -47,7 +48,13 @@ namespace Waives.Http.Tests
 
             await sut.Send(_request);
 
-            _retryLogger.Received(1).Log(LogLevel.Warn, Arg.Any<string>());
+            _retryLogger
+                .Received(1)
+                .Log(
+                    LogLevel.Warn,
+                    Arg.Is<string>(m => m.Contains(_request.RequestUri.ToString()) &&
+                                        m.Contains(((int)statusCode).ToString()) &&
+                                        m.Contains(statusCode.ToReasonPhrase())));
         }
 
         [Theory]
@@ -73,16 +80,21 @@ namespace Waives.Http.Tests
         {
             var sender = Substitute.For<IHttpRequestSender>();
 
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    x => throw new WaivesApiException(),
+                    x => throw new WaivesApiException(exceptionMessage),
                     x => Responses.Success(x.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(_retryLogger, sender);
 
             await sut.Send(_request);
 
-            _retryLogger.Received(1).Log(LogLevel.Warn, Arg.Any<string>());
+            _retryLogger
+                .Received(1)
+                .Log(
+                    LogLevel.Warn,
+                    Arg.Is<string>(m => m.Contains(exceptionMessage)));
         }
 
         [Fact]
@@ -174,6 +186,17 @@ namespace Waives.Http.Tests
             yield return new object[] { HttpStatusCode.RequestedRangeNotSatisfiable };
             yield return new object[] { HttpStatusCode.ExpectationFailed };
             yield return new object[] { HttpStatusCode.UpgradeRequired };
+        }
+    }
+
+    internal static class HttpStatusCodeExtensions
+    {
+        public static string ToReasonPhrase(this HttpStatusCode statusCode)
+        {
+            // Borrowed from StackOverflow here: https://stackoverflow.com/a/50588320/5296
+            // The regex inserts spaces into camel-cased strings. There's no way in-built,
+            // as far as I can tell, to achieve this conversion.
+            return Regex.Replace(statusCode.ToString(), "(?<=[a-z])([A-Z])", " $1", RegexOptions.Compiled);
         }
     }
 }
