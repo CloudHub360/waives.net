@@ -65,16 +65,12 @@ namespace Waives.Http.Tests
             });
         }
 
-        public static HttpResponseMessage Classify()
+        public static HttpResponseMessage Classify(HttpRequestMessageTemplate requestTemplate)
         {
-            return
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(ClassifyResponse)
-                    {
-                        Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-                    },
-                };
+            return From(HttpStatusCode.OK, requestTemplate, new StringContent(ClassifyResponse)
+            {
+                Headers = {ContentType = new MediaTypeHeaderValue("application/json")}
+            });
         }
 
         public static HttpResponseMessage Extract()

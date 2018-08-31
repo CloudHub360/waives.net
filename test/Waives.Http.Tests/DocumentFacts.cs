@@ -197,7 +197,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Classify());
+                .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Classify(_classifierName);
 
@@ -213,7 +213,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(Responses.Classify());
+                .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             var result = await _sut.Classify(_classifierName);
 
