@@ -1,4 +1,5 @@
-﻿using Waives.Http;
+﻿using System;
+using Waives.Http;
 using Waives.Http.Logging;
 
 namespace Waives.Pipelines
@@ -23,7 +24,7 @@ namespace Waives.Pipelines
         /// The URL on which the Waives API is running. This only needs overriding for
         /// connections to instances other than the public cloud-hosted service.
         /// </summary>
-        public string ApiUrl { get; set; } = WaivesClient.DefaultUrl;
+        public Uri ApiUrl { get; set; } = new Uri(WaivesClient.DefaultUrl);
 
         /// <summary>
         /// A logger that will receive log messages from the pipeline and the underlying <see cref="WaivesClient"/>.
