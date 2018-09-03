@@ -26,7 +26,7 @@ namespace FileSorter
             MoveFile(document, _outboxPath, result.ClassificationResults.DocumentType);
         }
 
-        private void MoveFile(FileSystemDocument fileSystemDocument, string boxPath, string subfolder = "")
+        private static void MoveFile(FileSystemDocument fileSystemDocument, string boxPath, string subfolder = "")
         {
             var destination = Path.Combine(boxPath, subfolder);
             EnsureDirectoryExists(destination);
