@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class HttpRequestMessageTemplate
     {

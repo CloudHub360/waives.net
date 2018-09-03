@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Waives.Http.RequestHandling;
 using Xunit;
 
 namespace Waives.Http.Tests

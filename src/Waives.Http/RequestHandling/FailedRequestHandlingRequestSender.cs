@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Waives.Http.Responses;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class FailedRequestHandlingRequestSender : IHttpRequestSender
     {

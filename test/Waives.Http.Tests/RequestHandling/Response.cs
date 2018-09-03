@@ -1,11 +1,11 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using Waives.Http.RequestHandling;
 
-namespace Waives.Http.Tests
+namespace Waives.Http.Tests.RequestHandling
 {
-    internal static class Responses
+    internal static class Response
     {
         public static HttpResponseMessage From(
             HttpStatusCode statusCode,

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
+using Waives.Http.RequestHandling;
 using Waives.Http.Responses;
 
 [assembly: InternalsVisibleTo("Waives.Http.Tests")]

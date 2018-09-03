@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class LoggingRequestSender : IHttpRequestSender
     {

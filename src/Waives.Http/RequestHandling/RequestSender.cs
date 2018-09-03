@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class RequestSender : IHttpRequestSender
     {

@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class TimeoutHandlingRequestSender : IHttpRequestSender
     {

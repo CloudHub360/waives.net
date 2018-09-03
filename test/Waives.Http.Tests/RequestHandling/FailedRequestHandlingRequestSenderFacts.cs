@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
+using Waives.Http.RequestHandling;
+using Waives.Http.Tests.RequestHandling;
 using Xunit;
 
 namespace Waives.Http.Tests
@@ -25,7 +27,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(_request)
-                .ReturnsForAnyArgs(Responses.ErrorFrom(statusCode, _request));
+                .ReturnsForAnyArgs(Response.ErrorFrom(statusCode, _request));
 
             await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Send(_request));
         }
@@ -33,7 +35,7 @@ namespace Waives.Http.Tests
         [Theory, MemberData(nameof(SuccessStatusCodes))]
         public async Task Return_the_response_for_successful_requests(HttpStatusCode statusCode)
         {
-            var expected = Responses.SuccessFrom(statusCode, _request);
+            var expected = Response.SuccessFrom(statusCode, _request);
             _requestSender
                 .Send(_request)
                 .ReturnsForAnyArgs(expected);

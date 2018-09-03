@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal interface IHttpRequestSender
     {
