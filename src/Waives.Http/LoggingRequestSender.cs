@@ -8,13 +8,13 @@ namespace Waives.Http
 {
     internal class LoggingRequestSender : IHttpRequestSender
     {
-        private readonly IHttpRequestSender _wrappedRequestSender;
         private readonly ILogger _logger;
+        private readonly IHttpRequestSender _wrappedRequestSender;
 
-        public LoggingRequestSender(IHttpRequestSender wrappedRequestSender, ILogger logger)
+        public LoggingRequestSender(ILogger logger, IHttpRequestSender wrappedRequestSender)
         {
-            _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
             _logger = logger ?? new NoopLogger();
+            _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
         public int Timeout
