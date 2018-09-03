@@ -27,7 +27,7 @@ namespace Waives.Http
             return new WaivesClient(
                 new LoggingRequestSender(
                     logger,
-                    new ExceptionHandlingRequestSender(
+                    new TimeoutHandlingRequestSender(
                         new FailedRequestHandlingRequestSender(
                             new ReliableRequestSender(
                                 logger,

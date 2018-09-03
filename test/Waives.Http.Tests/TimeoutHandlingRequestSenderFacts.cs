@@ -8,16 +8,16 @@ using Xunit;
 
 namespace Waives.Http.Tests
 {
-    public class ExceptionHandlingRequestSenderFacts
+    public class TimeoutHandlingRequestSenderFacts
     {
         private readonly IHttpRequestSender _sender;
         private readonly HttpRequestMessageTemplate _request;
-        private readonly ExceptionHandlingRequestSender _sut;
+        private readonly TimeoutHandlingRequestSender _sut;
 
-        public ExceptionHandlingRequestSenderFacts()
+        public TimeoutHandlingRequestSenderFacts()
         {
             _sender = Substitute.For<IHttpRequestSender>();
-            _sut = new ExceptionHandlingRequestSender(_sender);
+            _sut = new TimeoutHandlingRequestSender(_sender);
 
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
