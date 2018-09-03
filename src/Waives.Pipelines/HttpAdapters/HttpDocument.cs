@@ -53,10 +53,6 @@ namespace Waives.Pipelines.HttpAdapters
             {
                 await _documentClient.Delete().ConfigureAwait(false);
             }
-            catch (Exception e)
-            {
-                throw;
-            }
             finally
             {
                 afterDeletedAction();
