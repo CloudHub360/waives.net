@@ -1,5 +1,6 @@
 ﻿namespace Waives.Http
 {
+#pragma warning disable CA1034 // Nested types should not be visible
     public static class ContentTypes
     {
         public static readonly string Pdf = "application/pdf";
@@ -43,4 +44,5 @@
         public static readonly string OctetStream = "application/octet-stream";
         public static readonly string Zip = "application/zip";
     }
+#pragma warning restore CA1034 // Nested types should not be visible
 }
