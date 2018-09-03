@@ -155,10 +155,10 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Action<WaivesDocument> action)
         {
-            _pipeline = _pipeline.Process(async d =>
+            _pipeline = _pipeline.Process(d =>
             {
                 action(d);
-                return d;
+                return Task.FromResult(d);
             }, _onDocumentError);
 
             return this;
