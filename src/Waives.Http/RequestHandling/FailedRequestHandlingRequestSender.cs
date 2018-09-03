@@ -35,7 +35,7 @@ namespace Waives.Http.RequestHandling
             var responseContentType = response.Content.Headers.ContentType.MediaType;
             if (responseContentType == "application/json")
             {
-                var error = await response.Content.ReadAsAsync<Error>().ConfigureAwait(false);
+                var error = await response.Content.ReadAsAsync<ApiError>().ConfigureAwait(false);
                 throw new WaivesApiException(error.Message);
             }
 
