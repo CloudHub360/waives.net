@@ -50,5 +50,23 @@ namespace FileSorter
                 Directory.CreateDirectory(path);
             }
         }
+
+        public void HandleFailure(DocumentError error)
+        {
+            Console.WriteLine($"Processing {error.Document} failed: {error.Exception.Message}");
+
+            if (!(error.Document is FileSystemDocument document))
+            {
+                throw new InvalidOperationException("Cannot move a document which did not originate from the file system.");
+            }
+
+            // Move the document to the error box
+            MoveFile(document, _errorboxPath);
+
+            // Write a log for the document indicating the failure.
+            var logFile = Path.Combine(_errorboxPath, $"{document.FilePath.Name}.log");
+            Console.WriteLine($"Writing error log file to {logFile}");
+            File.WriteAllText(logFile, error.Exception.Message);
+        }
     }
 }
