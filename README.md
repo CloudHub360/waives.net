@@ -84,7 +84,7 @@ To get started with this API:
 
 ```csharp
 var client = WaivesClient.Create();
-client.Login("clientId", "clientSecret");
+await client.Login("clientId", "clientSecret");
 
 try
 {
