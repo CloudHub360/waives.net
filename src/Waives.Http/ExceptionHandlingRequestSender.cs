@@ -42,13 +42,6 @@ namespace Waives.Http
                 // is not received before the HttpClient's TimeOut expires
                 throw new WaivesApiException($"{request.Method} request to {request.RequestUri} timed-out.");
             }
-            catch (Exception e)
-            {
-                var message = $"An unexpected error occurred making {request.Method} request to {request.RequestUri}. " +
-                              $"The error was: {e.Message}.";
-
-                throw new WaivesApiException(message, e);
-            }
         }
     }
 }
