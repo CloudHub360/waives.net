@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NSubstitute;
 using Waives.Http.Logging;
+using Waives.Http.RequestHandling;
+using Waives.Http.Tests.RequestHandling;
 using Xunit;
 
 namespace Waives.Http.Tests
@@ -41,8 +43,8 @@ namespace Waives.Http.Tests
             sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.From(statusCode, ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                    ci => Response.From(statusCode, ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(_retryLogger, sender);
 
@@ -67,7 +69,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     ci => new HttpResponseMessage(statusCode),
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(_retryLogger, sender);
 
@@ -83,7 +85,7 @@ namespace Waives.Http.Tests
 
             var sender = Substitute.For<IHttpRequestSender>();
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(_retryLogger, sender);
 

@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Waives.Http.RequestHandling;
+using Waives.Http.Tests.RequestHandling;
 using Xunit;
 
 namespace Waives.Http.Tests
@@ -25,7 +27,7 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Returns_response_from_wrapped_sender()
         {
-            var expectedResponse = Responses.Success(_request);
+            var expectedResponse = Response.Success(_request);
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(expectedResponse);

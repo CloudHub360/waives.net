@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Xunit;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Waives.Http.RequestHandling;
+using Waives.Http.Tests.RequestHandling;
+using Xunit;
 
 namespace Waives.Http.Tests
 {
@@ -17,7 +19,7 @@ namespace Waives.Http.Tests
         public WaivesClientFacts()
         {
             _requestSender = Substitute.For<IHttpRequestSender>();
-            _sut = new WaivesClient(requestSender: _requestSender);
+            _sut = new WaivesClient(_requestSender);
 
             _documentContents = new byte[] { 0, 1, 2 };
         }
@@ -27,7 +29,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -46,7 +48,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -66,11 +68,11 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             _requestSender
                 .Send(Arg.Is<HttpRequestMessageTemplate>(m => m.RequestUri.ToString().Contains("/classify")))
-                .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.CreateDocument(filePath);
 
@@ -85,7 +87,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             using (var stream = new MemoryStream(_documentContents))
             {
@@ -95,13 +97,13 @@ namespace Waives.Http.Tests
 
                 _requestSender
                     .Send(Arg.Any<HttpRequestMessageTemplate>())
-                    .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
+                    .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
                 await document.Classify("classifier");
 
                 _requestSender
                     .Send(Arg.Any<HttpRequestMessageTemplate>())
-                    .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                    .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
                 await document.Delete();
             }
@@ -112,14 +114,14 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(new WaivesApiException(Responses.ErrorMessage));
+                .Throws(new WaivesApiException(Response.ErrorMessage));
 
             using (var stream = new MemoryStream(_documentContents))
             {
                 var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                     _sut.CreateDocument(stream));
 
-                Assert.Equal(Responses.ErrorMessage, exception.Message);
+                Assert.Equal(Response.ErrorMessage, exception.Message);
             }
         }
 
@@ -128,7 +130,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.GetAllDocuments();
 
@@ -144,7 +146,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
 
             var documents = await _sut.GetAllDocuments();
 
@@ -158,12 +160,12 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(new WaivesApiException(Responses.ErrorMessage));
+                .Throws(new WaivesApiException(Response.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.GetAllDocuments());
 
-            Assert.Equal(Responses.ErrorMessage, exception.Message);
+            Assert.Equal(Response.ErrorMessage, exception.Message);
         }
 
         [Fact]
@@ -174,7 +176,7 @@ namespace Waives.Http.Tests
 
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Login(expectedClientId, expectedClientSecret);
 
@@ -190,15 +192,15 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(new WaivesApiException(Responses.ErrorMessage));
+                .Throws(new WaivesApiException(Response.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Login("clientid", "clientsecret"));
 
-            Assert.Equal(Responses.ErrorMessage, exception.Message);
+            Assert.Equal(Response.ErrorMessage, exception.Message);
         }
 
-        private bool IsFormWithClientCredentials(HttpContent content, string expectedClientId, string expectedClientSecret)
+        private static bool IsFormWithClientCredentials(HttpContent content, string expectedClientId, string expectedClientSecret)
         {
             if (!(content is FormUrlEncodedContent))
             {
@@ -213,7 +215,7 @@ namespace Waives.Http.Tests
             return true;
         }
 
-        private bool RequestContentEquals(HttpRequestMessageTemplate request, byte[] expectedContents)
+        private static bool RequestContentEquals(HttpRequestMessageTemplate request, byte[] expectedContents)
         {
             var actualRequestContents = request.Content.ReadAsByteArrayAsync().Result;
 

@@ -6,7 +6,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Waives.Http.RequestHandling;
 using Waives.Http.Responses;
+using Waives.Http.Tests.RequestHandling;
 using Xunit;
 
 namespace Waives.Http.Tests
@@ -40,7 +42,7 @@ namespace Waives.Http.Tests
                 { "document:read", new HalUri(new Uri(_readUrl, UriKind.Relative), false) },
                 { "document:classify", new HalUri(new Uri(_classifyUrl, UriKind.Relative), true) },
                 { "document:extract", new HalUri(new Uri(_extractUrl, UriKind.Relative), true) },
-                { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) },
+                { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) }
             };
 
             _sut = new Document(_requestSender, "id", behaviours);
@@ -54,7 +56,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Delete();
 
@@ -83,8 +85,8 @@ namespace Waives.Http.Tests
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -101,8 +103,8 @@ namespace Waives.Http.Tests
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -119,8 +121,8 @@ namespace Waives.Http.Tests
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             var expectedContentType = "application/text";
 
@@ -139,8 +141,8 @@ namespace Waives.Http.Tests
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -157,8 +159,8 @@ namespace Waives.Http.Tests
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
-                    ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             await _sut.Read(_readResultsFilename);
 
@@ -175,7 +177,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     ci => throw new WaivesApiException(exceptionMessage),
-                    ci => Responses.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
+                    ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), _readResultsContent));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
             Assert.Equal(exceptionMessage, exception.Message);
@@ -189,7 +191,7 @@ namespace Waives.Http.Tests
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
-                    ci => Responses.Success(ci.Arg<HttpRequestMessageTemplate>()),
+                    ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()),
                     ci => throw new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read(_readResultsFilename));
@@ -201,7 +203,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Classify(_classifierName);
 
@@ -217,7 +219,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.Classify(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             var result = await _sut.Classify(_classifierName);
 
@@ -247,7 +249,7 @@ namespace Waives.Http.Tests
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.Extract(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Extract(_extractorName);
 
@@ -263,7 +265,7 @@ namespace Waives.Http.Tests
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Responses.Extract(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             var response = await _sut.Extract(_extractorName);
 

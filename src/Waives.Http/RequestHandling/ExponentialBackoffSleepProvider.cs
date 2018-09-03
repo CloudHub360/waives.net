@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class ExponentialBackoffSleepProvider
     {

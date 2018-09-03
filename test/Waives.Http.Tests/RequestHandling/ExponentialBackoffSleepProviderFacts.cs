@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using Waives.Http.RequestHandling;
+using Xunit;
 
 namespace Waives.Http.Tests
 {

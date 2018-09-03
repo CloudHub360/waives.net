@@ -6,7 +6,7 @@ using Polly.Extensions.Http;
 using Polly.Retry;
 using Waives.Http.Logging;
 
-namespace Waives.Http
+namespace Waives.Http.RequestHandling
 {
     internal class ReliableRequestSender : IHttpRequestSender
     {
