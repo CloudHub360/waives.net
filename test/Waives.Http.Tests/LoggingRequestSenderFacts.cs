@@ -19,7 +19,7 @@ namespace Waives.Http.Tests
         {
             _sender = Substitute.For<IHttpRequestSender>();
             _logger = Substitute.For<ILogger>();
-            _sut = new LoggingRequestSender(_sender, _logger);
+            _sut = new LoggingRequestSender(_logger, _sender);
 
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
