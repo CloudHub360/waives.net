@@ -28,7 +28,7 @@ namespace Waives.Http.Responses
             return _uri;
         }
 
-        private Uri ApplyTemplateTokens(Uri uri, object templateTokens)
+        private static Uri ApplyTemplateTokens(Uri uri, object templateTokens)
         {
             var uriString = uri.ToString();
 

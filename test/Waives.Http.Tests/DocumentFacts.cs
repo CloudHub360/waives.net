@@ -17,14 +17,12 @@ namespace Waives.Http.Tests
     {
         private readonly IHttpRequestSender _requestSender = Substitute.For<IHttpRequestSender>();
         private readonly Document _sut;
-        private readonly string _readUrl;
         private readonly string _classifyUrl;
         private readonly string _extractUrl;
         private readonly string _selfUrl;
         private readonly string _classifierName;
         private readonly string _extractorName;
         private readonly string _readResultsFilename;
-        private readonly string _readResultsContent;
 
         public DocumentFacts()
         {
@@ -32,14 +30,14 @@ namespace Waives.Http.Tests
             _classifierName = "classifier";
             _extractorName = "extractor";
 
-            _readUrl = $"/documents/{documentId}/reads";
+            var readUrl = $"/documents/{documentId}/reads";
             _classifyUrl = $"/documents/{documentId}/classify/{_classifierName}";
             _extractUrl = $"/documents/{documentId}/extract/{_extractorName}";
             _selfUrl = $"/documents/{documentId}";
 
             IDictionary<string, HalUri> behaviours = new Dictionary<string, HalUri>
             {
-                { "document:read", new HalUri(new Uri(_readUrl, UriKind.Relative), false) },
+                { "document:read", new HalUri(new Uri(readUrl, UriKind.Relative), false) },
                 { "document:classify", new HalUri(new Uri(_classifyUrl, UriKind.Relative), true) },
                 { "document:extract", new HalUri(new Uri(_extractUrl, UriKind.Relative), true) },
                 { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) }
@@ -48,7 +46,6 @@ namespace Waives.Http.Tests
             _sut = new Document(_requestSender, "id", behaviours);
 
             _readResultsFilename = Path.GetTempFileName();
-            _readResultsContent = "some text that was read";
         }
 
         [Fact]

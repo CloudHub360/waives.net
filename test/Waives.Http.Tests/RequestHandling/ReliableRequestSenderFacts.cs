@@ -112,7 +112,7 @@ namespace Waives.Http.Tests
             };
         }
 
-        private bool RequestsAreEqual(HttpRequestMessageTemplate expectedRequest, HttpRequestMessageTemplate actualRequest)
+        private static bool RequestsAreEqual(HttpRequestMessageTemplate expectedRequest, HttpRequestMessageTemplate actualRequest)
         {
             Assert.Equal(expectedRequest.Method, actualRequest.Method);
             Assert.Equal(expectedRequest.RequestUri, actualRequest.RequestUri);
