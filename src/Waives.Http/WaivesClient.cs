@@ -28,13 +28,14 @@ namespace Waives.Http
                 new LoggingRequestSender(
                     logger,
                     new ExceptionHandlingRequestSender(
-                        new ReliableRequestSender(
-                            logger,
-                            new RequestSender(
-                                new HttpClient
-                                {
-                                    BaseAddress = apiUri
-                                })))));
+                        new FailedRequestHandlingRequestSender(
+                            new ReliableRequestSender(
+                                logger,
+                                new RequestSender(
+                                    new HttpClient
+                                    {
+                                        BaseAddress = apiUri
+                                    }))))));
         }
 
         internal WaivesClient(IHttpRequestSender requestSender)
