@@ -77,28 +77,6 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task Send_retries_on_waives_api_exception()
-        {
-            var sender = Substitute.For<IHttpRequestSender>();
-
-            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
-            sender.Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(
-                    x => throw new WaivesApiException(exceptionMessage),
-                    x => Responses.Success(x.Arg<HttpRequestMessageTemplate>()));
-
-            var sut = new ReliableRequestSender(_retryLogger, sender);
-
-            await sut.Send(_request);
-
-            _retryLogger
-                .Received(1)
-                .Log(
-                    LogLevel.Warn,
-                    Arg.Is<string>(m => m.Contains(exceptionMessage)));
-        }
-
-        [Fact]
         public async Task Send_calls_the_wrapped_request_sender_with_a_properly_cloned_request()
         {
             var request = ARequestWithContentAndHeader();

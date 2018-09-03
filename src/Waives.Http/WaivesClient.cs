@@ -25,11 +25,11 @@ namespace Waives.Http
             logger = logger ?? new NoopLogger();
 
             return new WaivesClient(
-                new ReliableRequestSender(
+                new LoggingRequestSender(
                     logger,
-                    new LoggingRequestSender(
-                        logger,
-                        new ExceptionHandlingRequestSender(
+                    new ExceptionHandlingRequestSender(
+                        new ReliableRequestSender(
+                            logger,
                             new RequestSender(
                                 new HttpClient
                                 {

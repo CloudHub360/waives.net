@@ -18,9 +18,8 @@ namespace Waives.Http
         {
             var sleepDurationProvider = new ExponentialBackoffSleepProvider();
 
-            _policy = Policy
-                .Handle<WaivesApiException>()
-                .OrTransientHttpStatusCode()
+            _policy = HttpPolicyExtensions
+                .HandleTransientHttpError()
                 .WaitAndRetryAsync(8,
                     sleepDurationProvider.GetSleepDuration,
                     LogRetryAttempt);

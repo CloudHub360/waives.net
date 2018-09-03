@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
-using Waives.Http.Responses;
 
 namespace Waives.Http
 {
@@ -37,21 +36,7 @@ namespace Waives.Http
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)
         {
             var request = template.CreateRequest();
-
-            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            if (response.IsSuccessStatusCode)
-            {
-                return response;
-            }
-
-            var responseContentType = response.Content.Headers.ContentType.MediaType;
-            if (responseContentType == "application/json")
-            {
-                var error = await response.Content.ReadAsAsync<Error>().ConfigureAwait(false);
-                throw new WaivesApiException(error.Message);
-            }
-
-            throw new WaivesApiException($"Unknown Waives error occured: {(int)response.StatusCode} {response.ReasonPhrase}");
+            return await _httpClient.SendAsync(request).ConfigureAwait(false);
         }
     }
 }
