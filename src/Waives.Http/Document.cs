@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Waives.Http.RequestHandling;
@@ -19,39 +18,6 @@ namespace Waives.Http
             _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
             _behaviours = behaviours ?? throw new ArgumentNullException(nameof(behaviours));
             Id = id ?? throw new ArgumentNullException(nameof(id));
-        }
-
-        public async Task Read(string resultsFilename, string contentType = null)
-        {
-            contentType = contentType ?? ContentTypes.WaivesReadResults;
-            var requestUri = _behaviours["document:read"].CreateUri();
-
-            await DoRead(requestUri).ConfigureAwait(false);
-            var httpContent = await GetReadResults(requestUri, contentType).ConfigureAwait(false);
-
-            using (var fileStream = File.OpenWrite(resultsFilename))
-            {
-                await httpContent.CopyToAsync(fileStream).ConfigureAwait(false);
-            }
-        }
-
-        private async Task DoRead(Uri requestUri)
-        {
-            var readRequest = new HttpRequestMessageTemplate(HttpMethod.Put, requestUri)
-            {
-                Content = new StringContent(string.Empty)
-            };
-
-            await _requestSender.Send(readRequest).ConfigureAwait(false);
-        }
-
-        private async Task<HttpContent> GetReadResults(Uri requestUri, string contentType)
-        {
-            var request = new HttpRequestMessageTemplate(HttpMethod.Get, requestUri);
-            request.Headers.Add(new KeyValuePair<string, string>("Accept", contentType));
-
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-            return response.Content;
         }
 
         public async Task Delete()
