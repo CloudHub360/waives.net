@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace Waives.Http.Tests
 {
@@ -21,6 +22,22 @@ namespace Waives.Http.Tests
         public static HttpResponseMessage Success(HttpRequestMessageTemplate requestTemplate)
         {
             return From(HttpStatusCode.OK, requestTemplate);
+        }
+
+        public static HttpResponseMessage SuccessFrom(HttpStatusCode statusCode, HttpRequestMessageTemplate request)
+        {
+            return From(statusCode, request, new StringContent(GetAllDocumentsResponse)
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue("application/json" )}
+            });
+        }
+
+        public static HttpResponseMessage ErrorFrom(HttpStatusCode statusCode, HttpRequestMessageTemplate requestTemplate)
+        {
+            return From(statusCode, requestTemplate, new StringContent(ErrorResponse)
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+            });
         }
 
         public const string ErrorMessage = "The error message";
