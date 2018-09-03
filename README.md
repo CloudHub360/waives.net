@@ -51,7 +51,7 @@ To get started with this API, simply:
 ```csharp
 // Define a pipeline that classifies each document and writes its classification
 // to the console. This will also authenticate with the Waives API.
-var pipeline = WaivesApi.CreatePipeline(new WaivesOptions
+var pipeline = await WaivesApi.CreatePipeline(new WaivesOptions
 {
     ClientId = "clientId",
     ClientSecret = "clientSecret"
