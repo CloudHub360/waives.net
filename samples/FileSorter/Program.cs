@@ -70,6 +70,7 @@ namespace FileSorter
             pipeline.WithDocumentsFrom(filesystem)
                 .ClassifyWith(options["<classifier>"].ToString())
                 .Then(d => fileSorter.MoveDocument(d))
+                .OnDocumentError(e => Console.WriteLine($"Processing {e.Document} failed: {e.Exception.Message}"))
                 .OnPipelineCompleted(() => Console.WriteLine("Processing completed, press any key to exit."));
 
             try

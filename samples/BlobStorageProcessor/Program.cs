@@ -70,7 +70,9 @@ namespace BlobStorageProcessor
 
             pipeline.WithDocumentsFrom(blobStorage)
                 .ClassifyWith(options["--classifier"].ToString())
-                .Then(d => writer.Write(d));
+                .Then(d => writer.Write(d))
+                .OnDocumentError(e => Console.WriteLine($"Processing {e.Document} failed: {e.Exception.Message}"))
+                .OnPipelineCompleted(() => Console.WriteLine(("Processing completed.")));
 
             try
             {
