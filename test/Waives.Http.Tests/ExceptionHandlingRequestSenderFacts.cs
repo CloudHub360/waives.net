@@ -62,47 +62,6 @@ namespace Waives.Http.Tests
             Assert.Contains(_request.RequestUri.ToString(), actualException.Message);
         }
 
-        [Fact]
-        public async Task Throws_WaivesApiException_if_wrapped_sender_throws_another_exception()
-        {
-            var expectedException = new Exception("an error message");
-            _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(expectedException);
-
-            await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.Send(_request));
-        }
-
-        [Fact]
-        public async Task Includes_original_exception_as_inner_exception_if_wrapped_sender_throws_another_exception()
-        {
-            var expectedException = new Exception("an error message");
-            _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(expectedException);
-
-            var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.Send(_request));
-
-            Assert.Same(expectedException, actualException.InnerException);
-        }
-
-        [Fact]
-        public async Task Includes_request_details_in_exception_if_wrapped_sender_throws_another_exception()
-        {
-            var expectedException = new Exception("an error message");
-            _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(expectedException);
-
-            var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.Send(_request));
-
-            Assert.Contains(_request.Method.ToString(), actualException.Message);
-            Assert.Contains(_request.RequestUri.ToString(), actualException.Message);
-        }
-
         // If HttpClient times-out (client-side) then one of these exceptions is thrown
         // ReSharper disable once MemberCanBePrivate.Global
         public static IEnumerable<object[]> TimeoutExceptions()
