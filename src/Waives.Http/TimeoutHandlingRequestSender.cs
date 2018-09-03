@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Waives.Http
 {
-    internal class ExceptionHandlingRequestSender : IHttpRequestSender
+    internal class TimeoutHandlingRequestSender : IHttpRequestSender
     {
         private readonly IHttpRequestSender _wrappedRequestSender;
 
-        public ExceptionHandlingRequestSender(IHttpRequestSender wrappedRequestSender)
+        public TimeoutHandlingRequestSender(IHttpRequestSender wrappedRequestSender)
         {
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
