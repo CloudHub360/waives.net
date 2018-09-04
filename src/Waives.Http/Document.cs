@@ -7,10 +7,18 @@ using Waives.Http.Responses;
 
 namespace Waives.Http
 {
+    /// <summary>
+    /// A client for the Waives' Documents API. Instances can be obtained
+    /// via document operations on <see cref="WaivesClient"/>.
+    /// </summary>
     public class Document
     {
         private readonly IHttpRequestSender _requestSender;
         private readonly IDictionary<string, HalUri> _behaviours;
+
+        /// <summary>
+        /// Gets the string identifier of this document in the Waives platform.
+        /// </summary>
         public string Id { get; }
 
         internal Document(IHttpRequestSender requestSender, string id, IDictionary<string, HalUri> behaviours)
@@ -20,6 +28,9 @@ namespace Waives.Http
             Id = id ?? throw new ArgumentNullException(nameof(id));
         }
 
+        /// <summary>
+        /// Deletes this document in the Waives platform.
+        /// </summary>
         public async Task Delete()
         {
             var selfUrl = _behaviours["self"];
@@ -30,6 +41,12 @@ namespace Waives.Http
             await _requestSender.Send(request).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Performs classification on this document using the given classifer
+        /// name. The named classifier must already exist in the Waives platform.
+        /// </summary>
+        /// <param name="classifierName">The name of the classifier to use.</param>
+        /// <returns>The results of the classification operation.</returns>
         public async Task<ClassificationResult> Classify(string classifierName)
         {
             var classifyUrl = _behaviours["document:classify"];
@@ -45,6 +62,12 @@ namespace Waives.Http
             return responseBody.ClassificationResults;
         }
 
+        /// <summary>
+        /// Performs extraction on this document using the given extractor
+        /// name. The named extractor must already exist in the Waives platform.
+        /// </summary>
+        /// <param name="extractorName">The name of the extractor to use.</param>
+        /// <returns>The results of the extraction operation.</returns>
         public async Task<ExtractionResponse> Extract(string extractorName)
         {
             var extractUrl = _behaviours["document:extract"];
