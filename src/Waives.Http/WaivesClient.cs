@@ -63,31 +63,18 @@ namespace Waives.Http
                     Content = new StreamContent(documentSource)
                 };
 
-            return await CreateDocument(request).ConfigureAwait(false);
-        }
-
-        public async Task<Document> CreateDocument(string path)
-        {
-            var request =
-                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
-                {
-                    Content = new StreamContent(File.OpenRead(path))
-                };
-
-            return await CreateDocument(request).ConfigureAwait(false);
-        }
-
-        private async Task<Document> CreateDocument(HttpRequestMessageTemplate request)
-        {
             var response = await _requestSender.Send(request).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
 
-            var document = new Document(_requestSender, id, behaviours);
+            return new Document(_requestSender, id, behaviours);
+        }
 
-            return document;
+        public async Task<Document> CreateDocument(string path)
+        {
+            return await CreateDocument(File.OpenRead(path)).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Document>> GetAllDocuments()
