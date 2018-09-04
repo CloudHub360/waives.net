@@ -58,6 +58,14 @@ namespace Waives.Http.Tests.RequestHandling
             });
         }
 
+        public static HttpResponseMessage GetDocument(HttpRequestMessageTemplate requestTemplate)
+        {
+            return From(HttpStatusCode.OK, requestTemplate, new StringContent(GetDocumentResponse)
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+            });
+        }
+
         public static HttpResponseMessage GetAllDocuments(HttpRequestMessageTemplate requestTemplate)
         {
             return From(HttpStatusCode.OK, requestTemplate, new StringContent(GetAllDocumentsResponse)
@@ -159,6 +167,31 @@ namespace Waives.Http.Tests.RequestHandling
                 }]
             }
         }";
+
+        private const string GetDocumentResponse = @"{
+    ""id"": ""expectedDocumentId1"",
+    ""_links"": {
+        ""document:read"": {
+            ""href"": ""/documents/expectedDocumentId1/reads""
+        },
+        ""document:classify"": {
+            ""href"": ""/documents/expectedDocumentId1/classify/{classifier_name}"",
+            ""templated"": true
+        },
+        ""self"": {
+            ""href"": ""/documents/expectedDocumentId1""
+        }
+    },
+    ""_embedded"": {
+        ""files"": [
+        {
+            ""id"": ""HEE7UnX680y7yecR-yXsPA"",
+            ""file_type"": ""Image:TIFF"",
+            ""size"": 41203,
+            ""sha256"": ""eeea8dbbf4f0da70bf3dcc25ee0ecf5c6f8a4eae2817fe782a59589cbd4cb9fd""
+        }]
+    }
+}";
 
         private const string GetAllDocumentsResponse = @"{
 	        ""documents"": [

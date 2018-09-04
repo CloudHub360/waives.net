@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -123,6 +124,48 @@ namespace Waives.Http.Tests
 
                 Assert.Equal(Response.ErrorMessage, exception.Message);
             }
+        }
+
+        [Fact]
+        public async Task GetDocument_sends_a_request_to_the_correct_url()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.GetDocument(ci.Arg<HttpRequestMessageTemplate>()));
+
+            var documentId = $"anonymousString{Guid.NewGuid()}";
+            await _sut.GetDocument(documentId);
+
+            await _requestSender
+                .Received(1)
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                    m.Method == HttpMethod.Get &&
+                    m.RequestUri.ToString() == $"/documents/{documentId}"));
+        }
+
+        [Fact]
+        public async Task GetDocument_returns_the_requested_document()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.GetDocument(ci.Arg<HttpRequestMessageTemplate>()));
+
+            var document = await _sut.GetDocument($"anonymousString{Guid.NewGuid()}");
+
+            Assert.Equal("expectedDocumentId1", document.Id);
+        }
+
+        [Fact]
+        public async Task GetDocument_throws_if_response_is_not_success_code()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Throws(new WaivesApiException(Response.ErrorMessage));
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
+                _sut.GetDocument($"anonymousString{Guid.NewGuid()}"));
+
+            Assert.Equal(Response.ErrorMessage, exception.Message);
         }
 
         [Fact]
