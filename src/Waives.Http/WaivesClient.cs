@@ -55,6 +55,25 @@ namespace Waives.Http
             set => _requestSender.Timeout = value;
         }
 
+        public async Task Login(string clientId, string clientSecret)
+        {
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
+            {
+                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    {"client_id", clientId},
+                    {"client_secret", clientSecret}
+                })
+            };
+
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+
+            var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
+            var accessToken = responseContent.Token;
+
+            _requestSender.Authenticate(accessToken);
+        }
+
         public async Task<Document> CreateDocument(Stream documentSource)
         {
             var request =
@@ -84,25 +103,6 @@ namespace Waives.Http
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
             return responseContent.Documents.Select(d => new Document(_requestSender, d.Id, d.Links));
-        }
-
-        public async Task Login(string clientId, string clientSecret)
-        {
-            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
-            {
-                Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    {"client_id", clientId},
-                    {"client_secret", clientSecret}
-                })
-            };
-
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-
-            var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
-            var accessToken = responseContent.Token;
-
-            _requestSender.Authenticate(accessToken);
         }
     }
 }
