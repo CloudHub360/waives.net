@@ -96,6 +96,20 @@ namespace Waives.Http
             return await CreateDocument(File.OpenRead(path)).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Fetch a reference for the given document in the Waives platform.
+        /// </summary>
+        /// <param name="id">The ID of the document, as returned by <see cref="CreateDocument(Stream)"/>.</param>
+        /// <returns>A <see cref="Document"/> client for the specified document ID.</returns>
+        public async Task<Document> GetDocument(string id)
+        {
+            var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/documents/{id}", UriKind.Relative));
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+
+            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            return new Document(_requestSender, responseContent.Id, responseContent.Links);
+        }
+
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
