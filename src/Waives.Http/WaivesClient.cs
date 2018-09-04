@@ -14,12 +14,29 @@ using Waives.Http.Responses;
 [assembly: InternalsVisibleTo("Waives.Pipelines")]
 namespace Waives.Http
 {
+    /// <summary>
+    /// The top-level client class for communicating with the Waives platform API.
+    /// </summary>
     public class WaivesClient
     {
         internal const string DefaultUrl = "https://api.waives.io";
 
         private readonly IHttpRequestSender _requestSender;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="WaivesClient"/> using the given
+        /// API URI and logger. By default, the client is created for the public
+        /// Waives platform at https://api.waives.io/, and no logger is used.
+        /// <see cref="Login"/> must be called on this client before attempting to
+        /// use it for document operations.
+        /// </summary>
+        /// <param name="apiUri">The URI of the Waives API instance to use. Defaults
+        /// to https://api.waives.io/. </param>
+        /// <param name="logger">An optional logger to use, for further insight into
+        /// the requests being issued.</param>
+        /// <returns>A new <see cref="WaivesClient"/> instance. <see cref="Login"/>
+        /// must be called on this client before attempting to use it for document
+        /// operations.</returns>
         public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
         {
             apiUri = apiUri ?? new Uri(DefaultUrl);
@@ -55,6 +72,12 @@ namespace Waives.Http
             set => _requestSender.Timeout = value;
         }
 
+        /// <summary>
+        /// Authenticate your application with the Waives platform.
+        /// </summary>
+        /// <param name="clientId">The Waives API Client ID to use when authenticating with the service.</param>
+        /// <param name="clientSecret">The Waives API Client Secret to use when authenticating with the
+        /// service.</param>
         public async Task Login(string clientId, string clientSecret)
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
@@ -74,6 +97,20 @@ namespace Waives.Http
             _requestSender.Authenticate(accessToken);
         }
 
+        /// <summary>
+        /// Creates a new document in the Waives platform from the provided <see cref="Stream"/>.
+        /// </summary>
+        /// <remarks>
+        /// The Waives platform implements a limit on the number of documents that may concurrently
+        /// exist within your account. It is expected that documents will exist only transiently
+        /// within the Waives platform, and must be deleted after all desired operations have been
+        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// </remarks>
+        /// <param name="documentSource">The <see cref="Stream"/> source of the document.</param>
+        /// <returns>A <see cref="Document"/> client for the given document.</returns>
+        /// <seealso cref="Document"/>
+        /// <seealso cref="Document.Delete"/>
         public async Task<Document> CreateDocument(Stream documentSource)
         {
             var request =
@@ -91,6 +128,20 @@ namespace Waives.Http
             return new Document(_requestSender, id, behaviours);
         }
 
+        /// <summary>
+        /// Creates a new document in the Waives platform from the provided file path.
+        /// </summary>
+        /// <remarks>
+        /// The Waives platform implements a limit on the number of documents that may concurrently
+        /// exist within your account. It is expected that documents will exist only transiently
+        /// within the Waives platform, and must be deleted after all desired operations have been
+        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// </remarks>
+        /// <param name="path">A path to a file on disk from which the document will be created.</param>
+        /// <returns>A <see cref="Document"/> client for the given document.</returns>
+        /// <seealso cref="Document"/>
+        /// <seealso cref="Document.Delete"/>
         public async Task<Document> CreateDocument(string path)
         {
             return await CreateDocument(File.OpenRead(path)).ConfigureAwait(false);
@@ -110,6 +161,18 @@ namespace Waives.Http
             return new Document(_requestSender, responseContent.Id, responseContent.Links);
         }
 
+        /// <summary>
+        /// Retrieves all documents created in your account in the Waives platform.
+        /// </summary>
+        /// <remarks>
+        /// The Waives platform implements a limit on the number of documents that may concurrently
+        /// exist within your account. It is expected that documents will exist only transiently
+        /// within the Waives platform, and must be deleted after all desired operations have been
+        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// </remarks>
+        /// <returns>An <see cref="IEnumerable{Document}"/> representing all the documents
+        /// created in your account.</returns>
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
