@@ -29,7 +29,8 @@ namespace Waives.Http.Tests
                 .Send(_request)
                 .ReturnsForAnyArgs(Response.ErrorFrom(statusCode, _request));
 
-            await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Send(_request));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Send(_request));
+            Assert.Equal(Response.ErrorMessage, exception.Message);
         }
 
         [Theory, MemberData(nameof(SuccessStatusCodes))]
