@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -367,6 +368,25 @@ namespace Waives.Pipelines.Tests
             Assert.Equal(2, onDocumentErrorCalledFor.Count);
             Assert.Equal(1, onDocumentErrorCalledFor.First().sequence);
             Assert.Equal(2, onDocumentErrorCalledFor.Last().sequence);
+        }
+
+        [Fact]
+        public void OnDocumentError_does_not_swallow_exceptions_throw_by_the_error_handler()
+        {
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var expectedException = new IOException("Test test test");
+
+            _rateLimiter
+                .RateLimited(Arg.Any<IObservable<Document>>())
+                .Returns(source);
+
+            var pipeline = _sut
+                .WithDocumentsFrom(source)
+                .Then(d => throw new Exception("Document error"))
+                .OnDocumentError(err => throw expectedException);
+
+            var exception = Assert.Throws<PipelineException>(() => pipeline.Start());
+            Assert.Same(expectedException, exception.InnerException);
         }
 
         private class FakeRateLimiter : IRateLimiter
