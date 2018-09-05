@@ -11,13 +11,6 @@ namespace Waives.Pipelines
         {
         }
 
-        public PipelineException(Exception innerException)
-            : base("A fatal error occurred in the processing pipeline. View the InnerException " +
-                   "for more details.", innerException)
-        {
-
-        }
-
         public PipelineException(string message) : base(message)
         {
         }

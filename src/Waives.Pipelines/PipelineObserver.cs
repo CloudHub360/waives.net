@@ -18,7 +18,7 @@ namespace Waives.Pipelines
 
         public void OnError(Exception error)
         {
-            throw new PipelineException(error);
+            throw new PipelineException($"A fatal error occurred in the processing pipeline: {error.Message}", error);
         }
 
         public void OnNext(WaivesDocument value)
