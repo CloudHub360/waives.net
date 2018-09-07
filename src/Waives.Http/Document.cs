@@ -74,7 +74,7 @@ namespace Waives.Http
             var request = new HttpRequestMessageTemplate(HttpMethod.Post,
                 extractUrl.CreateUri(new
                 {
-                    classifier_name = extractorName
+                    extractor_name = extractorName
                 }));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);

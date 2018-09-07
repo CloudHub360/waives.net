@@ -31,6 +31,10 @@ namespace Waives.Http.Tests
             _extractorName = "extractor";
 
             var readUrl = $"/documents/{documentId}/reads";
+
+            var templatedClassifyUrl = $"/documents/{documentId}/classify/" + "{classifier_name}";
+            var templatedExtractUrl = $"/documents/{documentId}/extract/" + "{extractor_name}";
+
             _classifyUrl = $"/documents/{documentId}/classify/{_classifierName}";
             _extractUrl = $"/documents/{documentId}/extract/{_extractorName}";
             _selfUrl = $"/documents/{documentId}";
@@ -38,8 +42,8 @@ namespace Waives.Http.Tests
             IDictionary<string, HalUri> behaviours = new Dictionary<string, HalUri>
             {
                 { "document:read", new HalUri(new Uri(readUrl, UriKind.Relative), false) },
-                { "document:classify", new HalUri(new Uri(_classifyUrl, UriKind.Relative), true) },
-                { "document:extract", new HalUri(new Uri(_extractUrl, UriKind.Relative), true) },
+                { "document:classify", new HalUri(new Uri(templatedClassifyUrl, UriKind.Relative), true) },
+                { "document:extract", new HalUri(new Uri(templatedExtractUrl, UriKind.Relative), true) },
                 { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) }
             };
 
