@@ -22,7 +22,7 @@ namespace Waives.Pipelines.Tests
         {
             var httpDocument = Substitute.For<IHttpDocument>();
             httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
-            httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResponse());
+            httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
             httpDocument.Delete(Arg.Invoke());
 
             _documentFactory
