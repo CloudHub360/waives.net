@@ -25,7 +25,7 @@ namespace Waives.Http.Responses
     /// scenario, you may want to route this document for a person to review, or handle differently in some other way.
     /// </para>
     /// <para>In general, unconfident classifications indicate that the content of the document is substantially different
-    /// from any documents contained in your sample set.Therefore you may also wish to capture these documents, analyse them
+    /// from any documents contained in your sample set. Therefore you may also wish to capture these documents, analyse them
     /// and if appropriate add some to your samples and retrain your classifier.
     /// </para>
     /// </remarks>
