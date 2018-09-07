@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Waives.Http.Responses
@@ -69,7 +70,7 @@ namespace Waives.Http.Responses
         /// Gets the value of the result as a non-text type (e.g. Decimal or DateTime), if available
         /// </summary>
         [JsonProperty("value")]
-        public string Value { get; internal set; }
+        public Object Value { get; internal set; }
 
         /// <summary>
         /// Gets a score indicating how well any proximity rules have been met
