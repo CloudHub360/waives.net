@@ -150,26 +150,35 @@ namespace Waives.Http.Tests
 
 
             var extractionPage = response.DocumentMetadata.Pages.First();
+
             Assert.Equal(1, response.DocumentMetadata.PageCount);
             Assert.Equal(1, extractionPage.PageNumber);
             Assert.Equal(611.0, extractionPage.Width);
             Assert.Equal(1008.0, extractionPage.Height);
 
-            var extractionResult = response.ExtractionResults.First();
-            Assert.Equal("Amount", extractionResult.FieldName);
-            Assert.False(extractionResult.Rejected);
-            Assert.Equal("None", extractionResult.RejectReason);
-            Assert.Equal("$5.50", extractionResult.FieldResult.Text);
-            Assert.Equal(100.0, extractionResult.FieldResult.ProximityScore);
-            Assert.Equal(100.0, extractionResult.FieldResult.MatchScore);
-            Assert.Equal(100.0, extractionResult.FieldResult.TextScore);
+            var fieldResult = response.FieldResults.First();
+            Assert.Equal("Amount", fieldResult.FieldName);
+            Assert.False(fieldResult.Rejected);
+            Assert.Equal("None", fieldResult.RejectReason);
 
-            var extractionResultArea = extractionResult.FieldResult.ResultAreas.First();
-            Assert.Equal(558.7115, extractionResultArea.Top);
-            Assert.Equal(276.48, extractionResultArea.Left);
-            Assert.Equal(571.1989, extractionResultArea.Bottom);
-            Assert.Equal(298.58, extractionResultArea.Right);
-            Assert.Equal(1, extractionResultArea.PageNumber);
+            var primaryResult = fieldResult.Result;
+            Assert.Equal("$5.50", primaryResult.Text);
+            Assert.Equal(100.0, primaryResult.ProximityScore);
+            Assert.Equal(100.0, primaryResult.MatchScore);
+            Assert.Equal(100.0, primaryResult.TextScore);
+
+            var primaryResultArea = primaryResult.ResultAreas.First();
+            Assert.Equal(558.7115, primaryResultArea.Top);
+            Assert.Equal(276.48, primaryResultArea.Left);
+            Assert.Equal(571.1989, primaryResultArea.Bottom);
+            Assert.Equal(298.58, primaryResultArea.Right);
+            Assert.Equal(1, primaryResultArea.PageNumber);
+
+            var firstAlternativeResult = fieldResult.Alternatives.First();
+            Assert.Equal("$10.50", firstAlternativeResult.Text);
+
+            var firstAlternativeResultArea = firstAlternativeResult.ResultAreas.First();
+            Assert.Equal(123.4567, firstAlternativeResultArea.Top);
         }
 
         [Fact]
