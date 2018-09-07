@@ -167,7 +167,7 @@ namespace Waives.Http.Tests
             Assert.Equal(100.0, primaryResult.MatchScore);
             Assert.Equal(100.0, primaryResult.TextScore);
 
-            var primaryResultArea = primaryResult.ResultAreas.First();
+            var primaryResultArea = primaryResult.Areas.First();
             Assert.Equal(558.7115, primaryResultArea.Top);
             Assert.Equal(276.48, primaryResultArea.Left);
             Assert.Equal(571.1989, primaryResultArea.Bottom);
@@ -177,7 +177,7 @@ namespace Waives.Http.Tests
             var firstAlternativeResult = fieldResult.Alternatives.First();
             Assert.Equal("$10.50", firstAlternativeResult.Text);
 
-            var firstAlternativeResultArea = firstAlternativeResult.ResultAreas.First();
+            var firstAlternativeResultArea = firstAlternativeResult.Areas.First();
             Assert.Equal(123.4567, firstAlternativeResultArea.Top);
         }
 

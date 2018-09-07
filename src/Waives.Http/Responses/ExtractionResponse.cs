@@ -93,7 +93,7 @@ namespace Waives.Http.Responses
         /// Gets a list of areas from which the result originated
         /// </summary>
         [JsonProperty("areas")]
-        public IEnumerable<ExtractionResultArea> ResultAreas { get; internal set; }
+        public IEnumerable<ExtractionResultArea> Areas { get; internal set; }
     }
 
     /// <summary>
