@@ -275,7 +275,25 @@ namespace Waives.Http.Tests.RequestHandling
             ""page_number"": 1
         }]
     },
-    ""alternatives"": null,
+    ""alternatives"": [
+    {
+            ""text"": ""$10.50"",
+            ""value"": null,
+            ""rejected"": false,
+            ""reject_reason"": ""None"",
+            ""proximity_score"": 100.0,
+            ""match_score"": 100.0,
+            ""text_score"": 100.0,
+            ""areas"": [
+            {
+                ""top"": 123.4567,
+                ""left"": 276.48,
+                ""bottom"": 571.1989,
+                ""right"": 298.58,
+                ""page_number"": 1
+            }]
+        }
+    ],
     ""tabular_results"": null
 }],
 ""document"": {
