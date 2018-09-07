@@ -26,7 +26,7 @@ namespace Waives.Pipelines
 
         public ClassificationResult ClassificationResults { get; private set; }
 
-        public ExtractionResponse ExtractionResults { get; private set; }
+        public ExtractionResults ExtractionResults { get; private set; }
 
         public async Task<WaivesDocument> Classify(string classifierName)
         {

@@ -68,7 +68,7 @@ namespace Waives.Http
         /// </summary>
         /// <param name="extractorName">The name of the extractor to use.</param>
         /// <returns>The results of the extraction operation.</returns>
-        public async Task<ExtractionResponse> Extract(string extractorName)
+        public async Task<ExtractionResults> Extract(string extractorName)
         {
             var extractUrl = _behaviours["document:extract"];
             var request = new HttpRequestMessageTemplate(HttpMethod.Post,
@@ -78,7 +78,7 @@ namespace Waives.Http
                 }));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-            var responseBody = await response.Content.ReadAsAsync<ExtractionResponse>().ConfigureAwait(false);
+            var responseBody = await response.Content.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
             return responseBody;
         }
     }

@@ -6,7 +6,7 @@ namespace Waives.Http.Responses
     /// <summary>
     /// Represents an extraction result response.
     /// </summary>
-    public class ExtractionResponse
+    public class ExtractionResults
     {
         /// <summary>
         /// Gets the extraction results for the document.

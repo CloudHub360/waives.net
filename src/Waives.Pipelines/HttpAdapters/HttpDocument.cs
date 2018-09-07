@@ -13,7 +13,7 @@ namespace Waives.Pipelines.HttpAdapters
     {
         Task<ClassificationResult> Classify(string classifierName);
 
-        Task<ExtractionResponse> Extract(string extractorName);
+        Task<ExtractionResults> Extract(string extractorName);
 
         Task Delete(Action afterDeletedAction);
 
@@ -42,7 +42,7 @@ namespace Waives.Pipelines.HttpAdapters
             return await _documentClient.Classify(classifierName).ConfigureAwait(false);
         }
 
-        public async Task<ExtractionResponse> Extract(string extractorName)
+        public async Task<ExtractionResults> Extract(string extractorName)
         {
             return await _documentClient.Extract(extractorName).ConfigureAwait(false);
         }
