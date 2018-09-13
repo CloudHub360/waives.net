@@ -100,6 +100,33 @@ Include information about your development and runtime environment:
 
 ### Suggesting enhancements
 
+Enhancement suggestions are very welcome, from improving existing functionality to entirely new features. Following this
+guide will help the maintainers and community understand your suggestion and find related suggestions.
+
+Before submitting a suggestion, please check [this list](#before-submitting-an-enhancement-suggestion) as you may find
+you don't need to create one. When creating an enhancement suggestion, please [include as many details as you can](#how-do-i-submit-a-good-enhancement-suggestion).
+Fill in [the template](https://github.com/waives/waives.net/blob/master/.github/ISSUE_TEMPLATE/feature_request.md), and
+include [code samples](https://help.github.com/articles/markdown-basics/#multiple-lines) illustrating how you would like
+to consume your new feature if it existed.
+
+#### Before submitting an enhancement suggestion
+
+1. Indentify which API the enhancement belongs in: the HTTP API or the Pipelines API.
+2. Please do [a quick search](https://github.com/search?q=+is%3Aissue+user%3Awaives) to see if the enhancement has already been suggested. If it has, **please add a comment to the existing issue** rather than opening a new one.
+
+#### How do I submit a (good) enhancement suggestion?
+
+Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com/features/issues/). Create an issue
+using [the provided template](https://github.com/waives/waives.net/blob/master/.github/ISSUE_TEMPLATE/feature_request.md)
+and provide the following information:
+
+* **Use a clear and descriptive title** for the issue to identify the suggestion.
+* **Provide a step-by-step description of the suggested enhancement** in as many details as possible.
+* **Provide specific examples to demonstrate the steps.** Include code samples (as [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines)) illustrating how you would like to consume the feature.
+* **Explain why the enhancement would be useful** to most Waives.NET users and isn't something application-specific.
+* **Specify the version of Waives.NET you're using**.
+* **Specify the name and version of the OS you're using**. If you're running Windows, please include the data output by the `winver` command.
+
 ### Your first contribution
 
 ### Pull requests
