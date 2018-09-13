@@ -2,7 +2,7 @@
 
 :green_heart: *Thank you for taking the time to contribute!* :green_heart: We know that contributing
 to an open-source project is time-consuming and sometimes can be stressful too. This guide is here to
-help you with your contributions. 
+help you with your contributions.
 
 ## Table of Contents
 
@@ -27,15 +27,15 @@ to [community@waives.io](mailto:community@waives.io).
 Please:
 
 1. **Be friendly and respectful to all with whom you interact here.** Remember text is a lossy communication format
-and what you write _will_ be interpreted differently from how it was meant.
+and what you write will most likely be interpreted differently from how it was meant.
 2. **Use the bug and pull request templates provided.** These are here to make everyone's lives easier, contributors
 and maintainers.
 3. **Keep your commits and pull requests small.** A small commit is easier to understand, to cherry-pick, revert, and
-undo. Pull requests are easier to review, and so will be merged more quickly, if you keep them small. 
+undo. Pull requests are easier to review, and so will be merged more quickly, if you keep them small.
 4. **Follow the coding guidelines.** We have tried to make these easy-to-follow and not too demanding; hopefully it
-will be clear from the code files themselves, but there are also written guides for reference. 
+will be clear from the code files themselves, but there are also written guides for reference.
 5. **Include clear and thoughtfully-worded tests.** Tests should only test one thing, and they should clearly describe
-the behaviour they're trying to test. Take your time over test names. 
+the behaviour they're trying to test. Take your time over test names.
 
 :pray: Thank you for your time and contributions! :pray:
 
@@ -43,7 +43,7 @@ the behaviour they're trying to test. Take your time over test names.
 
 We'd love to answer your questions! We'll be happy to answer your questions via email at support@waives.io, and we
 expect to implement lower-friction communication methods such as chat and message boards in time as the project and
-community grows. Please do _not_ file issues to ask questions; these are for work items (e.g. bugs, features) only. 
+community grows. Please do _not_ file issues to ask questions; these are for work items (e.g. bugs, features) only.
 
 ## How can I contribute?
 
