@@ -127,9 +127,29 @@ and provide the following information:
 * **Specify the version of Waives.NET you're using**.
 * **Specify the name and version of the OS you're using**. If you're running Windows, please include the data output by the `winver` command.
 
-### Your first contribution
+### Your first code contribution
+
+If you're not sure where to begin contributing code to Waives.NET, take a look at the issues tagged `good first issue` and `help wanted`.
+
+* [Good first issues](https://github.com/waives/waives.net/labels/good%20first%20issue) should generally only require a few lines of code and tests.
+* [Help wanted](https://github.com/waives/waives.net/labels/help%20wanted) issues will be more involved than `good first issue`s. They may be an opportunity to work with other contributors.
 
 ### Pull requests
+
+* **Fill in the required template for your change.** Unfortunately GitHub doesn't yet recognise the multiple pull request templates and offer a choice the way it does with issues, but you can load the template into the Pull Request form by appending `template=bug_report.md` or `template=feature_request.md` to the pull request query string.
+* **Do not include issue numbers in the title.** Instead please use a clear, descriptive title and reference the issue number in the description body of the pull request.
+* **Describe the work that you have completed in as much detail as possible.** Include [code samples](https://help.github.com/articles/markdown-basics/#multiple-lines) to illustrate any API changes you have introduced.
+* **Include thoughtfully-worded, well-structured tests** in the `test/` folder. Run them using the build script as follows:
+
+   ```powershell
+   build/_init.ps1
+   build test
+   ```
+
+* **Document all new public members you introduce.** Include at least `<summary />`, `<param />` and `<returns />` sections.
+* **Avoid platform-dependent code.** Waives.NET targets .NET Standard 2.0 for the widest possible compatibility with .NET Framework, Mono, and .NET Core.
+* Ensure `using`s are sorted alphabetically, with `System` namespaces at the top of the list. Ensure any unused `using`s are removed.
+* Ensure `static` members are placed before instance members; fields before constructors before methods before properties; `public` before `internal` before `protected` before `private`.
 
 ## Style guides
 
