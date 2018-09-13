@@ -153,4 +153,9 @@ If you're not sure where to begin contributing code to Waives.NET, take a look a
 
 ## Style guides
 
-## Additional notes
+### Git commit messages
+
+* Use the present tense and imperative mood. The prefix "When applied, this commit will..." is a useful guide to achieving both of these.
+* Do not end the first line with full stop/period (.)
+* Limit the first line to 50 characters or fewer, and include a blank line after the first line.
+* Reference issues, pull requests and commits liberally after the first line.
