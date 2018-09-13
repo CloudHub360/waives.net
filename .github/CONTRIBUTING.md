@@ -49,6 +49,55 @@ community grows. Please do _not_ file issues to ask questions; these are for wor
 
 ### Reporting bugs
 
+Reporting bugs is a fantastic way to contribute to the project. If you've hit an issue, we'd love to hear about it so we
+can fix it and improve the project for all. Please check [this list](#before-submitting-a-bug-report) before submitting
+your bug report; it may be you don't need to! Please [include as many details as possible](#how-do-i-submit-a-good-bug-report),
+and use the [issue template](https://github.com/waives/waives.net/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) to
+guide your report; this will help us to resolve your issue more quickly!
+
+> **Note:** if you find a **Closed** issue similar to the one you've encountered, please do **not** reopen that issue.
+Instead, please create a new issue and include a link to the closed issue in your new one.
+
+#### Before submitting a bug report
+
+1. Please ensure you are using [the most recent version](https://github.com/waives/waives.net/releases/latest) of the SDK.
+
+2. Please do [a quick search](https://github.com/search?q=+is%3Aissue+user%3Awaives) to see if the problem has already been reported.
+
+   a. If there is a similar issue **and it is still open**, please add a comment to that issue with any new information you have.
+
+   b. If there is a similar issue **and it is closed**, please do **not** reopen it. Instead, please create a new issue and include a link to the closed issue in your new one.
+
+#### How do I submit a (good) bug report?
+
+We track bugs as [GitHub Issues](https://guides.github.com/features/issues/). Create a new issue for your bug, and
+select [the bug report template](https://github.com/waives/waives.net/blob/master/.github/ISSUE_TEMPLATE/bug_report.md).
+
+Explain the problem you are experiencing, and include additional details to help the project maintainers reproduce the
+problem:
+
+* **Use a clear and descriptive title** for your issue which describes the problem. Don't be afraid of long titles.
+* **Describe the exact steps to reproduce** providing as much detail as you can.
+* **Clearly state which API you are using.** The Waives.NET SDK comprises two APIs, Pipelines and HTTP.
+* **Provide specific examples to demonstrate the reproduction steps**. Include code snippets in [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines) to illustrate the issue, along with debugger data, console log output, etc. A minimal project reproducing the issue is the most ideal form of example.
+* **Explain what behaviour you expected and why.**
+* **Include supplementary resources.** A screen capture of a debugging session (provided as an [animated GIF](https://www.cockos.com/licecap/)) or console logs illustrating the issue will help the maintainers track down the problem will more quickly.
+* **If the problem is related to performance or memory consumption**, please include a CPU profile capture with your report. We can accept profiles created with Visual Studio's debugging tools or JetBrains dotTrace and dotMemory tools.
+
+Additional context which will speed up resolution:
+
+* **Did this start happening after an update** or has this always been the case?
+* **Can you reproduce the issue in an older version of the SDK** if it did start happening recently?
+* **Can you reliably reproduce the issue** or does it come and go?
+
+Include information about your development and runtime environment:
+
+* **Which .NET language are you using?** C#, F#, VB, etc.
+* **Are you targeting .NET Framework or .NET Core?**
+* **Are you using .NET Framework projects or .NET Core SDK projects?**
+* **Are you running on .NET Framework, Mono, or .NET Core?** Which version of the runtime are you using? Please include the patch version, i.e. say ".NET 4.7.0" rather than ".NET 4.7".
+* **What is the name and version of the OS you're using?** If you're running Windows, please include the data output by the `winver` command.
+
 ### Suggesting enhancements
 
 ### Your first contribution
