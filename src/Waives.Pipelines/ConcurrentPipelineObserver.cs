@@ -1,90 +1,73 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Pipelines
 {
-    internal class ConcurrentPipelineObserver : IObserver<WaivesDocument>, IDisposable
+    internal class ConcurrentPipelineObserver<T> : IObserver<T>, IDisposable
     {
-        private readonly IEnumerable<Func<WaivesDocument, Task<WaivesDocument>>> _docActions;
+        private readonly IDocumentProcessor<T> _documentProcessor;
         private readonly Action _onPipelineCompleted;
-        private readonly Action<DocumentError> _onDocumentError;
-        private readonly int _maxConcurrency;
         private bool _sourceComplete;
-        private readonly SemaphoreSlim _semaphore;
 
-        private readonly TaskScheduler _mainTaskScheduler = TaskScheduler.Current;
+        private readonly WorkPool _workPool;
+        private readonly TaskScheduler _callbackScheduler;
 
         internal ConcurrentPipelineObserver(
-            IEnumerable<Func<WaivesDocument, Task<WaivesDocument>>> docActions,
-            Action onPipelineCompleted, Action<DocumentError> onDocumentError, int maxConcurrency)
+            IDocumentProcessor<T> documentProcessor,
+            Action onPipelineCompleted,
+            int maxConcurrency,
+            TaskScheduler callbackScheduler)
         {
-            _docActions = docActions;
+            _documentProcessor = documentProcessor;
             _onPipelineCompleted = onPipelineCompleted;
-            _onDocumentError = onDocumentError;
-            _maxConcurrency = maxConcurrency;
-            _semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+            _callbackScheduler = callbackScheduler;
+            _workPool = new WorkPool(maxConcurrency);
         }
 
         public void OnCompleted()
         {
-            Console.WriteLine("OnComplete");
             _sourceComplete = true;
         }
 
         public void OnError(Exception error)
         {
-            throw new PipelineException(error);
+            throw new PipelineException(
+                $"A fatal error occurred in the processing pipeline: {error.Message}", error);
         }
 
-        public void OnNext(WaivesDocument doc)
+        public void OnNext(T doc)
         {
-            Console.WriteLine("OnNext");
-
             Task.Run(() => OnNextAsync(doc)).Wait();
         }
 
-        private async Task OnNextAsync(WaivesDocument doc)
+        private async Task OnNextAsync(T doc)
         {
-            await _semaphore.WaitAsync();
-
-            Console.WriteLine("In progress: " + (_maxConcurrency - _semaphore.CurrentCount));
-
-            Task.Run(() => PerformDocActions(doc)
-                .ContinueWith(
-                    t =>
-                    {
-                        _onDocumentError(new DocumentError(doc.Source, t.Exception));
-                    },
-                    CancellationToken.None,
-                    TaskContinuationOptions.OnlyOnFaulted,
-                    _mainTaskScheduler)
-                .ContinueWith(_ =>
+            await _workPool
+                .Post(() =>
                 {
-                    _semaphore.Release();
-                })
-                .ContinueWith(_ =>
-                {
-                    if (_sourceComplete && _semaphore.CurrentCount == _maxConcurrency)
-                    {
-                        _onPipelineCompleted();
-                    }
-                }, _mainTaskScheduler));
+                    return _documentProcessor.Run(doc)
+                        .ContinueWith(_ =>
+                        {
+                            if (_sourceComplete && !_workPool.IsRunning)
+                            {
+                                _onPipelineCompleted();
+                            }
+                        }, _callbackScheduler);
+                }).ConfigureAwait(false);
         }
 
-        private async Task PerformDocActions(WaivesDocument doc)
+        private void Dispose(bool disposing)
         {
-            foreach (var docAction in _docActions)
+            if (disposing)
             {
-                // mmm, curry.
-                doc = await docAction(doc);
+                _workPool?.Dispose();
             }
         }
 
         public void Dispose()
         {
-            _semaphore?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

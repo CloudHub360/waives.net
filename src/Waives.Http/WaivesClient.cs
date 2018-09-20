@@ -124,7 +124,6 @@ namespace Waives.Http
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var id = responseContent.Id;
             var behaviours = responseContent.Links;
-            Console.WriteLine($"Created doc: {behaviours["self"].CreateUri()}");
 
             return new Document(_requestSender, id, behaviours);
         }

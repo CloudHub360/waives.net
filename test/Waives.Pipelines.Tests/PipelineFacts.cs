@@ -23,7 +23,7 @@ namespace Waives.Pipelines.Tests
             var httpDocument = Substitute.For<IHttpDocument>();
             httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
             httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
-            httpDocument.Delete(Arg.Invoke());
+            httpDocument.Delete();
 
             _documentFactory
                 .CreateDocument(Arg.Any<Document>())
@@ -184,7 +184,7 @@ namespace Waives.Pipelines.Tests
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             _sut
                 .WithDocumentsFrom(source)
-                .Then(d => d.HttpDocument.Received(1).Delete(Arg.Any<Action>()))
+                .Then(d => d.HttpDocument.Received(1).Delete())
                 .Start();
         }
 

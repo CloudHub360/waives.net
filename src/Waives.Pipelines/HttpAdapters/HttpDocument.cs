@@ -15,7 +15,7 @@ namespace Waives.Pipelines.HttpAdapters
 
         Task<ExtractionResults> Extract(string extractorName);
 
-        Task Delete(Action afterDeletedAction);
+        Task Delete();
 
         string Id { get; }
     }
@@ -47,17 +47,9 @@ namespace Waives.Pipelines.HttpAdapters
             return await _documentClient.Extract(extractorName).ConfigureAwait(false);
         }
 
-        public async Task Delete(Action afterDeletedAction)
+        public async Task Delete()
         {
-            try
-            {
-                await _documentClient.Delete().ConfigureAwait(false);
-            }
-            finally
-            {
-                afterDeletedAction();
-            }
-
+            await _documentClient.Delete().ConfigureAwait(false);
         }
     }
 }

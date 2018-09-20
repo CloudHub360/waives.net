@@ -167,7 +167,7 @@ namespace Waives.Pipelines
         {
             _docActions.Add(async d =>
             {
-                await action(d);
+                await action(d).ConfigureAwait(false);
                 return d;
             });
 
@@ -181,7 +181,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> action)
         {
-            _docActions.Add(async d => await action(d));
+            _docActions.Add(async d => await action(d).ConfigureAwait(false));
 
             return this;
         }
@@ -226,7 +226,7 @@ namespace Waives.Pipelines
         {
             _docActions.Add(async d =>
             {
-                await d.HttpDocument.Delete(() => { });
+                await d.HttpDocument.Delete().ConfigureAwait(false);
 
                 _logger.Log(LogLevel.Info, $"Completed processing '{d.Source.SourceId}' and deleted Waives document");
 
@@ -234,10 +234,21 @@ namespace Waives.Pipelines
             });
 
             _logger.Log(LogLevel.Info, "Pipeline started");
-            var pipelineObserver = new ConcurrentPipelineObserver(_docActions,
+            var callbackScheduler = TaskScheduler.Current;
+
+            var documentProcessor = new DocumentProcessor<WaivesDocument>(
+                _docActions,
+                (exception, document) =>
+                {
+                    _onDocumentError(new DocumentError(document.Source, exception));
+                },
+                callbackScheduler);
+
+            var pipelineObserver = new ConcurrentPipelineObserver<WaivesDocument>(
+                documentProcessor,
                 _onPipelineCompleted,
-                _onDocumentError,
-                _maxConcurrency);
+                _maxConcurrency,
+                callbackScheduler);
 
             return pipelineObserver.SubscribeTo(_docSource);
         }
