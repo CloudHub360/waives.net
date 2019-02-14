@@ -42,6 +42,25 @@ namespace Waives.Http
         }
 
         /// <summary>
+        /// Reads text from the document. Subsequent calls to Classify and Extract
+        /// will use the results from this operation.
+        /// </summary>
+        /// <remarks>Not all types of files support this operation.
+        /// See the document for a list of supported file types. If you are doing
+        /// multiple classifications or extractions with different configurations
+        /// it is most efficient to call this method first, so the document is only
+        /// read once.</remarks>
+        public async Task Read()
+        {
+            var readUrl = _behaviours["document:read"];
+
+            var request = new HttpRequestMessageTemplate(HttpMethod.Put,
+                readUrl.CreateUri());
+
+            await _requestSender.Send(request).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Performs classification on this document using the given classifer
         /// name. The named classifier must already exist in the Waives platform.
         /// </summary>
