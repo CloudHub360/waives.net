@@ -46,7 +46,7 @@ namespace Waives.Http
         /// will use the results from this operation.
         /// </summary>
         /// <remarks>Not all types of files support this operation.
-        /// See the document for a list of supported file types. If you are doing
+        /// See the documentation for a list of supported file types. If you are doing
         /// multiple classifications or extractions with different configurations
         /// it is most efficient to call this method first, so the document is only
         /// read once.</remarks>
