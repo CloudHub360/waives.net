@@ -17,6 +17,7 @@ namespace Waives.Http.Tests
     {
         private readonly IHttpRequestSender _requestSender = Substitute.For<IHttpRequestSender>();
         private readonly Document _sut;
+        private readonly string _readUrl;
         private readonly string _classifyUrl;
         private readonly string _extractUrl;
         private readonly string _selfUrl;
@@ -24,13 +25,14 @@ namespace Waives.Http.Tests
         private readonly string _extractorName;
         private readonly string _readResultsFilename;
 
+
         public DocumentFacts()
         {
             const string documentId = "id";
             _classifierName = "classifier";
             _extractorName = "extractor";
 
-            var readUrl = $"/documents/{documentId}/reads";
+            _readUrl = $"/documents/{documentId}/reads";
 
             var templatedClassifyUrl = $"/documents/{documentId}/classify/" + "{classifier_name}";
             var templatedExtractUrl = $"/documents/{documentId}/extract/" + "{extractor_name}";
@@ -41,7 +43,7 @@ namespace Waives.Http.Tests
 
             IDictionary<string, HalUri> behaviours = new Dictionary<string, HalUri>
             {
-                { "document:read", new HalUri(new Uri(readUrl, UriKind.Relative), false) },
+                { "document:read", new HalUri(new Uri(_readUrl, UriKind.Relative), false) },
                 { "document:classify", new HalUri(new Uri(templatedClassifyUrl, UriKind.Relative), true) },
                 { "document:extract", new HalUri(new Uri(templatedExtractUrl, UriKind.Relative), true) },
                 { "self", new HalUri(new Uri(_selfUrl, UriKind.Relative), false) }
@@ -80,6 +82,33 @@ namespace Waives.Http.Tests
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
+        [Fact]
+        public async Task Read_sends_request_with_correct_url()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
+
+            await _sut.Read();
+
+            await _requestSender
+                .Received(1)
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                    m.Method == HttpMethod.Put &&
+                    m.RequestUri.ToString() == _readUrl));
+        }
+
+        [Fact]
+        public async Task Read_throws_if_response_is_not_success_code()
+        {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Throws(new WaivesApiException(exceptionMessage));
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read());
+            Assert.Equal(exceptionMessage, exception.Message);
+        }
 
         [Fact]
         public async Task Classify_sends_request_with_correct_url()
