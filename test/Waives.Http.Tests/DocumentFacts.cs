@@ -110,6 +110,72 @@ namespace Waives.Http.Tests
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
+        [Theory]
+        [InlineData(ReadResultsFormat.Text, "text/plain")]
+        [InlineData(ReadResultsFormat.Pdf, "application/pdf")]
+        [InlineData(ReadResultsFormat.WaivesDocument, "application/vnd.waives.resultformats.read+zip")]
+        public async Task Get_read_results_sends_request_with_correct_url(ReadResultsFormat format, string expectedAcceptHeader)
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), $"Anonymous string {Guid.NewGuid()}"));
+
+            await _sut.GetReadResults(_readResultsFilename, format);
+
+            await _requestSender
+                .Received(1)
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                    m.Method == HttpMethod.Get &&
+                    m.RequestUri.ToString() == _readUrl &&
+                    m.Headers.Contains(new KeyValuePair<string, string>("Accept", expectedAcceptHeader))));
+        }
+
+        [Fact]
+        public async Task Get_read_results_throws_if_response_is_not_success_code()
+        {
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Throws(new WaivesApiException(exceptionMessage));
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.GetReadResults(_readResultsFilename, ReadResultsFormat.Pdf));
+            Assert.Equal(exceptionMessage, exception.Message);
+        }
+
+        [Fact]
+        public async Task Get_read_results_writes_response_body_to_stream()
+        {
+            var readResults = $"Read results {Guid.NewGuid()}";
+
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), readResults));
+
+            using (var resultsStream = new MemoryStream())
+            using (var sr = new StreamReader(resultsStream))
+            {
+                await _sut.GetReadResults(resultsStream, ReadResultsFormat.Text);
+
+                resultsStream.Position = 0;
+                Assert.Equal(readResults, sr.ReadToEnd());
+            }
+        }
+
+        [Fact]
+        public async Task Get_read_results_writes_response_body_to_file()
+        {
+            var readResults = $"Read results {Guid.NewGuid()}";
+
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), readResults));
+
+            await _sut.GetReadResults(_readResultsFilename, ReadResultsFormat.Text);
+
+
+            Assert.Equal(readResults, await File.ReadAllTextAsync(_readResultsFilename));
+        }
+
         [Fact]
         public async Task Classify_sends_request_with_correct_url()
         {

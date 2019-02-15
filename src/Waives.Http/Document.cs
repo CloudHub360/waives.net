@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Waives.Http.RequestHandling;
@@ -61,6 +62,54 @@ namespace Waives.Http
         }
 
         /// <summary>
+        /// Gets the results of a document read and writes them in the requested format
+        /// to the specified path.
+        /// </summary>
+        /// <param name="path">The path of the file to write the results to</param>
+        /// <param name="format">The format of the results required</param>
+        /// <remarks>The Read method must be called before this method, otherwise a
+        /// WaivesApiException will be thrown.</remarks>
+        public async Task GetReadResults(string path, ReadResultsFormat format)
+        {
+            using (var fileStream = File.OpenWrite(path))
+            {
+                await GetReadResults(fileStream, format).ConfigureAwait(false);
+
+                fileStream.Close();
+            }
+        }
+
+        /// <summary>
+        /// Gets the results of a document read and writes them in the requested format
+        /// to the specified path.
+        /// </summary>
+        /// <param name="resultsStream">The stream to write the results to</param>
+        /// <param name="format">The format of the results required</param>
+        /// <remarks>The Read method must be called before this method, otherwise a
+        /// WaivesApiException will be thrown.</remarks>
+        public async Task GetReadResults(Stream resultsStream, ReadResultsFormat format)
+        {
+            var readUrl = _behaviours["document:read"];
+
+            var request = new HttpRequestMessageTemplate(HttpMethod.Get,
+                readUrl.CreateUri(),
+                new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("Accept", ResultsFormatToMimeType(format))
+                });
+
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var responseBody = await response
+                .Content
+                .ReadAsStreamAsync()
+                .ConfigureAwait(false);
+
+            await responseBody
+                .CopyToAsync(resultsStream)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Performs classification on this document using the given classifer
         /// name. The named classifier must already exist in the Waives platform.
         /// </summary>
@@ -99,6 +148,19 @@ namespace Waives.Http
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             var responseBody = await response.Content.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
             return responseBody;
+        }
+
+        private static string ResultsFormatToMimeType(ReadResultsFormat format)
+        {
+            switch (format)
+            {
+                case ReadResultsFormat.Text:
+                    return "text/plain";
+                case ReadResultsFormat.Pdf:
+                    return "application/pdf";
+                default:
+                    return "application/vnd.waives.resultformats.read+zip";
+            }
         }
     }
 }
