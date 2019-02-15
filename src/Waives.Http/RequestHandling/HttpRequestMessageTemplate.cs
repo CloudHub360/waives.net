@@ -6,6 +6,11 @@ namespace Waives.Http.RequestHandling
 {
     internal class HttpRequestMessageTemplate
     {
+        public HttpRequestMessageTemplate(HttpMethod method, Uri requestUri, List<KeyValuePair<string, string>> headers) : this(method, requestUri)
+        {
+            Headers = headers;
+        }
+
         public HttpRequestMessageTemplate(HttpMethod method, Uri requestUri)
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
