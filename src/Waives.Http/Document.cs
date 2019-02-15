@@ -74,8 +74,6 @@ namespace Waives.Http
             using (var fileStream = File.OpenWrite(path))
             {
                 await GetReadResults(fileStream, format).ConfigureAwait(false);
-
-                fileStream.Close();
             }
         }
 
