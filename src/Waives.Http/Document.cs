@@ -95,7 +95,7 @@ namespace Waives.Http
                 readUrl.CreateUri(),
                 new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("Accept", ResultsFormatToMimeType(format))
+                    new KeyValuePair<string, string>("Accept", format.ToMimeType())
                 });
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
@@ -148,19 +148,6 @@ namespace Waives.Http
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             var responseBody = await response.Content.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
             return responseBody;
-        }
-
-        private static string ResultsFormatToMimeType(ReadResultsFormat format)
-        {
-            switch (format)
-            {
-                case ReadResultsFormat.Text:
-                    return "text/plain";
-                case ReadResultsFormat.Pdf:
-                    return "application/pdf";
-                default:
-                    return "application/vnd.waives.resultformats.read+zip";
-            }
         }
     }
 }
