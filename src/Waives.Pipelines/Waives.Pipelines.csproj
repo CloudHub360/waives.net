@@ -12,7 +12,6 @@
     <Product>Waives.io</Product>
     <Authors>CloudHub 360 Ltd.</Authors>
     <Copyright>CloudHub 360 Ltd.</Copyright>
-    <PackageLicenseUrl>https://github.com/waives/waives.net/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl></PackageProjectUrl>
     <PackageIconUrl>https://avatars1.githubusercontent.com/u/41697261?s=400&amp;u=232bcf1c9ce942b67c9d42925ba8242602dccbe5&amp;v=4</PackageIconUrl>
     <RepositoryUrl>https://github.com/waives/waives.net</RepositoryUrl>
@@ -21,6 +20,14 @@
     <Description>This provides a Pipeline-based API for building document processing pipelines with the Waives API.</Description>
     <PackageId>Waives.Pipelines</PackageId>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <None Include="..\..\LICENSE.md" Pack="true" PackagePath=""/>
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
