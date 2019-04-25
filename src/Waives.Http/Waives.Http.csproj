@@ -15,11 +15,18 @@
     <Product>Waives.io</Product>
     <Description>This is the HTTP client library for calling the Waives API from .NET.</Description>
     <Copyright>CloudHub 360 Ltd.</Copyright>
-    <PackageLicenseUrl>https://github.com/waives/waives.net/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageId>Waives.Http</PackageId>
     <AssemblyName>Waives.Http</AssemblyName>
     <RootNamespace>Waives.Http</RootNamespace>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <None Include="..\..\LICENSE.md" Pack="true" PackagePath=""/>
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
