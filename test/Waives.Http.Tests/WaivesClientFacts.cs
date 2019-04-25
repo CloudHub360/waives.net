@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Waives.Http.RequestHandling;
+using Waives.Http.Requests;
 using Waives.Http.Tests.RequestHandling;
 using Xunit;
 
@@ -81,6 +82,32 @@ namespace Waives.Http.Tests
                 .Received(1)
                 .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
                     RequestContentEquals(m, File.ReadAllBytes(filePath))));
+        }
+
+        [Fact]
+        public async Task CreateDocument_sends_a_request_containing_the_supplied_file_url()
+        {
+            var fileUri = new Uri("https://myfileserver.com/mydocument.pdf");
+
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
+
+            await _sut.CreateDocument(fileUri);
+
+            var expectedJsonContent = new JsonContent(new ImportDocumentRequest
+            {
+                Url = fileUri.ToString()
+            });
+
+            var expectedContents = await expectedJsonContent.ReadAsByteArrayAsync();
+
+            await _requestSender
+                .Received(1)
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                    RequestContentEquals(m, expectedContents) &&
+                    m.Method == HttpMethod.Post &&
+                    m.Content.Headers.ContentType.MediaType == "application/json"));
         }
 
         [Fact]
@@ -264,5 +291,5 @@ namespace Waives.Http.Tests
 
             return actualRequestContents.SequenceEqual(expectedContents);
         }
-    }
+   }
 }

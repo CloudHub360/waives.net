@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
+using Waives.Http.Requests;
 using Waives.Http.Responses;
 
 [assembly: InternalsVisibleTo("Waives.Http.Tests")]
@@ -145,6 +146,41 @@ namespace Waives.Http
         public async Task<Document> CreateDocument(string path)
         {
             return await CreateDocument(File.OpenRead(path)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Creates a new document in the Waives platform from a file available at the specified URI.
+        /// </summary>
+        /// <remarks>
+        /// The Waives platform implements a limit on the number of documents that may concurrently
+        /// exist within your account. It is expected that documents will exist only transiently
+        /// within the Waives platform, and must be deleted after all desired operations have been
+        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// </remarks>
+        /// <param name="uri">The HTTP(S) URI of a file, accessible to Waives, from which the document will be created.</param>
+        /// <returns>A <see cref="Document"/> client for the given document.</returns>
+        /// <seealso cref="Document"/>
+        /// <seealso cref="Document.Delete"/>
+        public async Task<Document> CreateDocument(Uri uri)
+        {
+            var request =
+                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                {
+                    Content = new JsonContent(new ImportDocumentRequest
+                    {
+                        Url = uri.ToString()
+                    })
+
+                };
+
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+
+            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            var id = responseContent.Id;
+            var behaviours = responseContent.Links;
+
+            return new Document(_requestSender, id, behaviours);
         }
 
         /// <summary>
