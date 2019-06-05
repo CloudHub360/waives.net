@@ -1,9 +1,10 @@
-ARG tag=2.1-sdk
-FROM microsoft/dotnet:${tag}
+ARG tag=2.1.700
+FROM mcr.microsoft.com/dotnet/core/sdk:${tag}-bionic
 
-RUN apt-get update && \
-    apt-get install -y curl gnupg apt-transport-https && \
-    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list' && \
+RUN wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
     apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
     apt-get install -y powershell
+
