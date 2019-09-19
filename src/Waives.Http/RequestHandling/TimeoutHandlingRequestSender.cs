@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -20,6 +21,11 @@ namespace Waives.Http.RequestHandling
         }
 
         public void Authenticate(string accessToken)
+        {
+            _wrappedRequestSender.Authenticate(accessToken);
+        }
+
+        public void Authenticate(AccessToken accessToken)
         {
             _wrappedRequestSender.Authenticate(accessToken);
         }

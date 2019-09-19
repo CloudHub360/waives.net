@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
+using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -31,6 +32,11 @@ namespace Waives.Http.RequestHandling
         public void Authenticate(string accessToken)
         {
             _httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {accessToken}");
+        }
+
+        public void Authenticate(AccessToken accessToken)
+        {
+            Authenticate(accessToken.ToString());
         }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)

@@ -19,5 +19,10 @@ namespace Waives.Http.Responses
             Type = token_type;
             LifeTime = TimeSpan.FromSeconds(expires_in);
         }
+
+        public override string ToString()
+        {
+            return Token;
+        }
     }
 }

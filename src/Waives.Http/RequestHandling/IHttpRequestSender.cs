@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -8,6 +9,8 @@ namespace Waives.Http.RequestHandling
         int Timeout { get; set; }
 
         void Authenticate(string accessToken);
+
+        void Authenticate(AccessToken accessToken);
 
         Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request);
     }
