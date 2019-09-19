@@ -7,7 +7,7 @@ namespace Waives.Http
     internal class JsonContent : StringContent
     {
         public JsonContent(object obj) :
-            base(JsonConvert.SerializeObject(obj), Encoding.UTF8, (string)"application/json")
+            base(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json")
         { }
     }
 }
