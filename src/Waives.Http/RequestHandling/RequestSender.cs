@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
-using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -27,11 +26,6 @@ namespace Waives.Http.RequestHandling
         {
             get => _httpClient.Timeout.Seconds;
             set => _httpClient.Timeout = TimeSpan.FromSeconds(value);
-        }
-
-        public void Authenticate(AccessToken accessToken)
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {accessToken}");
         }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)

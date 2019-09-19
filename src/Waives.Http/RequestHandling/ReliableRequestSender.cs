@@ -5,7 +5,6 @@ using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
 using Waives.Http.Logging;
-using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -33,11 +32,6 @@ namespace Waives.Http.RequestHandling
         {
             get => _wrappedRequestSender.Timeout;
             set => _wrappedRequestSender.Timeout = value;
-        }
-
-        public void Authenticate(AccessToken accessToken)
-        {
-            _wrappedRequestSender.Authenticate(accessToken);
         }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
