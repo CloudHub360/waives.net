@@ -33,7 +33,7 @@ namespace Waives.Http.RequestHandling
 
         internal async Task<AccessToken> FetchAccessToken()
         {
-            return await _cachePolicy.ExecuteAsync(async () =>
+            return await _cachePolicy.ExecuteAsync(async context =>
             {
                 var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
                 {
@@ -46,7 +46,7 @@ namespace Waives.Http.RequestHandling
 
                 var response = await _requestSender.Send(request).ConfigureAwait(false);
                 return await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            }, new Context(nameof(FetchAccessToken))).ConfigureAwait(false);
         }
 
         public void Dispose()

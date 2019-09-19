@@ -238,53 +238,6 @@ namespace Waives.Http.Tests
             Assert.Equal(Response.ErrorMessage, exception.Message);
         }
 
-        [Fact]
-        public async Task Login_sends_a_request_with_the_specified_credentials()
-        {
-            const string expectedClientId = "clientid";
-            const string expectedClientSecret = "clientsecret";
-
-            _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => Response.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
-
-            _sut.Login(expectedClientId, expectedClientSecret);
-
-            await _requestSender
-                .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
-                    m.Method == HttpMethod.Post &&
-                    IsFormWithClientCredentials(m.Content, expectedClientId, expectedClientSecret)));
-        }
-
-        [Fact]
-        public void Login_throws_if_response_is_not_success_code()
-        {
-            _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(new WaivesApiException(Response.ErrorMessage));
-
-            var exception = Assert.Throws<WaivesApiException>(() =>
-                _sut.Login("clientid", "clientsecret"));
-
-            Assert.Equal(Response.ErrorMessage, exception.Message);
-        }
-
-        private static bool IsFormWithClientCredentials(HttpContent content, string expectedClientId, string expectedClientSecret)
-        {
-            if (!(content is FormUrlEncodedContent))
-            {
-                return false;
-            }
-
-            var formData = content.ReadAsFormDataAsync().Result;
-
-            Assert.Equal(expectedClientId, formData["client_id"]);
-            Assert.Equal(expectedClientSecret, formData["client_secret"]);
-
-            return true;
-        }
-
         private static bool RequestContentEquals(HttpRequestMessageTemplate request, byte[] expectedContents)
         {
             var actualRequestContents = request.Content.ReadAsByteArrayAsync().Result;
