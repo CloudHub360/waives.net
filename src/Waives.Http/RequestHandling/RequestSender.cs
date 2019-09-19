@@ -29,14 +29,9 @@ namespace Waives.Http.RequestHandling
             set => _httpClient.Timeout = TimeSpan.FromSeconds(value);
         }
 
-        public void Authenticate(string accessToken)
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {accessToken}");
-        }
-
         public void Authenticate(AccessToken accessToken)
         {
-            Authenticate(accessToken.ToString());
+            _httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {accessToken}");
         }
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)
