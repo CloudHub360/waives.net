@@ -18,13 +18,11 @@ namespace Waives.Http
     /// <summary>
     /// The top-level client class for communicating with the Waives platform API.
     /// </summary>
-    public sealed class WaivesClient : IDisposable
+    public sealed class WaivesClient
     {
         internal const string DefaultUrl = "https://api.waives.io";
 
         private readonly IHttpRequestSender _requestSender;
-
-        private readonly AccessTokenService _accessTokenService;
 
         /// <summary>
         /// Creates a new instance of <see cref="WaivesClient"/> using the given
@@ -37,9 +35,26 @@ namespace Waives.Http
         /// to https://api.waives.io/. </param>
         /// <param name="logger">An optional logger to use, for further insight into
         /// the requests being issued.</param>
-        /// <returns>A new <see cref="WaivesClient"/> instance. <see cref="Login"/>
-        /// must be called on this client before attempting to use it for document
-        /// operations.</returns>
+        /// <returns>A new <see cref="WaivesClient"/> instance ready for
+        /// authentication. <see cref="Login"/> must be called on this client before
+        /// attempting to use it for document operations.</returns>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// public static class Program
+        /// {
+        ///     public static async Task Main(string[] args)
+        ///     {
+        ///         var client = WaivesClient.Create().Login("my-client-id", "my-client-secret");
+        ///         foreach (var document in await client.GetAllDocuments())
+        ///         {
+        ///             await Console.WriteLineAsync(document.Id);
+        ///         }
+        ///     }
+        /// }
+        /// ]]>
+        /// </code>
+        /// </example>
         public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
         {
             apiUri = apiUri ?? new Uri(DefaultUrl);
@@ -64,7 +79,6 @@ namespace Waives.Http
         internal WaivesClient(IHttpRequestSender requestSender)
         {
             _requestSender = requestSender;
-            _accessTokenService = new AccessTokenService(_requestSender);
         }
 
         /// <summary>
@@ -84,13 +98,10 @@ namespace Waives.Http
         /// <param name="clientId">The Waives API Client ID to use when authenticating with the service.</param>
         /// <param name="clientSecret">The Waives API Client Secret to use when authenticating with the
         /// service.</param>
-        public async Task Login(string clientId, string clientSecret)
+        public WaivesClient Login(string clientId, string clientSecret)
         {
-            var accessToken = await _accessTokenService
-                .FetchAccessToken(clientId, clientSecret)
-                .ConfigureAwait(false);
-
-            _requestSender.Authenticate(accessToken);
+            var accessTokenService = new AccessTokenService(clientId, clientSecret, _requestSender);
+            return new WaivesClient(new TokenFetchingRequestSender(accessTokenService, _requestSender));
         }
 
         /// <summary>
@@ -214,11 +225,6 @@ namespace Waives.Http
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
             return responseContent.Documents.Select(d => new Document(_requestSender, d.Id, d.Links));
-        }
-
-        public void Dispose()
-        {
-            _accessTokenService.Dispose();
         }
     }
 }

@@ -248,7 +248,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Login(expectedClientId, expectedClientSecret);
+            _sut.Login(expectedClientId, expectedClientSecret);
 
             await _requestSender
                 .Received(1)
@@ -258,13 +258,13 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
-        public async Task Login_throws_if_response_is_not_success_code()
+        public void Login_throws_if_response_is_not_success_code()
         {
             _requestSender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(Response.ErrorMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
+            var exception = Assert.Throws<WaivesApiException>(() =>
                 _sut.Login("clientid", "clientsecret"));
 
             Assert.Equal(Response.ErrorMessage, exception.Message);

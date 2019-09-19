@@ -6,28 +6,32 @@ using Microsoft.Extensions.Caching.Memory;
 using Polly;
 using Polly.Caching;
 using Polly.Caching.Memory;
-using Waives.Http.RequestHandling;
+using Waives.Http.Responses;
 
-namespace Waives.Http.Responses
+namespace Waives.Http.RequestHandling
 {
     internal class AccessTokenService : IDisposable
     {
+        private readonly string _clientId;
+        private readonly string _clientSecret;
         private readonly IHttpRequestSender _requestSender;
         private readonly MemoryCache _cache;
         private readonly AsyncCachePolicy<AccessToken> _cachePolicy;
 
-        internal AccessTokenService(IHttpRequestSender requestSender)
+        internal AccessTokenService(string clientId, string clientSecret, IHttpRequestSender requestSender)
         {
+            _clientId = clientId;
+            _clientSecret = clientSecret;
             _requestSender = requestSender;
-            _cache = new MemoryCache(new MemoryCacheOptions());
 
+            _cache = new MemoryCache(new MemoryCacheOptions());
             _cachePolicy = Policy.CacheAsync(
                 new MemoryCacheProvider(_cache).AsyncFor<AccessToken>(),
                 new ResultTtl<AccessToken>(t => new Ttl(t.LifeTime)),
                 (_, __, ___) => { });
         }
 
-        internal async Task<AccessToken> FetchAccessToken(string clientId, string clientSecret)
+        internal async Task<AccessToken> FetchAccessToken()
         {
             return await _cachePolicy.ExecuteAsync(async () =>
             {
@@ -35,8 +39,8 @@ namespace Waives.Http.Responses
                 {
                     Content = new FormUrlEncodedContent(new Dictionary<string, string>
                     {
-                        {"client_id", clientId},
-                        {"client_secret", clientSecret}
+                        { "client_id", _clientId },
+                        { "client_secret", _clientSecret }
                     })
                 };
 
