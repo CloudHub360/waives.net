@@ -5,6 +5,7 @@ using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
 using Waives.Http.Logging;
+using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -35,6 +36,11 @@ namespace Waives.Http.RequestHandling
         }
 
         public void Authenticate(string accessToken)
+        {
+            _wrappedRequestSender.Authenticate(accessToken);
+        }
+
+        public void Authenticate(AccessToken accessToken)
         {
             _wrappedRequestSender.Authenticate(accessToken);
         }

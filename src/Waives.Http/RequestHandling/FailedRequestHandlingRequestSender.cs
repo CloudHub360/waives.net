@@ -24,6 +24,11 @@ namespace Waives.Http.RequestHandling
             _wrappedRequestSender.Authenticate(accessToken);
         }
 
+        public void Authenticate(AccessToken accessToken)
+        {
+            _wrappedRequestSender.Authenticate(accessToken);
+        }
+
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             var response = await _wrappedRequestSender.Send(request).ConfigureAwait(false);
