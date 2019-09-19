@@ -81,6 +81,13 @@ namespace Waives.Http
         /// service.</param>
         public async Task Login(string clientId, string clientSecret)
         {
+            var accessToken = await FetchAccessToken(clientId, clientSecret).ConfigureAwait(false);
+
+            _requestSender.Authenticate(accessToken);
+        }
+
+        private async Task<AccessToken> FetchAccessToken(string clientId, string clientSecret)
+        {
             var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
             {
                 Content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -91,11 +98,7 @@ namespace Waives.Http
             };
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-
-            var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
-            var accessToken = responseContent;
-
-            _requestSender.Authenticate(accessToken);
+            return await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
         }
 
         /// <summary>
