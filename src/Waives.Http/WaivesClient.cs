@@ -160,10 +160,13 @@ namespace Waives.Http
         /// </remarks>
         /// <param name="uri">The HTTP(S) URI of a file, accessible to Waives, from which the document will be created.</param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the provided <see cref="Uri"/> is null.</exception>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.Delete"/>
         public async Task<Document> CreateDocument(Uri uri)
         {
+            uri = uri ?? throw new ArgumentNullException(nameof(uri));
+
             var request =
                 new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
                 {
