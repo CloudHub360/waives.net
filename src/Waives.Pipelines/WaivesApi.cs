@@ -60,7 +60,7 @@ namespace Waives.Pipelines
         /// configure your document processing pipeline.</returns>
         public static async Task<Pipeline> CreatePipeline(WaivesOptions options)
         {
-            var waivesClient = await CreateAuthenticatedWaivesClient(options).ConfigureAwait(false);
+            var waivesClient = CreateAuthenticatedWaivesClient(options);
 
             var documentFactory = await HttpDocumentFactory.Create(
                 waivesClient,
@@ -73,11 +73,10 @@ namespace Waives.Pipelines
                 options.Logger);
         }
 
-        private static async Task<WaivesClient> CreateAuthenticatedWaivesClient(WaivesOptions options)
+        private static WaivesClient CreateAuthenticatedWaivesClient(WaivesOptions options)
         {
             var client = WaivesClient.Create(options.ApiUrl, options.Logger);
-            await client.Login(options.ClientId, options.ClientSecret).ConfigureAwait(false);
-            return client;
+            return client.Login(options.ClientId, options.ClientSecret);
         }
     }
 }
