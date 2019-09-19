@@ -12,7 +12,7 @@ namespace Waives.Http.RequestHandling
     {
         private readonly ILogger _retryLogger;
         private readonly IHttpRequestSender _wrappedRequestSender;
-        private readonly RetryPolicy<HttpResponseMessage> _policy;
+        private readonly AsyncRetryPolicy<HttpResponseMessage> _policy;
 
         public ReliableRequestSender(ILogger retryLogger, IHttpRequestSender wrappedRequestSender)
         {
