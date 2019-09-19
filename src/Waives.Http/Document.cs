@@ -91,9 +91,9 @@ namespace Waives.Http
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Get,
                 readUrl.CreateUri(),
-                new List<KeyValuePair<string, string>>
+                new Dictionary<string, string>
                 {
-                    new KeyValuePair<string, string>("Accept", format.ToMimeType())
+                    { "Accept", format.ToMimeType() }
                 });
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);

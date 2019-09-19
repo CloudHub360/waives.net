@@ -6,7 +6,7 @@ namespace Waives.Http.RequestHandling
 {
     internal class HttpRequestMessageTemplate
     {
-        public HttpRequestMessageTemplate(HttpMethod method, Uri requestUri, List<KeyValuePair<string, string>> headers) : this(method, requestUri)
+        public HttpRequestMessageTemplate(HttpMethod method, Uri requestUri, IDictionary<string, string> headers) : this(method, requestUri)
         {
             Headers = headers;
         }
@@ -15,13 +15,13 @@ namespace Waives.Http.RequestHandling
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
             RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-            Headers = new List<KeyValuePair<string, string>>();
+            Headers = new Dictionary<string, string>();
         }
 
         public HttpMethod Method { get; set; }
         public Uri RequestUri { get; set; }
         public HttpContent Content { get; set; }
-        public List<KeyValuePair<string, string>> Headers { get; }
+        public IDictionary<string, string> Headers { get; }
 
         public HttpRequestMessage CreateRequest()
         {
