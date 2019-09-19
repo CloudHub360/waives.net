@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
 {
@@ -18,11 +17,6 @@ namespace Waives.Http.RequestHandling
         {
             get => _wrappedRequestSender.Timeout;
             set => _wrappedRequestSender.Timeout = value;
-        }
-
-        public void Authenticate(AccessToken accessToken)
-        {
-            _wrappedRequestSender.Authenticate(accessToken);
         }
 
         /// <summary>
