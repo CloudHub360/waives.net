@@ -93,7 +93,7 @@ namespace Waives.Http
             var response = await _requestSender.Send(request).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
-            var accessToken = responseContent.Token;
+            var accessToken = responseContent;
 
             _requestSender.Authenticate(accessToken);
         }

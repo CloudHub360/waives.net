@@ -20,11 +20,6 @@ namespace Waives.Http.RequestHandling
             set => _wrappedRequestSender.Timeout = value;
         }
 
-        public void Authenticate(string accessToken)
-        {
-            _wrappedRequestSender.Authenticate(accessToken);
-        }
-
         public void Authenticate(AccessToken accessToken)
         {
             _wrappedRequestSender.Authenticate(accessToken);
