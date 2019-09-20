@@ -23,6 +23,7 @@ namespace Waives.Http
         internal const string DefaultUrl = "https://api.waives.io";
 
         private readonly IHttpRequestSender _requestSender;
+        private static ILogger Logger;
 
         /// <summary>
         /// Creates a new instance of <see cref="WaivesClient"/> using the given
@@ -58,7 +59,7 @@ namespace Waives.Http
         public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
         {
             apiUri = apiUri ?? new Uri(DefaultUrl);
-            logger = logger ?? new NoopLogger();
+            Logger = logger ?? new NoopLogger();
 
             var requestSender = new LoggingRequestSender(
                 logger,
@@ -100,7 +101,11 @@ namespace Waives.Http
         /// service.</param>
         public WaivesClient Login(string clientId, string clientSecret)
         {
-            var accessTokenService = new AccessTokenService(clientId, clientSecret, _requestSender);
+            var accessTokenService = new AccessTokenService(
+                clientId, clientSecret,
+                Logger ?? new NoopLogger(),
+                _requestSender);
+
             return new WaivesClient(new TokenFetchingRequestSender(accessTokenService, _requestSender));
         }
 

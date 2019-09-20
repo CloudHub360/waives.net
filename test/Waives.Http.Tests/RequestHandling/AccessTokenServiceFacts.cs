@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Xunit;
 
@@ -17,7 +18,10 @@ namespace Waives.Http.Tests.RequestHandling
 
         public AccessTokenServiceFacts()
         {
-            _sut = new AccessTokenService(ExpectedClientId, ExpectedClientSecret, _requestSender);
+            _sut = new AccessTokenService(
+                ExpectedClientId, ExpectedClientSecret,
+                Substitute.For<ILogger>(),
+                _requestSender);
         }
 
         [Fact]
