@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Polly;
 using Polly.Caching;
 using Polly.Caching.Memory;
+using Waives.Http.Logging;
 using Waives.Http.Responses;
 
 namespace Waives.Http.RequestHandling
@@ -18,7 +19,7 @@ namespace Waives.Http.RequestHandling
         private readonly MemoryCache _cache;
         private readonly AsyncCachePolicy<AccessToken> _cachePolicy;
 
-        internal AccessTokenService(string clientId, string clientSecret, IHttpRequestSender requestSender)
+        internal AccessTokenService(string clientId, string clientSecret, ILogger logger, IHttpRequestSender requestSender)
         {
             _clientId = clientId;
             _clientSecret = clientSecret;
@@ -28,7 +29,10 @@ namespace Waives.Http.RequestHandling
             _cachePolicy = Policy.CacheAsync(
                 new MemoryCacheProvider(_cache).AsyncFor<AccessToken>(),
                 new ResultTtl<AccessToken>(t => new Ttl(t.LifeTime - TimeSpan.FromHours(1))),
-                (_, __, ___) => { });
+                onCacheError: (ctx, _, ex) =>
+                {
+                    logger.Log(LogLevel.Error, $"Could not retrieve access token: '{ex.Message}'");
+                });
         }
 
         internal async Task<AccessToken> FetchAccessToken()
