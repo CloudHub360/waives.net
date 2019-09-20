@@ -27,7 +27,7 @@ namespace Waives.Http.RequestHandling
             _cache = new MemoryCache(new MemoryCacheOptions());
             _cachePolicy = Policy.CacheAsync(
                 new MemoryCacheProvider(_cache).AsyncFor<AccessToken>(),
-                new ResultTtl<AccessToken>(t => new Ttl(t.LifeTime)),
+                new ResultTtl<AccessToken>(t => new Ttl(t.LifeTime - TimeSpan.FromHours(1))),
                 (_, __, ___) => { });
         }
 
