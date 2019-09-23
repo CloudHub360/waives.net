@@ -154,6 +154,21 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
+        public async Task CreateDocument_throws_if_stream_is_empty()
+        {
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateDocument(Stream.Null));
+            Assert.Contains("The provided stream has no content.", exception.Message);
+            Assert.Equal("documentSource", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task CreateDocument_throws_if_stream_is_null()
+        {
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.CreateDocument((Stream)null));
+            Assert.Equal("documentSource", exception.ParamName);
+        }
+
+        [Fact]
         public async Task GetDocument_sends_a_request_to_the_correct_url()
         {
             _requestSender

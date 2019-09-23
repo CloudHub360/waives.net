@@ -125,6 +125,16 @@ namespace Waives.Http
         /// <seealso cref="Document.Delete"/>
         public async Task<Document> CreateDocument(Stream documentSource)
         {
+            if (documentSource == null)
+            {
+                throw new ArgumentNullException(nameof(documentSource));
+            }
+
+            if (documentSource.Length < 1)
+            {
+                throw new ArgumentException("The provided stream has no content.", nameof(documentSource));
+            }
+
             var request =
                 new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
                 {
