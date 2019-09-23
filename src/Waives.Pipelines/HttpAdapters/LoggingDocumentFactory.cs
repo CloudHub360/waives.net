@@ -6,20 +6,20 @@ namespace Waives.Pipelines.HttpAdapters
     /// <inheritdoc />
     internal class LoggingDocumentFactory : IHttpDocumentFactory
     {
-        private readonly ILogger _logger;
+        private readonly ILog _logger;
         private readonly IHttpDocumentFactory _wrappedDocumentFactory;
 
-        public LoggingDocumentFactory(ILogger logger, IHttpDocumentFactory underylingDocumentFactory)
+        public LoggingDocumentFactory(ILog logger, IHttpDocumentFactory underlyingDocumentFactory)
         {
             _logger = logger;
-            _wrappedDocumentFactory = underylingDocumentFactory;
+            _wrappedDocumentFactory = underlyingDocumentFactory;
         }
 
         public async Task<IHttpDocument> CreateDocument(Document source)
         {
             var httpDocument = await _wrappedDocumentFactory.CreateDocument(source).ConfigureAwait(false);
 
-            _logger.Log(LogLevel.Info, $"Created Waives document {httpDocument.Id} from '{source.SourceId}'");
+            _logger.Info($"Created Waives document {httpDocument.Id} from '{source.SourceId}'");
 
             return httpDocument;
         }

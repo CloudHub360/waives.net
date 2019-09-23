@@ -1,26 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NSubstitute;
+using Serilog;
 using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
-using Waives.Http.Tests.RequestHandling;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace Waives.Http.Tests
+namespace Waives.Http.Tests.RequestHandling
 {
-    public class ReliableRequestSenderFacts
+    public class ReliableRequestSenderFacts : IDisposable
     {
-        private readonly ILogger _retryLogger = Substitute.For<ILogger>();
+        private readonly StringBuilder _consoleOutput = new StringBuilder();
+
+        private ITestOutputHelper Console { get; }
+
         private readonly HttpRequestMessageTemplate _request;
 
-        public ReliableRequestSenderFacts()
+        public ReliableRequestSenderFacts(ITestOutputHelper console)
         {
+            Console = console;
+            System.Console.SetOut(TextWriter.Synchronized(new StringWriter(_consoleOutput)));
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .MinimumLevel.Verbose()
+                .CreateLogger();
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
 
@@ -46,18 +58,13 @@ namespace Waives.Http.Tests
                     ci => Response.From(statusCode, ci.Arg<HttpRequestMessageTemplate>()),
                     ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var sut = new ReliableRequestSender(_retryLogger, sender);
-
+            var sut = new ReliableRequestSender(sender);
             await sut.Send(_request);
 
-            _retryLogger
-                .Received(1)
-                .Log(
-                    LogLevel.Warn,
-                    Arg.Is<string>(m => m.Contains(_request.Method.ToString()) &&
-                                        m.Contains(_request.RequestUri.ToString()) &&
-                                        m.Contains(((int)statusCode).ToString()) &&
-                                        m.Contains(statusCode.ToReasonPhrase())));
+            var result = _consoleOutput.ToString();
+            Assert.Matches($"WRN.*Request '{_request.Method} {_request.RequestUri}' failed: " +
+                           $"{(int) statusCode} {statusCode.ToReasonPhrase()}. Retry \\d " +
+                           "will happen in \\d+ ms", result);
         }
 
         [Theory]
@@ -71,11 +78,12 @@ namespace Waives.Http.Tests
                     ci => new HttpResponseMessage(statusCode),
                     ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var sut = new ReliableRequestSender(_retryLogger, sender);
+            var sut = new ReliableRequestSender(sender);
 
             await sut.Send(_request);
 
-            _retryLogger.DidNotReceiveWithAnyArgs().Log(Arg.Any<LogLevel>(), Arg.Any<string>());
+            var result = _consoleOutput.ToString();
+            Assert.DoesNotMatch("Retry \\d will happen in \\d+ ms", result);
         }
 
         [Fact]
@@ -87,7 +95,7 @@ namespace Waives.Http.Tests
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var sut = new ReliableRequestSender(_retryLogger, sender);
+            var sut = new ReliableRequestSender(sender);
 
             await sut.Send(request);
 
@@ -167,6 +175,17 @@ namespace Waives.Http.Tests
             yield return new object[] { HttpStatusCode.RequestedRangeNotSatisfiable };
             yield return new object[] { HttpStatusCode.ExpectationFailed };
             yield return new object[] { HttpStatusCode.UpgradeRequired };
+        }
+
+        public void Dispose()
+        {
+            var logLines = _consoleOutput.ToString()
+                .Split(Environment.NewLine)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Select((e, i) => $"  {i + 1}. {e}");
+
+            Console.WriteLine($"Received log messages:{Environment.NewLine}{string.Join(Environment.NewLine, logLines)}");
+            Console.WriteLine("");
         }
     }
 

@@ -13,13 +13,15 @@ namespace Waives.Http.RequestHandling
 {
     internal class AccessTokenService : IDisposable
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly IHttpRequestSender _requestSender;
         private readonly MemoryCache _cache;
         private readonly AsyncCachePolicy<AccessToken> _cachePolicy;
 
-        internal AccessTokenService(string clientId, string clientSecret, ILogger logger, IHttpRequestSender requestSender)
+        internal AccessTokenService(string clientId, string clientSecret, IHttpRequestSender requestSender)
         {
             _clientId = clientId;
             _clientSecret = clientSecret;
@@ -31,7 +33,7 @@ namespace Waives.Http.RequestHandling
                 new ResultTtl<AccessToken>(t => new Ttl(t.LifeTime - TimeSpan.FromHours(1))),
                 onCacheError: (ctx, _, ex) =>
                 {
-                    logger.Log(LogLevel.Error, $"Could not retrieve access token: '{ex.Message}'");
+                    Logger.Error($"Could not retrieve access token: '{ex.Message}'");
                 });
         }
 

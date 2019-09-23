@@ -10,12 +10,14 @@ namespace Waives.Http.RequestHandling
 {
     internal class ReliableRequestSender : IHttpRequestSender
     {
-        private readonly ILogger _retryLogger;
+        private static readonly ILog RetryLogger = LogProvider.GetCurrentClassLogger();
         private readonly IHttpRequestSender _wrappedRequestSender;
         private readonly AsyncRetryPolicy<HttpResponseMessage> _policy;
 
-        public ReliableRequestSender(ILogger retryLogger, IHttpRequestSender wrappedRequestSender)
+        public ReliableRequestSender(IHttpRequestSender wrappedRequestSender)
         {
+            _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
+
             var sleepDurationProvider = new ExponentialBackoffSleepProvider();
 
             _policy = HttpPolicyExtensions
@@ -23,9 +25,6 @@ namespace Waives.Http.RequestHandling
                 .WaitAndRetryAsync(8,
                     sleepDurationProvider.GetSleepDuration,
                     LogRetryAttempt);
-
-            _retryLogger = retryLogger ?? throw new ArgumentNullException(nameof(retryLogger));
-            _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
         public int Timeout
@@ -48,8 +47,7 @@ namespace Waives.Http.RequestHandling
             if (response != null)
             {
                 var request = response.RequestMessage;
-                _retryLogger.Log(
-                    LogLevel.Warn,
+                RetryLogger.Warn(
                     $"Request '{request.Method} {request.RequestUri}' failed: " +
                     $"{(int)response.StatusCode} {response.ReasonPhrase}. Retry {retryCount} " +
                     $"will happen in {timeSpan.TotalMilliseconds} ms");
@@ -58,8 +56,7 @@ namespace Waives.Http.RequestHandling
             var exception = result.Exception;
             if (exception != null)
             {
-                _retryLogger.Log(
-                    LogLevel.Warn,
+                RetryLogger.Warn(
                     $"Request failed: {exception.Message}. Retry {retryCount} " +
                     $"will happen in {timeSpan.TotalMilliseconds} ms");
             }

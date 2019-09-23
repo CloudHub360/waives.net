@@ -18,10 +18,7 @@ namespace Waives.Http.Tests.RequestHandling
 
         public AccessTokenServiceFacts()
         {
-            _sut = new AccessTokenService(
-                ExpectedClientId, ExpectedClientSecret,
-                Substitute.For<ILogger>(),
-                _requestSender);
+            _sut = new AccessTokenService(ExpectedClientId, ExpectedClientSecret, _requestSender);
         }
 
         [Fact]

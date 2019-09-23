@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Waives.Http.Requests;
 using Waives.Http.Responses;
@@ -23,7 +22,6 @@ namespace Waives.Http
         internal const string DefaultUrl = "https://api.waives.io";
 
         private readonly IHttpRequestSender _requestSender;
-        private static ILogger Logger;
 
         /// <summary>
         /// Creates a new instance of <see cref="WaivesClient"/> using the given
@@ -56,18 +54,13 @@ namespace Waives.Http
         /// ]]>
         /// </code>
         /// </example>
-        public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
+        public static WaivesClient Create(Uri apiUri = null)
         {
             apiUri = apiUri ?? new Uri(DefaultUrl);
-            Logger = logger ?? new NoopLogger();
 
-            var requestSender = new LoggingRequestSender(
-                logger,
-                new TimeoutHandlingRequestSender(
+            var requestSender = new LoggingRequestSender(new TimeoutHandlingRequestSender(
                     new FailedRequestHandlingRequestSender(
-                        new ReliableRequestSender(
-                            logger,
-                            new RequestSender(
+                        new ReliableRequestSender(new RequestSender(
                                 new HttpClient
                                 {
                                     BaseAddress = apiUri
@@ -101,11 +94,7 @@ namespace Waives.Http
         /// service.</param>
         public WaivesClient Login(string clientId, string clientSecret)
         {
-            var accessTokenService = new AccessTokenService(
-                clientId, clientSecret,
-                Logger ?? new NoopLogger(),
-                _requestSender);
-
+            var accessTokenService = new AccessTokenService(clientId, clientSecret, _requestSender);
             return new WaivesClient(new TokenFetchingRequestSender(accessTokenService, _requestSender));
         }
 

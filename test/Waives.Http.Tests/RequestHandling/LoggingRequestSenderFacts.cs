@@ -1,27 +1,39 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Waives.Http.Logging;
+using Serilog;
 using Waives.Http.RequestHandling;
-using Waives.Http.Tests.RequestHandling;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace Waives.Http.Tests
+namespace Waives.Http.Tests.RequestHandling
 {
-    public class LoggingRequestSenderFacts
+    public class LoggingRequestSenderFacts : IDisposable
     {
+        private readonly StringBuilder _consoleOutput = new StringBuilder();
+
+        private ITestOutputHelper Console { get; }
+
         private readonly IHttpRequestSender _sender;
-        private readonly ILogger _logger;
         private readonly LoggingRequestSender _sut;
         private readonly HttpRequestMessageTemplate _request;
 
-        public LoggingRequestSenderFacts()
+        public LoggingRequestSenderFacts(ITestOutputHelper output)
         {
+            Console = output;
+            System.Console.SetOut(TextWriter.Synchronized(new StringWriter(_consoleOutput)));
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .MinimumLevel.Verbose()
+                .CreateLogger();
+
             _sender = Substitute.For<IHttpRequestSender>();
-            _logger = Substitute.For<ILogger>();
-            _sut = new LoggingRequestSender(_logger, _sender);
+            _sut = new LoggingRequestSender(_sender);
 
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
@@ -58,12 +70,12 @@ namespace Waives.Http.Tests
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => RequestHandling.Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Send(_request);
 
-            _logger.Received(2)
-                .Log(LogLevel.Trace, Arg.Any<string>());
+            var result = _consoleOutput.ToString();
+            Assert.Matches($"VRB.*Sending {_request.Method} request to {_request.RequestUri}", result);
         }
 
         [Fact]
@@ -77,8 +89,8 @@ namespace Waives.Http.Tests
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-            _logger.Received(1)
-                .Log(LogLevel.Trace, Arg.Is<string>(m => m.Contains(_request.RequestUri.ToString())));
+            var result = _consoleOutput.ToString();
+            Assert.Matches($"VRB.*Sending {_request.Method} request to {_request.RequestUri}", result);
         }
 
         [Fact]
@@ -86,12 +98,12 @@ namespace Waives.Http.Tests
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => RequestHandling.Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Send(_request);
 
-            _logger.Received(2)
-                .Log(LogLevel.Trace, Arg.Any<string>());
+            var result = _consoleOutput.ToString();
+            Assert.Matches($"VRB.*Received response from {_request.Method} {_request.RequestUri} \\(200\\) \\(\\d+ ms\\)", result);
         }
 
         [Fact]
@@ -105,8 +117,8 @@ namespace Waives.Http.Tests
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-                _logger.Received(1)
-                    .Log(LogLevel.Error, Arg.Any<string>());
+            var result = _consoleOutput.ToString();
+            Assert.Matches($"ERR.*{exception.Message}", result);
         }
 
         [Fact]
@@ -120,8 +132,9 @@ namespace Waives.Http.Tests
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-            _logger.Received(1)
-                    .Log(LogLevel.Error, Arg.Is<string>(m => m.Contains(exception.Message)));
+            var result = _consoleOutput.ToString();
+            Assert.Matches($"ERR.*{exception.Message}", result);
+            Assert.Matches(@"Waives\.Http\.WaivesApiException: an error message", result);
         }
 
         [Fact]
@@ -137,8 +150,22 @@ namespace Waives.Http.Tests
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-            _logger.Received(1)
-                    .Log(LogLevel.Error, Arg.Is<string>(m => m.Contains(innerException.Message)));
+            var result = _consoleOutput.ToString();
+            Assert.Matches(
+                $"ERR.*{exception.Message} Inner exception: {innerException.GetType()}: {innerException.Message}",
+                result);
+            Assert.Matches(@"Waives\.Http\.WaivesApiException: an error message ---> System\.Exception: inner message", result);
+        }
+
+        public void Dispose()
+        {
+            var logLines = _consoleOutput.ToString()
+                .Split(Environment.NewLine)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Select((e, i) => $"  {i + 1}. {e}");
+
+            Console.WriteLine($"Received log messages:{Environment.NewLine}{string.Join(Environment.NewLine, logLines)}");
+            Console.WriteLine("");
         }
     }
 }

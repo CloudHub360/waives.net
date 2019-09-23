@@ -8,12 +8,11 @@ namespace Waives.Http.RequestHandling
 {
     internal class LoggingRequestSender : IHttpRequestSender
     {
-        private readonly ILogger _logger;
+        private static readonly ILog Logger = LogProvider.For<RequestSender>();
         private readonly IHttpRequestSender _wrappedRequestSender;
 
-        public LoggingRequestSender(ILogger logger, IHttpRequestSender wrappedRequestSender)
+        public LoggingRequestSender(IHttpRequestSender wrappedRequestSender)
         {
-            _logger = logger ?? new NoopLogger();
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
@@ -26,7 +25,7 @@ namespace Waives.Http.RequestHandling
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
             var stopWatch = new Stopwatch();
-            _logger.Log(LogLevel.Trace, $"Sending {request.Method} request to {request.RequestUri}");
+            Logger.TraceFormat("Sending {RequestMethod} request to {RequestUri}", request.Method, request.RequestUri);
 
             try
             {
@@ -34,8 +33,9 @@ namespace Waives.Http.RequestHandling
                 var response = await _wrappedRequestSender.Send(request).ConfigureAwait(false);
                 stopWatch.Stop();
 
-                _logger.Log(LogLevel.Trace,
-                    $"Received response from {request.Method} {request.RequestUri} ({response.StatusCode}) ({stopWatch.ElapsedMilliseconds} ms)");
+                Logger.TraceFormat(
+                    "Received response from {RequestMethod} {RequestUri} ({StatusCode}) ({ElapsedMilliseconds} ms)",
+                    request.Method, request.RequestUri, (int)response.StatusCode, stopWatch.ElapsedMilliseconds);
 
                 return response;
             }
@@ -43,11 +43,11 @@ namespace Waives.Http.RequestHandling
             {
                 if (e.InnerException != null)
                 {
-                    _logger.Log(LogLevel.Error, $"{e.Message} Inner exception: {e.InnerException.Message}");
+                    Logger.ErrorException($"{e.Message} Inner exception: {e.InnerException}", e);
                 }
                 else
                 {
-                    _logger.Log(LogLevel.Error, e.Message);
+                    Logger.ErrorException(e.Message, e);
                 }
                 throw;
             }

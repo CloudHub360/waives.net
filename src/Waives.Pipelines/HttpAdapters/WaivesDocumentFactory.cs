@@ -19,6 +19,7 @@ namespace Waives.Pipelines.HttpAdapters
     /// </summary>
     internal class HttpDocumentFactory : IHttpDocumentFactory
     {
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
         private readonly WaivesClient _apiClient;
 
         private HttpDocumentFactory(WaivesClient apiClient)
@@ -35,15 +36,15 @@ namespace Waives.Pipelines.HttpAdapters
             }
         }
 
-        internal static async Task<IHttpDocumentFactory> Create(WaivesClient apiClient, ILogger logger, bool deleteOrphanedDocuments = true)
+        internal static async Task<IHttpDocumentFactory> Create(WaivesClient apiClient, bool deleteOrphanedDocuments = true)
         {
             if (deleteOrphanedDocuments)
             {
                 await DeleteOrphanedDocuments(apiClient).ConfigureAwait(false);
-                logger.Log(LogLevel.Info, "Deleted all Waives documents");
+                Logger.Info("Deleted all Waives documents");
             }
 
-            return new LoggingDocumentFactory(logger, new HttpDocumentFactory(apiClient));
+            return new LoggingDocumentFactory(Logger, new HttpDocumentFactory(apiClient));
         }
 
         private static async Task DeleteOrphanedDocuments(WaivesClient apiClient)

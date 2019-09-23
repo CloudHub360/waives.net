@@ -1,6 +1,5 @@
 ﻿using System;
 using Waives.Http;
-using Waives.Http.Logging;
 
 namespace Waives.Pipelines
 {
@@ -25,11 +24,6 @@ namespace Waives.Pipelines
         /// connections to instances other than the public cloud-hosted service.
         /// </summary>
         public Uri ApiUrl { get; set; } = new Uri(WaivesClient.DefaultUrl);
-
-        /// <summary>
-        /// A logger that will receive log messages from the pipeline and the underlying <see cref="WaivesClient"/>.
-        /// </summary>
-        public ILogger Logger { get; set; } = new NoopLogger();
 
         /// <summary>
         /// If set to <c>true</c>, it will (immediately) delete all documents
