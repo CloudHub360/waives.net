@@ -135,6 +135,15 @@ namespace Waives.Http
                 throw new ArgumentException("The provided stream has no content.", nameof(documentSource));
             }
 
+            if (!documentSource.CanSeek)
+            {
+                var bytesRead = documentSource.Read(new byte[1], 0, 1);
+                if (bytesRead < 1)
+                {
+                    throw new ArgumentException("The provided stream has no content.", nameof(documentSource));
+                }
+            }
+
             var request =
                 new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
                 {

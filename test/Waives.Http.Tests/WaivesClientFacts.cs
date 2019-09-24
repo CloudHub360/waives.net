@@ -169,6 +169,14 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
+        public async Task CreateDocument_throws_if_unseekable_stream_is_empty()
+        {
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateDocument(new UnseekableMemoryStream()));
+            Assert.Contains("The provided stream has no content.", exception.Message);
+            Assert.Equal("documentSource", exception.ParamName);
+        }
+
+        [Fact]
         public async Task GetDocument_sends_a_request_to_the_correct_url()
         {
             _requestSender
@@ -259,5 +267,59 @@ namespace Waives.Http.Tests
 
             return actualRequestContents.SequenceEqual(expectedContents);
         }
-   }
+
+        private class UnseekableMemoryStream : Stream
+        {
+            private const string NotSupportedMessage = "The stream does not support seeking.";
+            private readonly MemoryStream _stream = new MemoryStream();
+
+            public UnseekableMemoryStream()
+            {
+            }
+
+            public UnseekableMemoryStream(byte[] contents)
+            {
+                _stream = new MemoryStream(contents);
+            }
+
+            public override void Flush()
+            {
+                _stream.Flush();
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                return _stream.Read(buffer, offset, count);
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotSupportedException(NotSupportedMessage);
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotSupportedException(NotSupportedMessage);
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                _stream.Write(buffer, offset, count);
+            }
+
+            public override bool CanRead => _stream.CanRead;
+
+            public override bool CanSeek { get; } = false;
+
+            public override bool CanWrite => _stream.CanWrite;
+
+            public override long Length => throw new NotSupportedException(NotSupportedMessage);
+
+            public override long Position
+            {
+                get => throw new NotSupportedException(NotSupportedMessage);
+                set => throw new NotSupportedException(NotSupportedMessage);
+            }
+        }
+    }
 }
