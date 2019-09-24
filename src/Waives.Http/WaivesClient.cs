@@ -130,7 +130,7 @@ namespace Waives.Http
                 throw new ArgumentNullException(nameof(documentSource));
             }
 
-            if (documentSource.Length < 1)
+            if (documentSource.CanSeek && documentSource.Length < 1)
             {
                 throw new ArgumentException("The provided stream has no content.", nameof(documentSource));
             }
