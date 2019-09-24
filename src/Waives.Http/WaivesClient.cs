@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Waives.Http.Requests;
@@ -130,33 +131,37 @@ namespace Waives.Http
                 throw new ArgumentNullException(nameof(documentSource));
             }
 
-            if (documentSource.CanSeek && documentSource.Length < 1)
+            var bytesRead = int.MaxValue;
+            if (!documentSource.CanSeek)
+            {
+                // This Stream implementation from ASP.NET Core buffers streams larger than the specified threshold to
+                // a temporary file, up to the buffer limit. Furthermore, it is a seekable Stream, so we can query the
+                // Stream's length
+                documentSource = new FileBufferingReadStream(
+                    documentSource,
+                    1024 * 1024, /* 1MiB */
+                    30 * 1000 * 1000, /* 30 MB */
+                    Path.GetTempPath);
+
+                bytesRead = await documentSource.ReadAsync(new byte[1], 0, 1).ConfigureAwait(false);
+                documentSource.Seek(0, SeekOrigin.Begin);
+            }
+
+            if (documentSource.Length < 1 || bytesRead < 1)
             {
                 throw new ArgumentException("The provided stream has no content.", nameof(documentSource));
             }
 
-            if (!documentSource.CanSeek)
-            {
-                var bytesRead = documentSource.Read(new byte[1], 0, 1);
-                if (bytesRead < 1)
-                {
-                    throw new ArgumentException("The provided stream has no content.", nameof(documentSource));
-                }
-            }
-
             var request =
-                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/documents", UriKind.Relative))
                 {
                     Content = new StreamContent(documentSource)
                 };
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
-            var id = responseContent.Id;
-            var behaviours = responseContent.Links;
 
-            return new Document(_requestSender, id, behaviours);
+            return new Document(_requestSender, responseContent.Id, responseContent.Links);
         }
 
         /// <summary>

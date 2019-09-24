@@ -64,6 +64,24 @@ namespace Waives.Http.Tests
         }
 
         [Fact]
+        public async Task CreateDocument_sends_the_supplied_unseekable_stream_as_content()
+        {
+            _requestSender
+                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
+
+            using (var stream = new UnseekableMemoryStream(_documentContents))
+            {
+                await _sut.CreateDocument(stream);
+
+                await _requestSender
+                    .Received(1)
+                    .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                        RequestContentEquals(m, _documentContents)));
+            }
+        }
+
+        [Fact]
         public async Task CreateDocument_sends_the_supplied_file_as_content()
         {
             const string filePath = "DummyDocument.txt";
