@@ -56,6 +56,7 @@ namespace Waives.Http.Tests.RequestHandling
                 .HasMessage("Request '{RequestMethod} {RequestUri}' failed with " +
                             "{StatusCode}. Retry {RetryAttempt} will happen in {RetryDelay} ms")
                 .AtLevel(LogEventLevel.Warning)
+                .Once()
                 .WithPropertyValue("RequestMethod", $"\"{_request.Method}\"")
                 .WithPropertyValue("RequestUri", _request.RequestUri)
                 .WithPropertyValue("StatusCode", statusCode)
