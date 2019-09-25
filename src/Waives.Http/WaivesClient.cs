@@ -25,7 +25,6 @@ namespace Waives.Http
         internal const string DefaultUrl = "https://api.waives.io";
 
         private readonly IHttpRequestSender _requestSender;
-        private static ILogger Logger;
 
         /// <summary>
         /// Creates a new instance of <see cref="WaivesClient"/> using the given
@@ -61,9 +60,9 @@ namespace Waives.Http
         public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
         {
             apiUri = apiUri ?? new Uri(DefaultUrl);
-            Logger = logger ?? new NoopLogger();
 
-            var requestSender = new LoggingRequestSender(new TimeoutHandlingRequestSender(
+            var requestSender = new LoggingRequestSender(
+                new TimeoutHandlingRequestSender(
                     new FailedRequestHandlingRequestSender(
                         new ReliableRequestSender(new RequestSender(
                                 new HttpClient
