@@ -1,26 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Waives.Http.Logging;
+using Serilog.Events;
 using Waives.Http.RequestHandling;
+using Waives.Http.Tests.Logging;
 using Xunit;
 
 namespace Waives.Http.Tests.RequestHandling
 {
-    public class LoggingRequestSenderFacts
+    public class LoggingRequestSenderFacts : IDisposable
     {
         private readonly IHttpRequestSender _sender;
-        private readonly ILogger _logger;
+        private readonly IList<LogEvent> _logEvents = new List<LogEvent>();
+        private readonly IDisposable _logger;
         private readonly LoggingRequestSender _sut;
         private readonly HttpRequestMessageTemplate _request;
 
         public LoggingRequestSenderFacts()
         {
             _sender = Substitute.For<IHttpRequestSender>();
-            _logger = Substitute.For<ILogger>();
-            _sut = new LoggingRequestSender(_logger, _sender);
+            _sut = new LoggingRequestSender(_sender);
+
+            _logger = Logger.CaptureTo(_logEvents);
 
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
         }
@@ -57,12 +61,16 @@ namespace Waives.Http.Tests.RequestHandling
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => RequestHandling.Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Send(_request);
 
-            _logger.Received(2)
-                .Log(LogLevel.Trace, Arg.Any<string>());
+            _logEvents
+                .HasMessage("Sending {RequestMethod} request to {RequestUri}")
+                .AtLevel(LogEventLevel.Verbose)
+                .Once()
+                .WithPropertyValue("RequestMethod", $"\"{_request.Method}\"")
+                .WithPropertyValue("RequestUri", _request.RequestUri);
         }
 
         [Fact]
@@ -76,8 +84,12 @@ namespace Waives.Http.Tests.RequestHandling
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-            _logger.Received(1)
-                .Log(LogLevel.Trace, Arg.Is<string>(m => m.Contains(_request.RequestUri.ToString())));
+            _logEvents
+                .HasMessage("Sending {RequestMethod} request to {RequestUri}")
+                .AtLevel(LogEventLevel.Verbose)
+                .Once()
+                .WithPropertyValue("RequestMethod", $"\"{_request.Method}\"")
+                .WithPropertyValue("RequestUri", _request.RequestUri);
         }
 
         [Fact]
@@ -85,12 +97,18 @@ namespace Waives.Http.Tests.RequestHandling
         {
             _sender
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Returns(ci => RequestHandling.Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
+                .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.Send(_request);
 
-            _logger.Received(2)
-                .Log(LogLevel.Trace, Arg.Any<string>());
+            _logEvents
+                .HasMessage("Received response from {RequestMethod} {RequestUri} ({StatusCode}) ({ElapsedMilliseconds} ms)")
+                .AtLevel(LogEventLevel.Verbose)
+                .Once()
+                .WithPropertyValue("RequestMethod", $"\"{_request.Method}\"")
+                .WithPropertyValue("RequestUri", _request.RequestUri)
+                .WithPropertyValue("StatusCode", 200)
+                .WithProperty("ElapsedMilliseconds");
         }
 
         [Fact]
@@ -104,23 +122,11 @@ namespace Waives.Http.Tests.RequestHandling
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-                _logger.Received(1)
-                    .Log(LogLevel.Error, Arg.Any<string>());
-        }
-
-        [Fact]
-        public async Task Logs_an_error_message_that_includes_the_exception_message()
-        {
-            var exception = new WaivesApiException("an error message");
-            _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
-                .Throws(exception);
-
-            await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.Send(_request));
-
-            _logger.Received(1)
-                    .Log(LogLevel.Error, Arg.Is<string>(m => m.Contains(exception.Message)));
+            _logEvents
+                .HasMessage(exception.Message)
+                .AtLevel(LogEventLevel.Error)
+                .Once()
+                .WithException(exception);
         }
 
         [Fact]
@@ -136,8 +142,18 @@ namespace Waives.Http.Tests.RequestHandling
             await Assert.ThrowsAsync<WaivesApiException>(() =>
                 _sut.Send(_request));
 
-            _logger.Received(1)
-                    .Log(LogLevel.Error, Arg.Is<string>(m => m.Contains(innerException.Message)));
+            _logEvents
+                .HasMessage("{Message} Inner exception: {InnerExceptionMessage}")
+                .AtLevel(LogEventLevel.Error)
+                .Once()
+                .WithException(exception)
+                .WithPropertyValue("Message", $"\"{exception.Message}\"")
+                .WithPropertyValue("InnerExceptionMessage", $"\"{innerException.Message}\"");
+        }
+
+        public void Dispose()
+        {
+            _logger.Dispose();
         }
     }
 }

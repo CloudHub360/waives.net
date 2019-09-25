@@ -24,6 +24,7 @@ namespace Waives.Http.Tests.Logging
                 {
                     LogEventSubject.OnNext(logEvent);
                 }).Subscribe())
+                .MinimumLevel.Verbose()
                 .Enrich.FromLogContext()
                 .CreateLogger();
         }
@@ -60,6 +61,19 @@ namespace Waives.Http.Tests.Logging
             return matchingEvents;
         }
 
+        public static IEnumerable<LogEvent> Once(this IEnumerable<LogEvent> logEvents)
+        {
+            Assert.Single(logEvents);
+            return logEvents;
+        }
+
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
+        public static IEnumerable<LogEvent> Times(this IEnumerable<LogEvent> logEvents, int expectedCount)
+        {
+            Assert.Equal(expectedCount, logEvents.Count());
+            return logEvents;
+        }
+
         public static IEnumerable<LogEvent> AtLevel(this IEnumerable<LogEvent> logEvents, LogEventLevel eventLevel)
         {
             var matchingEvents = logEvents.Where(e => e.Level == eventLevel);
@@ -87,6 +101,14 @@ namespace Waives.Http.Tests.Logging
             Assert.True(propertyExists);
 
             return logEvents;
+        }
+
+        public static IEnumerable<LogEvent> WithException(this IEnumerable<LogEvent> logEvents, Exception exception)
+        {
+            var matchingEvents = logEvents.Where(e => e.Exception == exception);
+            Assert.NotEmpty(matchingEvents);
+
+            return matchingEvents;
         }
 
         // ReSharper restore PossibleMultipleEnumeration

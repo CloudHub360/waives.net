@@ -63,9 +63,7 @@ namespace Waives.Http
             apiUri = apiUri ?? new Uri(DefaultUrl);
             Logger = logger ?? new NoopLogger();
 
-            var requestSender = new LoggingRequestSender(
-                logger,
-                new TimeoutHandlingRequestSender(
+            var requestSender = new LoggingRequestSender(new TimeoutHandlingRequestSender(
                     new FailedRequestHandlingRequestSender(
                         new ReliableRequestSender(new RequestSender(
                                 new HttpClient
