@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Xunit;
 
@@ -21,7 +20,6 @@ namespace Waives.Http.Tests.RequestHandling
         {
             _sut = new AccessTokenService(
                 ExpectedClientId, ExpectedClientSecret,
-                Substitute.For<ILogger>(),
                 _requestSender);
         }
 

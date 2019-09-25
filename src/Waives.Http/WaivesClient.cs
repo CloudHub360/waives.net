@@ -105,7 +105,6 @@ namespace Waives.Http
         {
             var accessTokenService = new AccessTokenService(
                 clientId, clientSecret,
-                Logger ?? new NoopLogger(),
                 _requestSender);
 
             return new WaivesClient(new TokenFetchingRequestSender(accessTokenService, _requestSender));
