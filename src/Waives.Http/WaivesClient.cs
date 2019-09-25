@@ -67,9 +67,7 @@ namespace Waives.Http
                 logger,
                 new TimeoutHandlingRequestSender(
                     new FailedRequestHandlingRequestSender(
-                        new ReliableRequestSender(
-                            logger,
-                            new RequestSender(
+                        new ReliableRequestSender(new RequestSender(
                                 new HttpClient
                                 {
                                     BaseAddress = apiUri

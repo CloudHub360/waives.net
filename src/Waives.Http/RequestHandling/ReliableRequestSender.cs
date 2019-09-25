@@ -10,11 +10,11 @@ namespace Waives.Http.RequestHandling
 {
     internal class ReliableRequestSender : IHttpRequestSender
     {
-        private readonly ILogger _retryLogger;
+        private static readonly ILog RetryLogger = LogProvider.GetCurrentClassLogger();
         private readonly IHttpRequestSender _wrappedRequestSender;
         private readonly AsyncRetryPolicy<HttpResponseMessage> _policy;
 
-        public ReliableRequestSender(ILogger retryLogger, IHttpRequestSender wrappedRequestSender)
+        public ReliableRequestSender(IHttpRequestSender wrappedRequestSender)
         {
             var sleepDurationProvider = new ExponentialBackoffSleepProvider();
 
@@ -24,7 +24,6 @@ namespace Waives.Http.RequestHandling
                     sleepDurationProvider.GetSleepDuration,
                     LogRetryAttempt);
 
-            _retryLogger = retryLogger ?? throw new ArgumentNullException(nameof(retryLogger));
             _wrappedRequestSender = wrappedRequestSender ?? throw new ArgumentNullException(nameof(wrappedRequestSender));
         }
 
@@ -48,20 +47,17 @@ namespace Waives.Http.RequestHandling
             if (response != null)
             {
                 var request = response.RequestMessage;
-                _retryLogger.Log(
-                    LogLevel.Warn,
-                    $"Request '{request.Method} {request.RequestUri}' failed: " +
-                    $"{(int)response.StatusCode} {response.ReasonPhrase}. Retry {retryCount} " +
-                    $"will happen in {timeSpan.TotalMilliseconds} ms");
+                RetryLogger.Warn("Request '{RequestMethod} {RequestUri}' failed with " +
+                    "{StatusCode}. Retry {RetryAttempt} will happen in {RetryDelay} ms",
+                    request.Method, request.RequestUri, response.StatusCode, retryCount,
+                    timeSpan.TotalMilliseconds);
             }
 
             var exception = result.Exception;
             if (exception != null)
             {
-                _retryLogger.Log(
-                    LogLevel.Warn,
-                    $"Request failed: {exception.Message}. Retry {retryCount} " +
-                    $"will happen in {timeSpan.TotalMilliseconds} ms");
+                RetryLogger.WarnException("Request failed: {Message}. Retry {RetryAttempt} will happen in " +
+                    "{RetryDelay} ms", exception, exception.Message, retryCount, timeSpan.TotalMilliseconds);
             }
 
             return Task.CompletedTask;

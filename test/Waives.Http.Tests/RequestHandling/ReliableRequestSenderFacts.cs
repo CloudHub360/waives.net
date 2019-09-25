@@ -4,24 +4,26 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NSubstitute;
-using Waives.Http.Logging;
+using Serilog.Events;
 using Waives.Http.RequestHandling;
-using Waives.Http.Tests.RequestHandling;
+using Waives.Http.Tests.Logging;
 using Xunit;
 
 namespace Waives.Http.Tests
 {
-    public class ReliableRequestSenderFacts
+    public class ReliableRequestSenderFacts : IDisposable
     {
-        private readonly ILogger _retryLogger = Substitute.For<ILogger>();
+        private readonly IList<LogEvent> _logEvents = new List<LogEvent>();
+        private readonly IDisposable _retryLogger;
         private readonly HttpRequestMessageTemplate _request;
 
         public ReliableRequestSenderFacts()
         {
             _request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
+
+            _retryLogger = Logger.CaptureTo(_logEvents);
         }
 
         [Theory]
@@ -46,18 +48,19 @@ namespace Waives.Http.Tests
                     ci => Response.From(statusCode, ci.Arg<HttpRequestMessageTemplate>()),
                     ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var sut = new ReliableRequestSender(_retryLogger, sender);
+            var sut = new ReliableRequestSender(sender);
 
             await sut.Send(_request);
 
-            _retryLogger
-                .Received(1)
-                .Log(
-                    LogLevel.Warn,
-                    Arg.Is<string>(m => m.Contains(_request.Method.ToString()) &&
-                                        m.Contains(_request.RequestUri.ToString()) &&
-                                        m.Contains(((int)statusCode).ToString()) &&
-                                        m.Contains(statusCode.ToReasonPhrase())));
+            _logEvents
+                .HasMessage("Request '{RequestMethod} {RequestUri}' failed with " +
+                            "{StatusCode}. Retry {RetryAttempt} will happen in {RetryDelay} ms")
+                .AtLevel(LogEventLevel.Warning)
+                .WithPropertyValue("RequestMethod", $"\"{_request.Method}\"")
+                .WithPropertyValue("RequestUri", _request.RequestUri)
+                .WithPropertyValue("StatusCode", statusCode)
+                .WithProperty("RetryAttempt")
+                .WithProperty("RetryDelay");
         }
 
         [Theory]
@@ -71,11 +74,11 @@ namespace Waives.Http.Tests
                     ci => new HttpResponseMessage(statusCode),
                     ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var sut = new ReliableRequestSender(_retryLogger, sender);
+            var sut = new ReliableRequestSender(sender);
 
             await sut.Send(_request);
 
-            _retryLogger.DidNotReceiveWithAnyArgs().Log(Arg.Any<LogLevel>(), Arg.Any<string>());
+            Assert.Empty(_logEvents);
         }
 
         [Fact]
@@ -87,7 +90,7 @@ namespace Waives.Http.Tests
             sender.Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var sut = new ReliableRequestSender(_retryLogger, sender);
+            var sut = new ReliableRequestSender(sender);
 
             await sut.Send(request);
 
@@ -168,16 +171,10 @@ namespace Waives.Http.Tests
             yield return new object[] { HttpStatusCode.ExpectationFailed };
             yield return new object[] { HttpStatusCode.UpgradeRequired };
         }
-    }
 
-    internal static class HttpStatusCodeExtensions
-    {
-        public static string ToReasonPhrase(this HttpStatusCode statusCode)
+        public void Dispose()
         {
-            // Borrowed from StackOverflow here: https://stackoverflow.com/a/50588320/5296
-            // The regex inserts spaces into camel-cased strings. There's no way in-built,
-            // as far as I can tell, to achieve this conversion.
-            return Regex.Replace(statusCode.ToString(), "(?<=[a-z])([A-Z])", " $1", RegexOptions.Compiled);
+            _retryLogger.Dispose();
         }
     }
 }
