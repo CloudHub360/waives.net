@@ -64,18 +64,16 @@ namespace Waives.Pipelines
 
             var documentFactory = await HttpDocumentFactory.Create(
                 waivesClient,
-                options.Logger,
                 options.DeleteExistingDocuments).ConfigureAwait(false);
 
             return new Pipeline(
                 documentFactory,
-                new RateLimiter(null, options.MaxConcurrency),
-                options.Logger);
+                new RateLimiter(null, options.MaxConcurrency));
         }
 
         private static WaivesClient CreateAuthenticatedWaivesClient(WaivesOptions options)
         {
-            var client = WaivesClient.Create(options.ApiUrl, options.Logger);
+            var client = WaivesClient.Create(options.ApiUrl);
             return client.Login(options.ClientId, options.ClientSecret);
         }
     }

@@ -30,7 +30,7 @@ namespace Waives.Pipelines.Tests
                 .CreateDocument(Arg.Any<Document>())
                 .Returns(httpDocument);
 
-            _sut = new Pipeline(_documentFactory, _rateLimiter, Substitute.For<ILogger>());
+            _sut = new Pipeline(_documentFactory, _rateLimiter);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Waives.Pipelines.Tests
         public void WithDocumentsFrom_passes_the_document_source_to_the_ratelimiter()
         {
             var rateLimiter = Substitute.For<IRateLimiter>();
-            var sut = new Pipeline(_documentFactory, rateLimiter, Substitute.For<ILogger>());
+            var sut = new Pipeline(_documentFactory, rateLimiter);
             var source = Observable.Repeat<Document>(new TestDocument(Generate.Bytes()), 3);
             sut.WithDocumentsFrom(source);
 
@@ -237,7 +237,7 @@ namespace Waives.Pipelines.Tests
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
 
             var fakeRateLimiter = new FakeRateLimiter();
-            var sut = new Pipeline(_documentFactory, fakeRateLimiter, Substitute.For<ILogger>());
+            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
 
             sut.WithDocumentsFrom(source)
                 .Start();
@@ -252,7 +252,7 @@ namespace Waives.Pipelines.Tests
                 .Repeat(new TestDocument(Generate.Bytes()), 1);
 
             var fakeRateLimiter = new FakeRateLimiter();
-            var sut = new Pipeline(_documentFactory, fakeRateLimiter, Substitute.For<ILogger>());
+            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
 
             sut.WithDocumentsFrom(source)
                 .Then(d => throw new Exception("An exception"))
