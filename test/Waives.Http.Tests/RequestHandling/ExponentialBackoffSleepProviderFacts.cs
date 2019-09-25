@@ -1,7 +1,7 @@
 ﻿using Waives.Http.RequestHandling;
 using Xunit;
 
-namespace Waives.Http.Tests
+namespace Waives.Http.Tests.RequestHandling
 {
     public class ExponentialBackoffSleepProviderFacts
     {
