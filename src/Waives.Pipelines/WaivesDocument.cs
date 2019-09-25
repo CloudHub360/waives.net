@@ -46,9 +46,9 @@ namespace Waives.Pipelines
             };
         }
 
-        public async Task Delete(Action afterDeletedAction)
+        public async Task Delete()
         {
-            await _waivesDocument.Delete(afterDeletedAction).ConfigureAwait(false);
+            await _waivesDocument.Delete().ConfigureAwait(false);
         }
     }
 }

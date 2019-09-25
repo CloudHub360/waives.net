@@ -39,7 +39,7 @@ namespace Waives.Pipelines
             var waivesDocument = error.Document as WaivesDocument;
             if (waivesDocument != null)
             {
-                await waivesDocument.Delete(() => { }).ConfigureAwait(false);
+                await waivesDocument.Delete().ConfigureAwait(false);
                 return new DocumentError(waivesDocument.Source, error.Exception);
             }
 
