@@ -17,17 +17,18 @@ namespace Waives.Pipelines.Tests
     {
         private readonly IHttpDocumentFactory _documentFactory = Substitute.For<IHttpDocumentFactory>();
         private readonly Pipeline _sut;
+        private readonly IHttpDocument _httpDocument;
 
         public PipelineFacts()
         {
-            var httpDocument = Substitute.For<IHttpDocument>();
-            httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
-            httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
-            httpDocument.Delete(Arg.Invoke());
+            _httpDocument = Substitute.For<IHttpDocument>();
+            _httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
+            _httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
+            _httpDocument.Delete();
 
             _documentFactory
                 .CreateDocument(Arg.Any<Document>())
-                .Returns(httpDocument);
+                .Returns(_httpDocument);
 
             _sut = new Pipeline(_documentFactory, 10);
         }
@@ -44,90 +45,76 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public void WithDocumentsFrom_projects_the_rate_limited_documents_into_the_pipeline()
+        public async Task WithDocumentsFrom_creates_each_document_with_Waives()
         {
-            var expectedDocuments = Enumerable.Repeat<Document>(new TestDocument(Generate.Bytes()), 5).ToObservable();
-
-            var pipeline = _sut.WithDocumentsFrom(expectedDocuments);
-
-            Assert.Equal(
-                expectedDocuments.ToEnumerable(),
-                pipeline.Select(d => d.Source).ToEnumerable());
-        }
-
-        [Fact]
-        public void WithDocumentsFrom_creates_each_document_with_Waives()
-        {
-            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var testDocument = new TestDocument(Generate.Bytes());
+            var source = Observable.Repeat(testDocument, 1);
 
             var pipeline = _sut.WithDocumentsFrom(source);
+            await pipeline.RunAsync();
 
-            pipeline.Subscribe(t =>
-            {
-                _documentFactory.Received(1).CreateDocument(t.Source);
-            });
+            await _documentFactory.Received(1).CreateDocument(testDocument);
         }
 
         [Fact]
-        public void ClassifyWith_classifies_each_document_with_Waives()
+        public async Task ClassifyWith_classifies_each_document_with_Waives()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             var classifierName = Generate.String();
 
             var pipeline = _sut
                 .WithDocumentsFrom(source)
-                .ClassifyWith(classifierName);
+                .ClassifyWith(classifierName)
+                .Then(t => { Assert.NotNull(t.ClassificationResults); });
 
-            pipeline.Subscribe(t =>
-            {
-                t.HttpDocument.Received(1).Classify(classifierName);
-                Assert.NotNull(t.ClassificationResults);
-            });
+            await pipeline.RunAsync();
+
+            await _httpDocument.Received(1).Classify(classifierName);
         }
 
         [Fact]
-        public void ExtractWith_extracts_from_each_document_with_Waives()
+        public async Task ExtractWith_extracts_from_each_document_with_Waives()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             var extractorName = Generate.String();
 
             var pipeline = _sut
                 .WithDocumentsFrom(source)
-                .ExtractWith(extractorName);
+                .ExtractWith(extractorName)
+                .Then(t => { Assert.NotNull(t.ExtractionResults); });
 
-            pipeline.Subscribe(t =>
-            {
-                t.HttpDocument.Received(1).Extract(extractorName);
-                Assert.NotNull(t.ExtractionResults);
-            });
+            await pipeline.RunAsync();
+            await _httpDocument.Received(1).Extract(extractorName);
         }
 
         [Fact]
-        public void Results_are_preserved_when_performing_classification_and_extraction_in_the_same_pipeline()
+        public async Task Results_are_preserved_when_performing_classification_and_extraction_in_the_same_pipeline()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
 
-            _sut
+            await _sut
                 .WithDocumentsFrom(source)
                 .ClassifyWith(Generate.String())
                 .ExtractWith(Generate.String())
-                .Subscribe(t =>
+                .Then(t =>
                 {
                     Assert.NotNull(t.ExtractionResults);
                     Assert.NotNull(t.ClassificationResults);
-                });
+                })
+                .RunAsync();
 
             // Extract and classify in opposite order to ensure the results
             // are preserved in both directions
-            _sut
+            await _sut
                 .WithDocumentsFrom(source)
                 .ExtractWith(Generate.String())
                 .ClassifyWith(Generate.String())
-                .Subscribe(t =>
+                .Then(t =>
                 {
                     Assert.NotNull(t.ExtractionResults);
                     Assert.NotNull(t.ClassificationResults);
-                });
+                })
+                .RunAsync();
         }
 
         [Fact]
@@ -184,69 +171,20 @@ namespace Waives.Pipelines.Tests
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             _sut
                 .WithDocumentsFrom(source)
-                .Then(d => d.HttpDocument.Received(1).Delete(Arg.Any<Action>()))
+                .Then(d => d.HttpDocument.Received(1).Delete())
                 .Start();
         }
 
-//        [Fact]
-//        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_finishes_its_processing()
-//        {
-//            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-//
-//            var fakeRateLimiter = new FakeRateLimiter();
-//            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
-//
-//            sut.WithDocumentsFrom(source)
-//                .Start();
-//
-//            Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
-//        }
-//
-//        [Fact]
-//        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_a_processing_error()
-//        {
-//            var source = Observable
-//                .Repeat(new TestDocument(Generate.Bytes()), 1);
-//
-//            var fakeRateLimiter = new FakeRateLimiter();
-//            var sut = new Pipeline(_documentFactory, fakeRateLimiter);
-//
-//            sut.WithDocumentsFrom(source)
-//                .Then(d => throw new Exception("An exception"))
-//                .Start();
-//
-//            Assert.True(fakeRateLimiter.MakeDocumentSlotAvailableCalled);
-//        }
-//
-//        [Fact]
-//        public void A_slot_is_freed_in_the_rate_limiter_when_a_document_has_an_error_during_creation()
-//        {
-//            var source = Observable
-//                .Repeat(new TestDocument(Generate.Bytes()), 1);
-//
-//            _documentFactory
-//                .CreateDocument(Arg.Any<Document>())
-//                .Throws(new Exception("Could not create document"));
-//
-//            _rateLimiter
-//                .RateLimited(Arg.Any<IObservable<Document>>())
-//                .Returns(source);
-//
-//            _sut.WithDocumentsFrom(source)
-//                .Start();
-//
-//            _rateLimiter.Received(1).MakeDocumentSlotAvailable();
-//        }
 
         [Fact]
-        public void OnDocumentError_is_run_when_a_document_has_a_processing_error()
+        public async Task OnDocumentError_is_run_when_a_document_has_a_processing_error()
         {
             var onDocumentErrorActionRun = false;
             var document = new TestDocument(Generate.Bytes());
             var exception = new Exception("An exception");
             var source = Observable.Repeat(document, 1);
 
-            _sut.WithDocumentsFrom(source)
+            await _sut.WithDocumentsFrom(source)
                 .Then(d => throw exception)
                 .OnDocumentError(err =>
                 {
@@ -254,7 +192,7 @@ namespace Waives.Pipelines.Tests
                     Assert.Same(exception, err.Exception);
                     onDocumentErrorActionRun = true;
                 })
-                .Start();
+                .RunAsync();
 
             Assert.True(onDocumentErrorActionRun);
         }
