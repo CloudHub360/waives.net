@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
-using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Xunit;
 
@@ -18,7 +17,6 @@ namespace Waives.Http.Tests.RequestHandling
             _sut = new TokenFetchingRequestSender(
                 new AccessTokenService(
                     "clientId", "clientSecret",
-                    Substitute.For<ILogger>(),
                     _requestSender),
                 _requestSender);
 
