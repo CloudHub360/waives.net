@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
@@ -51,14 +50,14 @@ namespace Waives.Pipelines
     /// }
     /// ]]>
     /// </example>
-    public class Pipeline : IObservable<WaivesDocument>
+    public class Pipeline
     {
         private static readonly ILog _logger = LogProvider.GetCurrentClassLogger();
 
         private readonly IHttpDocumentFactory _documentFactory;
         private readonly int _maxConcurrency;
-        private IObservable<WaivesDocument> _docSource = Observable.Empty<WaivesDocument>();
-        private Action _onPipelineCompleted = () => { };
+        private IObservable<Document> _docSource = Observable.Empty<Document>();
+        private Action _onPipelineCompletedUserAction = () =>{};
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
 
@@ -79,11 +78,6 @@ namespace Waives.Pipelines
 
                 _userErrorAction(err);
             };
-
-            _onPipelineCompleted = () =>
-            {
-                _logger.Info("Pipeline complete");
-            };
         }
 
         /// <summary>
@@ -94,14 +88,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            _docSource = documentSource.SelectMany(
-                async d =>
-                {
-                    _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
-
-                    return new WaivesDocument(d,
-                        await _documentFactory.CreateDocument(d).ConfigureAwait(false));
-                });
+            _docSource = documentSource;
 
             return this;
         }
@@ -173,7 +160,7 @@ namespace Waives.Pipelines
         {
             _docActions.Add(async d =>
             {
-                await action(d);
+                await action(d).ConfigureAwait(false);
                 return d;
             });
 
@@ -187,7 +174,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> action)
         {
-            _docActions.Add(async d => await action(d));
+            _docActions.Add(async d => await action(d).ConfigureAwait(false));
 
             return this;
         }
@@ -199,7 +186,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnPipelineCompleted(Action action)
         {
-            _onPipelineCompleted = action ?? (() => { });
+            _onPipelineCompletedUserAction = action ?? (() => { });
             return this;
         }
 
@@ -230,31 +217,70 @@ namespace Waives.Pipelines
         /// this object.</returns>
         public IDisposable Start()
         {
-            _docActions.Add(async d =>
-            {
-                await d.HttpDocument.Delete(() => { });
+            var (disposable, _) = StartAsync();
+            return disposable;
+        }
 
-                _logger.Info(
+        private (IDisposable, Task) StartAsync()
+        {
+            // take a copy of _docActions so Start() is idempotent
+            var docActions = new List<Func<WaivesDocument, Task<WaivesDocument>>>(_docActions)
+            {
+                async d =>
+                {
+                    await d.HttpDocument.Delete().ConfigureAwait(false);
+
+                    _logger.Info(
                         "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
                         d.Id,
                         d.Source.SourceId);
 
-                return d;
-            });
+                    return d;
+                }
+            };
+
+            var taskCompletion = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            void OnPipelineComplete()
+            {
+                _onPipelineCompletedUserAction();
+                _logger.Info("Pipeline complete");
+                taskCompletion.SetResult(true);
+            }
+
+            void OnDocumentException(Exception exception, Document document)
+            {
+                _onDocumentError(new DocumentError(document, exception));
+            }
 
             _logger.Info("Pipeline started");
-            var pipelineObserver = new ConcurrentPipelineObserver(_docActions,
-                _onPipelineCompleted,
-                _onDocumentError,
+
+            var documentProcessor = new DocumentProcessor(
+                async d =>
+                {
+                    _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
+
+                    var httpDocument = await _documentFactory
+                        .CreateDocument(d).ConfigureAwait(false);
+
+                    return new WaivesDocument(d,httpDocument);
+                },
+                docActions,
+                OnDocumentException);
+
+            var pipelineObserver = new ConcurrentPipelineObserver(
+                documentProcessor,
+                OnPipelineComplete,
                 _maxConcurrency);
 
-            return pipelineObserver.SubscribeTo(_docSource);
+            return (_docSource.Subscribe(pipelineObserver), taskCompletion.Task);
         }
 
-        /// <inheritdoc />
-        public IDisposable Subscribe(IObserver<WaivesDocument> observer)
+        public async Task RunAsync()
         {
-            return observer.SubscribeTo(_docSource);
+            var (_, task) = StartAsync();
+            await task;
         }
     }
 }
