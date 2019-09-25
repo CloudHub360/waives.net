@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -35,13 +36,13 @@ namespace Waives.Pipelines.Tests
 
             Func<Task> func = async () =>
             {
-                currentConcurrency++;
+                Interlocked.Increment(ref currentConcurrency);
                 await Task.Delay(10); // simulate work
                 lock (sut)
                 {
                     maxObservedConcurrency = Math.Max(maxObservedConcurrency, currentConcurrency);
                 }
-                currentConcurrency--;
+                Interlocked.Decrement(ref currentConcurrency);
             };
             for (int i = 0; i < postCount; i++)
             {
