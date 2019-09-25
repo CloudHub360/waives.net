@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Waives.Http.RequestHandling;
-using Waives.Http.Tests.RequestHandling;
 using Xunit;
 
-namespace Waives.Http.Tests
+namespace Waives.Http.Tests.RequestHandling
 {
     public class TimeoutHandlingRequestSenderFacts
     {

@@ -11,7 +11,7 @@ using Waives.Http.RequestHandling;
 using Waives.Http.Tests.Logging;
 using Xunit;
 
-namespace Waives.Http.Tests
+namespace Waives.Http.Tests.RequestHandling
 {
     public class ReliableRequestSenderFacts : IDisposable
     {
