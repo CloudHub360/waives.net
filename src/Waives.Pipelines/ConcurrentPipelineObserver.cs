@@ -40,7 +40,7 @@ namespace Waives.Pipelines
             {
                 try
                 {
-                    await _documentProcessor.Run(doc);
+                    await _documentProcessor.RunAsync(doc);
                 }
                 finally
                 {

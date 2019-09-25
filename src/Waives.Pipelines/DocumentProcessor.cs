@@ -20,7 +20,7 @@ namespace Waives.Pipelines
             _onDocumentException = onDocumentException ?? throw new ArgumentNullException(nameof(onDocumentException));
         }
 
-        public async Task Run(Document doc)
+        public async Task RunAsync(Document doc)
         {
             try
             {

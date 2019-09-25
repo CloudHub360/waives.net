@@ -4,6 +4,6 @@ namespace Waives.Pipelines
 {
     internal interface IDocumentProcessor
     {
-        Task Run(Document doc);
+        Task RunAsync(Document doc);
     }
 }
