@@ -57,7 +57,7 @@ namespace Waives.Http
         /// ]]>
         /// </code>
         /// </example>
-        public static WaivesClient Create(Uri apiUri = null, ILogger logger = null)
+        public static WaivesClient Create(Uri apiUri = null)
         {
             apiUri = apiUri ?? new Uri(DefaultUrl);
 

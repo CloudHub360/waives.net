@@ -27,11 +27,6 @@ namespace Waives.Pipelines
         public Uri ApiUrl { get; set; } = new Uri(WaivesClient.DefaultUrl);
 
         /// <summary>
-        /// A logger that will receive log messages from the pipeline and the underlying <see cref="WaivesClient"/>.
-        /// </summary>
-        public ILogger Logger { get; set; } = new NoopLogger();
-
-        /// <summary>
         /// If set to <c>true</c>, it will (immediately) delete all documents
         /// in existence in the Waives account; if set to <c>false</c>, no such clean up will be completed.
         /// Defaults to <c>true</c>.
