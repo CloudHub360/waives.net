@@ -209,19 +209,13 @@ namespace Waives.Pipelines
             return this;
         }
 
+
         /// <summary>
         /// Start processing the documents in the pipeline.
         /// </summary>
-        /// <returns>An <see cref="IDisposable"/> subscription object. If you wish to terminate
-        /// the document processing pipeline manually, invoke <see cref="IDisposable.Dispose"/> on
-        /// this object.</returns>
-        public IDisposable Start()
-        {
-            var (disposable, _) = StartAsync();
-            return disposable;
-        }
-
-        private (IDisposable, Task) StartAsync()
+        /// <returns>A <see cref="Task"/> which completes when processing of all the documents
+        /// in the pipeline is complete.</returns>
+        public async Task RunAsync()
         {
             // take a copy of _docActions so Start() is idempotent
             var docActions = new List<Func<WaivesDocument, Task<WaivesDocument>>>(_docActions)
@@ -282,13 +276,9 @@ namespace Waives.Pipelines
                 OnPipelineError,
                 _maxConcurrency);
 
-            return (_docSource.Subscribe(pipelineObserver), taskCompletion.Task);
-        }
+            _docSource.Subscribe(pipelineObserver);
 
-        public async Task RunAsync()
-        {
-            var (_, task) = StartAsync();
-            await task;
+            await taskCompletion.Task;
         }
     }
 }

@@ -15,7 +15,9 @@ namespace Waives.Pipelines.Tests
 {
     public class PipelineFacts
     {
-        private readonly IHttpDocumentFactory _documentFactory = Substitute.For<IHttpDocumentFactory>();
+        private readonly IHttpDocumentFactory _documentFactory =
+            Substitute.For<IHttpDocumentFactory>();
+
         private readonly Pipeline _sut;
         private readonly IHttpDocument _httpDocument;
 
@@ -34,12 +36,12 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public void OnPipelineCompleted_is_run_at_the_end_of_a_successful_pipeline()
+        public async Task OnPipelineCompleted_is_run_at_the_end_of_a_successful_pipeline()
         {
             var pipelineCompleted = false;
             _sut.OnPipelineCompleted(() => pipelineCompleted = true);
 
-            _sut.Start();
+            await _sut.RunAsync();
 
             Assert.True(pipelineCompleted);
         }
@@ -88,7 +90,8 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public async Task Results_are_preserved_when_performing_classification_and_extraction_in_the_same_pipeline()
+        public async Task
+            Results_are_preserved_when_performing_classification_and_extraction_in_the_same_pipeline()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
 
@@ -118,7 +121,7 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public void Then_invokes_the_supplied_Action()
+        public async Task Then_invokes_the_supplied_Action()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             var actionInvoked = false;
@@ -126,7 +129,7 @@ namespace Waives.Pipelines.Tests
             var pipeline = _sut.WithDocumentsFrom(source)
                 .Then(d => actionInvoked = true);
 
-            pipeline.Start();
+            await pipeline.RunAsync();
 
             Assert.True(actionInvoked);
         }
@@ -140,7 +143,7 @@ namespace Waives.Pipelines.Tests
             var pipeline = _sut.WithDocumentsFrom(source)
                 .Then(async d => await Task.Run(() => completion.SetResult(true)));
 
-            pipeline.Start();
+            await pipeline.RunAsync();
             var actionWasCalled = await completion.Task;
 
             Assert.True(actionWasCalled);
@@ -159,22 +162,21 @@ namespace Waives.Pipelines.Tests
                     return Task.FromResult(d);
                 });
 
-            pipeline.Start();
+            await pipeline.RunAsync();
             var funcWasCalled = await completion.Task;
 
             Assert.True(funcWasCalled);
         }
 
         [Fact]
-        public void The_document_is_deleted_when_processing_completes()
+        public async Task The_document_is_deleted_when_processing_completes()
         {
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
-            _sut
+            await _sut
                 .WithDocumentsFrom(source)
                 .Then(d => d.HttpDocument.Received(1).Delete())
-                .Start();
+                .RunAsync();
         }
-
 
         [Fact]
         public async Task OnDocumentError_is_run_when_a_document_has_a_processing_error()
@@ -198,7 +200,7 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
-        public void OnDocumentError_is_run_when_a_document_has_an_error_during_creation()
+        public async Task OnDocumentError_is_run_when_a_document_has_an_error_during_creation()
         {
             var onDocumentErrorActionRun = false;
             var document = new TestDocument(Generate.Bytes());
@@ -209,7 +211,7 @@ namespace Waives.Pipelines.Tests
                 .CreateDocument(Arg.Any<Document>())
                 .Throws(exception);
 
-            _sut.WithDocumentsFrom(source)
+            await _sut.WithDocumentsFrom(source)
                 .OnDocumentError(err =>
                 {
                     Assert.Same(document, err.Document);
@@ -218,13 +220,13 @@ namespace Waives.Pipelines.Tests
                     Assert.Equal(err.Exception.Message, exception.Message);
                     onDocumentErrorActionRun = true;
                 })
-                .Start();
+                .RunAsync();
 
-                Assert.True(onDocumentErrorActionRun);
+            Assert.True(onDocumentErrorActionRun);
         }
 
         [Fact]
-        public void OnDocumentError_is_run_multiple_times_in_correct_order_if_specified()
+        public async Task OnDocumentError_is_run_multiple_times_in_correct_order_if_specified()
         {
             var onDocumentErrorCalledFor = new List<(DocumentError error, int sequence)>();
             var document = new TestDocument(Generate.Bytes());
@@ -235,7 +237,7 @@ namespace Waives.Pipelines.Tests
                 .CreateDocument(Arg.Any<Document>())
                 .Throws(exception);
 
-            _sut.WithDocumentsFrom(source)
+            await _sut.WithDocumentsFrom(source)
                 .OnDocumentError(err =>
                 {
                     onDocumentErrorCalledFor.Add(
@@ -246,7 +248,7 @@ namespace Waives.Pipelines.Tests
                     onDocumentErrorCalledFor.Add(
                         (error: err, sequence: 2));
                 })
-                .Start();
+                .RunAsync();
 
             Assert.Equal(2, onDocumentErrorCalledFor.Count);
             Assert.Equal(1, onDocumentErrorCalledFor.First().sequence);
