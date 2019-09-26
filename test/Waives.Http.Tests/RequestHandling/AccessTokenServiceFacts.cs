@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Waives.Http.Logging;
@@ -60,12 +61,15 @@ namespace Waives.Http.Tests.RequestHandling
                 return false;
             }
 
-            var formData = content.ReadAsFormDataAsync().Result;
+            var contentStream = content.ReadAsStreamAsync().Result;
+            using (var reader = new FormReader(contentStream))
+            {
+                var formData = reader.ReadFormAsync().Result;
 
-            Assert.Equal(expectedClientId, formData["client_id"]);
-            Assert.Equal(expectedClientSecret, formData["client_secret"]);
-
-            return true;
+                Assert.Equal(expectedClientId, formData["client_id"]);
+                Assert.Equal(expectedClientSecret, formData["client_secret"]);
+                return true;
+            }
         }
     }
 }
