@@ -136,6 +136,25 @@ namespace Waives.Http
         /// <returns>The results of the extraction operation.</returns>
         public async Task<ExtractionResults> Extract(string extractorName)
         {
+            var extractionResponse = await DoExtraction(extractorName).ConfigureAwait(false);
+            return await extractionResponse.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
+        }
+
+        public async Task<Stream> Redact(string extractorName)
+        {
+            var extractionResponse = await DoExtraction(extractorName).ConfigureAwait(false);
+            var redactions = await extractionResponse.ReadAsStringAsync().ConfigureAwait(false);
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents/{Id}/redact", UriKind.Relative))
+            {
+                Content = new JsonContent(redactions)
+            };
+
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        }
+
+        private async Task<HttpContent> DoExtraction(string extractorName)
+        {
             var extractUrl = _behaviours["document:extract"];
             var request = new HttpRequestMessageTemplate(HttpMethod.Post,
                 extractUrl.CreateUri(new
@@ -144,20 +163,7 @@ namespace Waives.Http
                 }));
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-            var responseBody = await response.Content.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
-            return responseBody;
-        }
-
-        public async Task<Stream> Redact(string extractorName)
-        {
-            var redactions = await Extract(extractorName).ConfigureAwait(false);
-            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents/{Id}/redact", UriKind.Relative))
-            {
-                Content = new JsonContent(redactions)
-            };
-
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
-            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            return response.Content;
         }
     }
 }
