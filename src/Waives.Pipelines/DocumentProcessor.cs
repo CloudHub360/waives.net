@@ -20,24 +20,24 @@ namespace Waives.Pipelines
             _onDocumentException = onDocumentException ?? throw new ArgumentNullException(nameof(onDocumentException));
         }
 
-        public async Task RunAsync(Document doc)
+        public async Task RunAsync(Document document)
         {
             try
             {
-                var waivesDocument = await _docCreator(doc);
-                await PerformDocActions(waivesDocument).ConfigureAwait(false);
+                var waivesDocument = await _docCreator(document);
+                await RunActions(waivesDocument).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                _onDocumentException(e, doc);
+                _onDocumentException(e, document);
             }
         }
 
-        private async Task PerformDocActions(WaivesDocument doc)
+        private async Task RunActions(WaivesDocument document)
         {
             foreach (var docAction in _docActions)
             {
-                doc = await docAction(doc).ConfigureAwait(false);
+                document = await docAction(document).ConfigureAwait(false);
             }
         }
     }
