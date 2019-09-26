@@ -11,6 +11,10 @@ namespace Waives.Http
         public JsonContent(object obj) :
             base(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json")
         { }
+
+        public JsonContent(string json) :
+            base(json, Encoding.UTF8, "application/json")
+        { }
     }
 
     internal static class JsonContentExtensions

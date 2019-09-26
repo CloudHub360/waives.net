@@ -349,12 +349,63 @@ namespace Waives.Http.Tests
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
+        [Fact]
+        public async Task Redact_uses_extraction_results_for_redaction()
+        {
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
+
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
+
+            await _sut.Redact(_extractorName);
+
+            await _requestSender
+                .Received(1)
+                .Send(
+                    Arg.Is<HttpRequestMessageTemplate>(
+                        t => new HttpContentEqualityComparer().Equals(
+                            t.Content,
+                            Response.Extract(t).Content)));
+        }
+
         public void Dispose()
         {
             if (File.Exists(_readResultsFilename))
             {
                 File.Delete(_readResultsFilename);
             }
+        }
+    }
+
+    internal class HttpContentEqualityComparer : IEqualityComparer<HttpContent>
+    {
+        public bool Equals(HttpContent x, HttpContent y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            var xContent = x.ReadAsStringAsync();
+            var yContent = y.ReadAsStringAsync();
+
+            Task.WaitAll(xContent, yContent);
+
+            Assert.Equal(xContent.Result, yContent.Result);
+            return true;
+        }
+
+        public int GetHashCode(HttpContent obj)
+        {
+            return 1;
         }
     }
 }
