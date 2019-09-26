@@ -9,13 +9,11 @@ namespace Waives.Pipelines
 {
     internal class WorkPool : IDisposable
     {
-        private readonly int _maxConcurrency;
         private readonly SemaphoreSlim _semaphore;
         private readonly ConcurrentDictionary<Task, bool> _tasks = new ConcurrentDictionary<Task, bool>();
 
         public WorkPool(int maxConcurrency)
         {
-            _maxConcurrency = maxConcurrency;
             _semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
         }
 
@@ -54,7 +52,7 @@ namespace Waives.Pipelines
         {
             if (disposing)
             {
-                _semaphore?.Dispose();
+                _semaphore.Dispose();
             }
         }
 
