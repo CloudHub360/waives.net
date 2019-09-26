@@ -1,6 +1,13 @@
 # waives.net
 
 This repository is where we develop the .NET SDK libraries for [Waives](https://waives.io/).
+The .NET SDK targets .NET Standard 2.0. We explicitly support .NET Core 2.1 and
+higher, as well as .NET Framework 4.7.2 and higher. The SDK _should_ work on
+Mono version 5.4 and higher, but this is not tested and support is on a best-
+effort basis only.
+
+If you are using Visual Studio, please ensure you are using Visual Studio 2017
+or later.
 
 ## Getting Started
 
@@ -16,19 +23,12 @@ bit of configuration of NuGet:
    <?xml version="1.0" encoding="utf-8"?>
    <configuration>
      <packageSources>
-       <add key="Waives Pre-release" value="" protocolVersion="" />
+       <add key="Waives Pre-release" value="https://www.myget.org/F/waives-nightly/api/v3/index.json" protocolVersion="3" />
      </packageSources>
    </configuration>
    ```
 
-3. Set the `value` and `protocolVersion` attributes as follows:
-   * **Visual Studio 2015+**:
-     * `value`: https://www.myget.org/F/waives-nightly/api/v3/index.json
-     * `protocolVersion`: 3
-   * **Visual Studio 2012/2013**
-     * `value`: https://www.myget.org/F/waives-nightly/api/v2
-     * `protocolVersion`: 2
-4. Install the latest pre-release version using your NuGet client or
+3. Install the latest pre-release version using your NuGet client or
 
    ```powershell
    Install-Package -Pre Waives.Pipelines
