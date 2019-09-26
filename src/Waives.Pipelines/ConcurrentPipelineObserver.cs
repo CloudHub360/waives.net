@@ -7,16 +7,19 @@ namespace Waives.Pipelines
     {
         private readonly IDocumentProcessor _documentProcessor;
         private readonly Action _onPipelineCompleted;
+        private readonly Action<Exception> _onError;
 
         private readonly WorkPool _workPool;
 
         internal ConcurrentPipelineObserver(
             IDocumentProcessor documentProcessor,
             Action onPipelineCompleted,
+            Action<Exception> onError,
             int maxConcurrency)
         {
             _documentProcessor = documentProcessor ?? throw new ArgumentNullException(nameof(documentProcessor));
             _onPipelineCompleted = onPipelineCompleted ?? throw new ArgumentNullException(nameof(onPipelineCompleted));
+            _onError = onError ?? throw new ArgumentNullException(nameof(onError));
             _workPool = new WorkPool(maxConcurrency);
         }
 
@@ -28,9 +31,9 @@ namespace Waives.Pipelines
 
         public void OnError(Exception error)
         {
-            throw new PipelineException(
+            _onError(new PipelineException(
                 $"A fatal error occurred in the processing pipeline: {error.Message}",
-                error);
+                error));
         }
 
         public void OnNext(Document document)
