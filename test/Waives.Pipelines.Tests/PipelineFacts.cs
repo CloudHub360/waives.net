@@ -50,7 +50,7 @@ namespace Waives.Pipelines.Tests
         public async Task WithDocumentsFrom_creates_each_document_with_Waives()
         {
             var testDocument = new TestDocument(Generate.Bytes());
-            var source = Observable.Repeat(testDocument, 1);
+            var source = Observable.Return(testDocument);
 
             var pipeline = _sut.WithDocumentsFrom(source);
             await pipeline.RunAsync();

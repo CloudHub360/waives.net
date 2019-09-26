@@ -26,8 +26,8 @@ namespace Waives.Pipelines.Tests
         [Theory]
         [InlineData(1,3)]
         [InlineData(3,3)]
-        [InlineData(100,100)]
-        [InlineData(100,101)]
+        [InlineData(1000,1000)]
+        [InlineData(1000,1001)]
         public async Task Post_runs_to_concurrency_limit(int concurrencyLimit, int postCount)
         {
             var sut = new WorkPool(concurrencyLimit);
@@ -49,7 +49,6 @@ namespace Waives.Pipelines.Tests
                 sut.Post(func);
             }
             await sut.WaitAsync();
-
 
             Assert.Equal(concurrencyLimit, maxObservedConcurrency);
         }
