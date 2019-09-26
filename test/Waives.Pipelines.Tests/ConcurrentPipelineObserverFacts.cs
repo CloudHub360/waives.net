@@ -33,7 +33,7 @@ namespace Waives.Pipelines.Tests
             _source.Subscribe(sut);
 
             await _tcs.Task;
-            await _documentProcessor.Received(10).RunAsync(_testDocument);
+            await _documentProcessor.Received(_maxConcurrency).RunAsync(_testDocument);
         }
 
         [Fact]
