@@ -249,6 +249,13 @@ namespace Waives.Pipelines
                 taskCompletion.SetResult(true);
             }
 
+            void OnPipelineError(Exception e)
+            {
+                _logger.Error(e, "An error occurred processing the pipeline");
+
+                taskCompletion.SetException(e);
+            }
+
             void OnDocumentException(Exception exception, Document document)
             {
                 _onDocumentError(new DocumentError(document, exception));
@@ -272,6 +279,7 @@ namespace Waives.Pipelines
             var pipelineObserver = new ConcurrentPipelineObserver(
                 documentProcessor,
                 OnPipelineComplete,
+                OnPipelineError,
                 _maxConcurrency);
 
             return (_docSource.Subscribe(pipelineObserver), taskCompletion.Task);
