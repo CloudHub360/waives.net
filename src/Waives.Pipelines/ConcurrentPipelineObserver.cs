@@ -7,7 +7,6 @@ namespace Waives.Pipelines
     {
         private readonly IDocumentProcessor _documentProcessor;
         private readonly Action _onPipelineCompleted;
-        private bool _sourceComplete;
 
         private readonly WorkPool _workPool;
 
@@ -23,8 +22,8 @@ namespace Waives.Pipelines
 
         public void OnCompleted()
         {
-            _sourceComplete = true;
-            _ = TryCompletionHandler();
+            Task.Run(_workPool.WaitAsync).Wait();
+            _onPipelineCompleted();
         }
 
         public void OnError(Exception error)
@@ -34,35 +33,16 @@ namespace Waives.Pipelines
                 error);
         }
 
-        public void OnNext(Document doc)
+        public void OnNext(Document document)
         {
-            _workPool.Post(async () =>
-            {
-                try
-                {
-                    await _documentProcessor.RunAsync(doc);
-                }
-                finally
-                {
-                    await TryCompletionHandler();
-                }
-            });
-        }
-
-        private async Task TryCompletionHandler()
-        {
-            if (_sourceComplete)
-            {
-                await _workPool.WaitAsync();
-                _onPipelineCompleted();
-            }
+            _workPool.Post(async () => await _documentProcessor.RunAsync(document));
         }
 
         private void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _workPool?.Dispose();
+                _workPool.Dispose();
             }
         }
 

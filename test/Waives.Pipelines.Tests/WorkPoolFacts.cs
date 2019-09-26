@@ -27,7 +27,7 @@ namespace Waives.Pipelines.Tests
         [InlineData(1,3)]
         [InlineData(3,3)]
         [InlineData(100,100)]
-        [InlineData(100,300)]
+        [InlineData(100,101)]
         public async Task Post_runs_to_concurrency_limit(int concurrencyLimit, int postCount)
         {
             var sut = new WorkPool(concurrencyLimit);
