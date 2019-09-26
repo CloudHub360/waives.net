@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Waives.Http.RequestHandling;
@@ -103,6 +104,14 @@ namespace Waives.Http.Tests.RequestHandling
             return From(HttpStatusCode.OK, requestTemplate, new StringContent(ExtractResponse)
             {
                 Headers = {ContentType = new MediaTypeHeaderValue("application/json")}
+            });
+        }
+
+        public static HttpResponseMessage Redact(HttpRequestMessageTemplate requestTemplate)
+        {
+            return From(HttpStatusCode.OK, requestTemplate, new StreamContent(new MemoryStream(RedactResponse))
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue("application/pdf") }
             });
         }
 
@@ -306,5 +315,7 @@ namespace Waives.Http.Tests.RequestHandling
         }]
     }
 }";
+
+        private static readonly byte[] RedactResponse = { 1, 2, 3};
     }
 }
