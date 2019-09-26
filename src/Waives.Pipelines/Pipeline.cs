@@ -57,7 +57,7 @@ namespace Waives.Pipelines
         private readonly IHttpDocumentFactory _documentFactory;
         private readonly int _maxConcurrency;
         private IObservable<Document> _docSource = Observable.Empty<Document>();
-        private Action _onPipelineCompletedUserAction = () =>{};
+        private Action _onPipelineCompletedUserAction = () => { };
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
 
@@ -271,7 +271,7 @@ namespace Waives.Pipelines
                     var httpDocument = await _documentFactory
                         .CreateDocument(d).ConfigureAwait(false);
 
-                    return new WaivesDocument(d,httpDocument);
+                    return new WaivesDocument(d, httpDocument);
                 },
                 docActions,
                 OnDocumentException);
