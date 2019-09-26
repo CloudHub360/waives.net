@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Waives.Http.Requests;
@@ -158,9 +159,9 @@ namespace Waives.Http
                 };
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
-            var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
+            var document = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
 
-            return new Document(_requestSender, responseContent.Id, responseContent.Links);
+            return new Document(_requestSender, document.Id, document.Links);
         }
 
         /// <summary>
