@@ -20,6 +20,7 @@ namespace Waives.Http.Tests
         private readonly string _readUrl;
         private readonly string _classifyUrl;
         private readonly string _extractUrl;
+        private readonly string _redactUrl;
         private readonly string _selfUrl;
         private readonly string _classifierName;
         private readonly string _extractorName;
@@ -39,6 +40,7 @@ namespace Waives.Http.Tests
 
             _classifyUrl = $"/documents/{documentId}/classify/{_classifierName}";
             _extractUrl = $"/documents/{documentId}/extract/{_extractorName}";
+            _redactUrl = $"/documents/{documentId}/redact";
             _selfUrl = $"/documents/{documentId}";
 
             IDictionary<string, HalUri> behaviours = new Dictionary<string, HalUri>
@@ -289,6 +291,61 @@ namespace Waives.Http.Tests
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Extract(_extractorName));
+            Assert.Equal(exceptionMessage, exception.Message);
+        }
+
+        [Fact]
+        public async Task Redact_sends_request_with_correct_url()
+        {
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
+
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
+
+            await _sut.Redact(_extractorName);
+
+            await _requestSender
+                .Received(1)
+                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                    m.Method == HttpMethod.Post &&
+                    m.RequestUri.ToString() == _redactUrl));
+        }
+
+        [Fact]
+        public async Task Redact_returns_a_stream()
+        {
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
+
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
+
+            var response = await _sut.Redact(_extractorName);
+
+            var result = new byte[3].AsMemory();
+            response.Read(result.Span);
+
+            Assert.Equal(new byte[] { 1, 2, 3 }, result.ToArray());
+        }
+
+        [Fact]
+        public async Task Redact_throws_if_response_is_not_success_code()
+        {
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
+
+            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
+            _requestSender
+                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .Throws(new WaivesApiException(exceptionMessage));
+
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Redact(_extractorName));
             Assert.Equal(exceptionMessage, exception.Message);
         }
 

@@ -147,5 +147,17 @@ namespace Waives.Http
             var responseBody = await response.Content.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
             return responseBody;
         }
+
+        public async Task<Stream> Redact(string extractorName)
+        {
+            var redactions = await Extract(extractorName).ConfigureAwait(false);
+            var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents/{Id}/redact", UriKind.Relative))
+            {
+                Content = new JsonContent(redactions)
+            };
+
+            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        }
     }
 }
