@@ -75,14 +75,12 @@ namespace FileSorter
 
             try
             {
-                pipeline.Start();
+                await pipeline.RunAsync();
             }
             catch (PipelineException ex)
             {
                 Console.WriteLine(ex);
             }
-
-            await Task.Delay(Timeout.Infinite, cancellation.Token);
         }
 
         private static void EnsureDirectoryExists(string path)
