@@ -49,7 +49,7 @@ namespace Waives.Pipelines.Tests
         [Fact]
         public async Task Runs_all_provided_actions_on_docs()
         {
-            var fakeDocActions = FakeDocAction.AListOfDocActions(10);
+            var fakeDocActions = FakeDocAction.AListOfDocActions(3);
             var sut = new DocumentProcessor(
                 _docCreator,
                 fakeDocActions.Select<FakeDocAction, Func<WaivesDocument, Task<WaivesDocument>>>(f => f.Run),
