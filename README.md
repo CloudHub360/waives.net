@@ -11,9 +11,9 @@ or later.
 
 ## Getting Started
 
-The Waives .NET SDK is available as a set of NuGet packages. You can download
-the bleeding-edge version of the libraries from MyGet, which requires a little
-bit of configuration of NuGet:
+The Waives .NET SDK is available as a set of NuGet packages. If you wish, you
+can download the bleeding-edge version of the libraries from the MyGet feed,
+which requires a little bit of configuration of NuGet:
 
 1. Add a [NuGet.config](https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior)
   file to the root of your project's repository.
