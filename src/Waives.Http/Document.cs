@@ -141,6 +141,21 @@ namespace Waives.Http
             return await extractionResponse.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Performs redaction on this document using results from an
+        /// <see cref="Extract" langword="extraction"/> operation using the
+        /// specified extractor name. The named extractor must already exist in
+        /// the Waives platform. The result of this operation is a PDF file with
+        /// the extracted data removed from the file.
+        /// </summary>
+        /// <param name="extractorName">
+        /// The name of the extractor to use to identify the areas of the
+        /// document to redact.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Stream"/> of bytes containing a PDF file. The returned
+        /// Stream should be disposed of in your own code.
+        /// </returns>
         public async Task<Stream> Redact(string extractorName)
         {
             var extractionResponse =
