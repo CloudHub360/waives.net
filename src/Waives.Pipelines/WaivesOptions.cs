@@ -36,6 +36,8 @@ namespace Waives.Pipelines
         /// <summary>
         /// The maximum number of documents to process concurrently.
         /// </summary>
-        public int MaxConcurrency { get; set; } = RateLimiter.DefaultMaximumConcurrentDocuments;
+        public int MaxConcurrency { get; set; } = DefaultMaximumConcurrentDocuments;
+
+        public const byte DefaultMaximumConcurrentDocuments = 10;
     }
 }

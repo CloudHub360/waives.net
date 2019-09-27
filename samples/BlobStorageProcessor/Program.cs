@@ -68,8 +68,6 @@ namespace BlobStorageProcessor
                 ClientSecret = "clientSecret"
             });
 
-            var completion = new TaskCompletionSource<bool>();
-
             pipeline.WithDocumentsFrom(blobStorage)
                 .ClassifyWith(options["--classifier"].ToString())
                 .Then(d => writer.Write(d))
@@ -77,20 +75,16 @@ namespace BlobStorageProcessor
                 .OnPipelineCompleted(() =>
                 {
                     Console.WriteLine(("Processing completed."));
-                    completion.SetResult(true);
                 });
 
             try
             {
-                pipeline.Start();
+                await pipeline.RunAsync();
             }
             catch (PipelineException ex)
             {
                 Console.WriteLine(ex);
-                completion.SetResult(false);
             }
-
-            await completion.Task;
         }
 
         private static IEnumerable<BlobStorageContainer> EnumerateContainers(string connectionString, string containerSas, IEnumerable<string> containerNames)

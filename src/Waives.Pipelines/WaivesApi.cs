@@ -68,7 +68,7 @@ namespace Waives.Pipelines
 
             return new Pipeline(
                 documentFactory,
-                new RateLimiter(null, options.MaxConcurrency));
+                options.MaxConcurrency);
         }
 
         private static WaivesClient CreateAuthenticatedWaivesClient(WaivesOptions options)

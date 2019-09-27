@@ -1,0 +1,56 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Waives.Pipelines.Tests
+{
+    public class WorkPoolFacts
+    {
+        [Fact]
+        public async Task Post_runs_supplied_func()
+        {
+            var sut = new WorkPool(3);
+            var hasRun = false;
+
+            sut.Post(() =>
+            {
+                hasRun = true;
+                return Task.CompletedTask;
+            });
+            await sut.WaitAsync();
+
+            Assert.True(hasRun);
+        }
+
+        [Theory]
+        [InlineData(1,3)]
+        [InlineData(3,3)]
+        [InlineData(1000,1000)]
+        [InlineData(1000,1001)]
+        public async Task Post_runs_to_concurrency_limit(int concurrencyLimit, int postCount)
+        {
+            var sut = new WorkPool(concurrencyLimit);
+            var currentConcurrency = 0;
+            var maxObservedConcurrency = 0;
+
+            Func<Task> func = async () =>
+            {
+                Interlocked.Increment(ref currentConcurrency);
+                await Task.Delay(10); // simulate work
+                lock (sut)
+                {
+                    maxObservedConcurrency = Math.Max(maxObservedConcurrency, currentConcurrency);
+                }
+                Interlocked.Decrement(ref currentConcurrency);
+            };
+            for (int i = 0; i < postCount; i++)
+            {
+                sut.Post(func);
+            }
+            await sut.WaitAsync();
+
+            Assert.Equal(concurrencyLimit, maxObservedConcurrency);
+        }
+    }
+}
