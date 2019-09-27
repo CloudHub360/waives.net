@@ -9,6 +9,8 @@ namespace Waives.Http.Responses
     /// </summary>
     public class ExtractionResults
     {
+        internal const string MimeType = "application/vnd.waives.resultformats.extractdata+json";
+
         /// <summary>
         /// Gets the extraction results for the document.
         /// </summary>

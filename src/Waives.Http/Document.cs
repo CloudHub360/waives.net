@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Waives.Http.RequestHandling;
+using Waives.Http.Requests;
 using Waives.Http.Responses;
 
 namespace Waives.Http
@@ -142,7 +143,10 @@ namespace Waives.Http
 
         public async Task<Stream> Redact(string extractorName)
         {
-            var extractionResponse = await DoExtraction(extractorName).ConfigureAwait(false);
+            var extractionResponse =
+                await DoExtraction(extractorName, RedactionRequest.MimeType)
+                .ConfigureAwait(false);
+
             var redactions = await extractionResponse.ReadAsStringAsync().ConfigureAwait(false);
             var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents/{Id}/redact", UriKind.Relative))
             {
@@ -153,14 +157,21 @@ namespace Waives.Http
             return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
 
-        private async Task<HttpContent> DoExtraction(string extractorName)
+        private async Task<HttpContent> DoExtraction(string extractorName,
+            string desiredResponseFormat = ExtractionResults.MimeType)
         {
-            var extractUrl = _behaviours["document:extract"];
-            var request = new HttpRequestMessageTemplate(HttpMethod.Post,
-                extractUrl.CreateUri(new
+            var extractUrl = _behaviours["document:extract"].CreateUri(new
+            {
+                extractor_name = extractorName
+            });
+
+            var request = new HttpRequestMessageTemplate(
+                HttpMethod.Post,
+                extractUrl,
+                new Dictionary<string, string>
                 {
-                    extractor_name = extractorName
-                }));
+                    { "Accept", desiredResponseFormat }
+                });
 
             var response = await _requestSender.Send(request).ConfigureAwait(false);
             return response.Content;
