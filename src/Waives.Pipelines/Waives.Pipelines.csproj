@@ -8,6 +8,8 @@
     <AssemblyName>Waives.Pipelines</AssemblyName>
     <RootNamespace>Waives.Pipelines</RootNamespace>
     <Version>1.0.0</Version>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Company>CloudHub 360 Ltd.</Company>
     <Product>Waives.io</Product>
     <Authors>CloudHub 360 Ltd.</Authors>
