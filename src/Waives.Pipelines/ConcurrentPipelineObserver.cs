@@ -25,8 +25,9 @@ namespace Waives.Pipelines
 
         public void OnCompleted()
         {
-            Task.Run(_workPool.WaitAsync).Wait();
-            _onPipelineCompleted();
+             _workPool.WaitAsync()
+                .ContinueWith(_ => _onPipelineCompleted())
+                .ConfigureAwait(false);
         }
 
         public void OnError(Exception error)
