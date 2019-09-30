@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
 using Waives.Pipelines.HttpAdapters;
@@ -44,6 +45,14 @@ namespace Waives.Pipelines
                 ClassificationResults = ClassificationResults,
                 ExtractionResults = await _waivesDocument.Extract(extractorName).ConfigureAwait(false)
             };
+        }
+
+        public async Task<WaivesDocument> Redact(string extractorName, Func<Stream, Task> resultFunc)
+        {
+            var resultStream = await _waivesDocument.Redact(extractorName);
+            await resultFunc(resultStream);
+
+            return this;
         }
 
         public async Task Delete()

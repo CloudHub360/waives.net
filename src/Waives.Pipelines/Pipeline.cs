@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
@@ -129,6 +130,28 @@ namespace Waives.Pipelines
                     "Extracted data from document {DocumentId} from '{DocumentSource}'",
                     d.Id,
                     d.Source.SourceId);
+                return document;
+            });
+
+            return this;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="extractorName"></param>
+        /// <param name="resultFunc"></param>
+        /// <returns></returns>
+        public Pipeline RedactWith(string extractorName, Func<Stream, Task> resultFunc)
+        {
+            _docActions.Add(async d =>
+            {
+                var document = await d.Redact(extractorName, resultFunc).ConfigureAwait(false);
+                _logger.Info(
+                    "Redacted data from document {DocumentId} from '{DocumentSource}' using extractor '{ExtractorName}'",
+                    d.Id,
+                    d.Source.SourceId,
+                    extractorName);
                 return document;
             });
 

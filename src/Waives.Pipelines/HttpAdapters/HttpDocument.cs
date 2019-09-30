@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
@@ -14,6 +14,8 @@ namespace Waives.Pipelines.HttpAdapters
         Task<ClassificationResult> Classify(string classifierName);
 
         Task<ExtractionResults> Extract(string extractorName);
+
+        Task<Stream> Redact(string extractorName);
 
         Task Delete();
 
@@ -45,6 +47,11 @@ namespace Waives.Pipelines.HttpAdapters
         public async Task<ExtractionResults> Extract(string extractorName)
         {
             return await _documentClient.Extract(extractorName).ConfigureAwait(false);
+        }
+
+        public async Task<Stream> Redact(string extractorName)
+        {
+            return await _documentClient.Redact(extractorName).ConfigureAwait(false);
         }
 
         public async Task Delete()

@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Waives.Http.Logging;
 using Waives.Http.Responses;
 using Waives.Pipelines.HttpAdapters;
 using Xunit;
@@ -26,6 +25,7 @@ namespace Waives.Pipelines.Tests
             _httpDocument = Substitute.For<IHttpDocument>();
             _httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
             _httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
+            _httpDocument.Redact(Arg.Any<string>()).Returns(new MemoryStream(new byte[] { 1, 2, 3 }));
             _httpDocument.Delete();
 
             _documentFactory
@@ -87,6 +87,24 @@ namespace Waives.Pipelines.Tests
 
             await pipeline.RunAsync();
             await _httpDocument.Received(1).Extract(extractorName);
+        }
+
+        [Fact]
+        public async Task RedactWith_extracts_from_each_document_with_Waives()
+        {
+            var source = Observable.Return(new TestDocument(Generate.Bytes()));
+            var extractorName = Generate.String();
+
+            var pipeline = _sut
+                .WithDocumentsFrom(source)
+                .RedactWith(extractorName, redactedPdf =>
+                {
+                    AssertStreamsAreEqual(new MemoryStream(new byte[] { 1, 2, 3 }), redactedPdf);
+                    return Task.CompletedTask;
+                });
+
+            await pipeline.RunAsync();
+            await _httpDocument.Received(1).Redact(extractorName);
         }
 
         [Fact]
@@ -282,6 +300,16 @@ namespace Waives.Pipelines.Tests
             var actualException = await Assert.ThrowsAsync<Exception>(() => pipeline.RunAsync());
 
             Assert.Same(expectedException, actualException);
+        }
+		
+		private static void AssertStreamsAreEqual(Stream expected, Stream actual)
+        {
+            int expectedByte, actualByte;
+            while ((expectedByte = expected.ReadByte()) != -1 &&
+                   (actualByte = actual.ReadByte()) != -1)
+            {
+                Assert.Equal(expectedByte, actualByte);
+            }
         }
     }
 }
