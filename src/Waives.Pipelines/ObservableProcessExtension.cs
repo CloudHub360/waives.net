@@ -20,7 +20,7 @@ namespace Waives.Pipelines
                 }
                 catch (Exception e)
                 {
-                    var documentError = await OnProcessingError(
+                    var documentError = await OnProcessingErrorAsync(
                         new ProcessingError<TDocument>(d, e)).ConfigureAwait(false);
 
                     errorAction(documentError);
@@ -32,7 +32,7 @@ namespace Waives.Pipelines
             return results.Select(r => r.Document);
         }
 
-        private static async Task<DocumentError> OnProcessingError<TDocument>(ProcessingError<TDocument> error)
+        private static async Task<DocumentError> OnProcessingErrorAsync<TDocument>(ProcessingError<TDocument> error)
         {
             // Try coercing the document in error to a Waives Document. If it is, it
             // has been created in the platform and must be deleted before proceeding.
