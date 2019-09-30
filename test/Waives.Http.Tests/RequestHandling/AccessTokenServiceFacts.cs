@@ -27,14 +27,14 @@ namespace Waives.Http.Tests.RequestHandling
         public async Task Login_sends_a_request_with_the_specified_credentials()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.FetchAccessTokenAsync();
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     IsFormWithClientCredentials(m.Content, ExpectedClientId, ExpectedClientSecret)));
         }
@@ -43,7 +43,7 @@ namespace Waives.Http.Tests.RequestHandling
         public async Task Login_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(Response.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>

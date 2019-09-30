@@ -152,7 +152,7 @@ namespace Waives.Http
                     Content = new StreamContent(documentSource)
                 };
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
             var document = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
 
             return new Document(_requestSender, document.Id, document.Links);
@@ -206,7 +206,7 @@ namespace Waives.Http
 
                 };
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var id = responseContent.Id;
@@ -223,7 +223,7 @@ namespace Waives.Http
         public async Task<Document> GetDocument(string id)
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/documents/{id}", UriKind.Relative));
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             return new Document(_requestSender, responseContent.Id, responseContent.Links);
@@ -244,7 +244,7 @@ namespace Waives.Http
         public async Task<IEnumerable<Document>> GetAllDocuments()
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
             return responseContent.Documents.Select(d => new Document(_requestSender, d.Id, d.Links));

@@ -21,7 +21,7 @@ namespace Waives.Http.Tests.RequestHandling
                 _requestSender);
 
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(
                     r => !r.Headers.ContainsKey("Authorization")))
                 .Returns(ci => Response.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
         }
@@ -29,23 +29,23 @@ namespace Waives.Http.Tests.RequestHandling
         [Fact]
         public async Task Send_retrieves_an_access_token_for_the_request()
         {
-            await _sut.Send(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
+            await _sut.SendAsync(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(
                     r => r.RequestUri == new Uri("/oauth/token", UriKind.Relative)));
         }
 
         [Fact]
         public async Task Send_retrieves_an_access_token_only_once_while_the_token_is_valid()
         {
-            await _sut.Send(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
-            await _sut.Send(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
-            await _sut.Send(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
+            await _sut.SendAsync(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
+            await _sut.SendAsync(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
+            await _sut.SendAsync(new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative)));
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(
                     r => r.RequestUri == new Uri("/oauth/token", UriKind.Relative)));
         }
 
@@ -54,11 +54,11 @@ namespace Waives.Http.Tests.RequestHandling
         {
             var template = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
 
-            await _sut.Send(template);
+            await _sut.SendAsync(template);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(
                     r => r.RequestUri == template.RequestUri &&
                          r.Headers.ContainsKey("Authorization")));
         }

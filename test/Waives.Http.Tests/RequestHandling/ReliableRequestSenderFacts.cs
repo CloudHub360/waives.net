@@ -43,14 +43,14 @@ namespace Waives.Http.Tests.RequestHandling
         {
             var sender = Substitute.For<IHttpRequestSender>();
             sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     ci => Response.From(statusCode, ci.Arg<HttpRequestMessageTemplate>()),
                     ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(sender);
 
-            await sut.Send(_request);
+            await sut.SendAsync(_request);
 
             _logEvents
                 .HasMessage("Request '{RequestMethod} {RequestUri}' failed with " +
@@ -70,14 +70,14 @@ namespace Waives.Http.Tests.RequestHandling
         {
             var sender = Substitute.For<IHttpRequestSender>();
             sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(
                     ci => new HttpResponseMessage(statusCode),
                     ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(sender);
 
-            await sut.Send(_request);
+            await sut.SendAsync(_request);
 
             Assert.Empty(_logEvents);
         }
@@ -88,20 +88,20 @@ namespace Waives.Http.Tests.RequestHandling
             var request = ARequestWithContentAndHeader();
 
             var sender = Substitute.For<IHttpRequestSender>();
-            sender.Send(Arg.Any<HttpRequestMessageTemplate>())
+            sender.SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             var sut = new ReliableRequestSender(sender);
 
-            await sut.Send(request);
+            await sut.SendAsync(request);
 
             await sender
                 .Received(1)
-                .Send(Arg.Any<HttpRequestMessageTemplate>());
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>());
 
             await sender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     RequestsAreEqual(request, m)));
         }
 

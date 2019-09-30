@@ -22,7 +22,7 @@ namespace Waives.Http.RequestHandling
             set => _wrappedRequestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
         {
             var stopWatch = new Stopwatch();
             Logger.Trace("Sending {RequestMethod} request to {RequestUri}", request.Method, request.RequestUri);
@@ -30,7 +30,7 @@ namespace Waives.Http.RequestHandling
             try
             {
                 stopWatch.Start();
-                var response = await _wrappedRequestSender.Send(request).ConfigureAwait(false);
+                var response = await _wrappedRequestSender.SendAsync(request).ConfigureAwait(false);
                 stopWatch.Stop();
 
                 Logger.Trace(

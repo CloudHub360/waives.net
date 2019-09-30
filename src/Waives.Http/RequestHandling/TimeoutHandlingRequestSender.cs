@@ -25,11 +25,11 @@ namespace Waives.Http.RequestHandling
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
         {
             try
             {
-                return await _wrappedRequestSender.Send(request).ConfigureAwait(false);
+                return await _wrappedRequestSender.SendAsync(request).ConfigureAwait(false);
             }
             catch (Exception e) when (e is TaskCanceledException || e is OperationCanceledException)
             {

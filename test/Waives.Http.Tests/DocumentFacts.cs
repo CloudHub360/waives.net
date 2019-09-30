@@ -60,14 +60,14 @@ namespace Waives.Http.Tests
         public async Task Delete_sends_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.DeleteAsync();
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Delete &&
                     m.RequestUri.ToString() == _selfUrl));
         }
@@ -77,7 +77,7 @@ namespace Waives.Http.Tests
         {
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.DeleteAsync());
@@ -88,14 +88,14 @@ namespace Waives.Http.Tests
         public async Task Read_sends_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.ReadAsync();
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Put &&
                     m.RequestUri.ToString() == _readUrl));
         }
@@ -105,7 +105,7 @@ namespace Waives.Http.Tests
         {
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.ReadAsync());
@@ -119,14 +119,14 @@ namespace Waives.Http.Tests
         public async Task Get_read_results_sends_request_with_correct_url(ReadResultsFormat format, string expectedAcceptHeader)
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), $"Anonymous string {Guid.NewGuid()}"));
 
             await _sut.GetReadResultsAsync(_readResultsFilename, format);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Get &&
                     m.RequestUri.ToString() == _readUrl &&
                     m.Headers.Contains(new KeyValuePair<string, string>("Accept", expectedAcceptHeader))));
@@ -137,7 +137,7 @@ namespace Waives.Http.Tests
         {
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.GetReadResultsAsync(_readResultsFilename, ReadResultsFormat.Pdf));
@@ -150,7 +150,7 @@ namespace Waives.Http.Tests
             var readResults = $"Read results {Guid.NewGuid()}";
 
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), readResults));
 
             using (var resultsStream = new MemoryStream())
@@ -169,7 +169,7 @@ namespace Waives.Http.Tests
             var readResults = $"Read results {Guid.NewGuid()}";
 
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), readResults));
 
             await _sut.GetReadResultsAsync(_readResultsFilename, ReadResultsFormat.Text);
@@ -182,14 +182,14 @@ namespace Waives.Http.Tests
         public async Task Classify_sends_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.ClassifyAsync(_classifierName);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     m.RequestUri.ToString() == _classifyUrl));
         }
@@ -198,7 +198,7 @@ namespace Waives.Http.Tests
         public async Task Classify_returns_a_result_with_correct_properties_set()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
             var result = await _sut.ClassifyAsync(_classifierName);
@@ -216,7 +216,7 @@ namespace Waives.Http.Tests
         {
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.ClassifyAsync(_classifierName));
@@ -228,14 +228,14 @@ namespace Waives.Http.Tests
         {
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.ExtractAsync(_extractorName);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     m.RequestUri.ToString() == _extractUrl));
         }
@@ -244,7 +244,7 @@ namespace Waives.Http.Tests
         public async Task Extract_returns_a_result_with_correct_properties_set()
         {
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             var response = await _sut.ExtractAsync(_extractorName);
@@ -287,7 +287,7 @@ namespace Waives.Http.Tests
         {
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.ExtractAsync(_extractorName));
@@ -298,18 +298,18 @@ namespace Waives.Http.Tests
         public async Task Redact_sends_request_with_correct_url()
         {
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.RedactAsync(_extractorName);
 
             await _requestSender
                 .Received(1)
-                .Send(Arg.Is<HttpRequestMessageTemplate>(m =>
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m =>
                     m.Method == HttpMethod.Post &&
                     m.RequestUri.ToString() == _redactUrl));
         }
@@ -318,11 +318,11 @@ namespace Waives.Http.Tests
         public async Task Redact_returns_a_stream()
         {
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
 
             var response = await _sut.RedactAsync(_extractorName);
@@ -337,12 +337,12 @@ namespace Waives.Http.Tests
         public async Task Redact_throws_if_response_is_not_success_code()
         {
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Throws(new WaivesApiException(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.RedactAsync(_extractorName));
@@ -353,18 +353,18 @@ namespace Waives.Http.Tests
         public async Task Redact_uses_extraction_results_for_redaction()
         {
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("extract")))
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
             _requestSender
-                .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
+                .SendAsync(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
 
             await _sut.RedactAsync(_extractorName);
 
             await _requestSender
                 .Received(1)
-                .Send(
+                .SendAsync(
                     Arg.Is<HttpRequestMessageTemplate>(
                         t => new HttpContentEqualityComparer().Equals(
                             t.Content,
