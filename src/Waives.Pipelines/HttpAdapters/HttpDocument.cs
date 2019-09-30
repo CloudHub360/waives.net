@@ -11,13 +11,13 @@ namespace Waives.Pipelines.HttpAdapters
     /// </summary>
     internal interface IHttpDocument
     {
-        Task<ClassificationResult> Classify(string classifierName);
+        Task<ClassificationResult> ClassifyAsync(string classifierName);
 
-        Task<ExtractionResults> Extract(string extractorName);
+        Task<ExtractionResults> ExtractAsync(string extractorName);
 
-        Task<Stream> Redact(string extractorName);
+        Task<Stream> RedactAsync(string extractorName);
 
-        Task Delete();
+        Task DeleteAsync();
 
         string Id { get; }
     }
@@ -39,22 +39,22 @@ namespace Waives.Pipelines.HttpAdapters
             _documentClient = documentClient;
         }
 
-        public async Task<ClassificationResult> Classify(string classifierName)
+        public async Task<ClassificationResult> ClassifyAsync(string classifierName)
         {
             return await _documentClient.ClassifyAsync(classifierName).ConfigureAwait(false);
         }
 
-        public async Task<ExtractionResults> Extract(string extractorName)
+        public async Task<ExtractionResults> ExtractAsync(string extractorName)
         {
             return await _documentClient.ExtractAsync(extractorName).ConfigureAwait(false);
         }
 
-        public async Task<Stream> Redact(string extractorName)
+        public async Task<Stream> RedactAsync(string extractorName)
         {
             return await _documentClient.RedactAsync(extractorName).ConfigureAwait(false);
         }
 
-        public async Task Delete()
+        public async Task DeleteAsync()
         {
             await _documentClient.DeleteAsync().ConfigureAwait(false);
         }

@@ -340,7 +340,7 @@ namespace Waives.Pipelines
             {
                 try
                 {
-                    await d.HttpDocument.Delete().ConfigureAwait(false);
+                    await d.HttpDocument.DeleteAsync().ConfigureAwait(false);
 
                     _logger.Info(
                         "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
