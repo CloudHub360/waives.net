@@ -23,9 +23,10 @@ namespace Waives.Pipelines
         /// level of concurrency, Post blocks until one of the in-flight Tasks has completed.
         /// </summary>
         /// <param name="action"></param>
-        public void Post(Func<Task> action)
+        /// <param name="cancellationToken"></param>
+        public void Post(Func<Task> action, CancellationToken cancellationToken = default)
         {
-            _semaphore.Wait();
+            _semaphore.Wait(cancellationToken);
 
             var task = action();
             _tasks.TryAdd(task, true);
@@ -41,9 +42,9 @@ namespace Waives.Pipelines
         /// Waits for all currently executing tasks.
         /// </summary>
         /// <returns></returns>
-        public async Task WaitAsync()
+        public async Task WaitAsync(CancellationToken cancellationToken = default)
         {
-            await _semaphore.WaitAsync();
+            await _semaphore.WaitAsync(cancellationToken);
             await Task.WhenAll(_tasks.Keys.ToArray());
             _semaphore.Release();
         }
