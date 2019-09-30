@@ -23,7 +23,7 @@ namespace Waives.Http.RequestHandling
 
         public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
         {
-            var token = await _accessTokenService.FetchAccessToken().ConfigureAwait(false);
+            var token = await _accessTokenService.FetchAccessTokenAsync().ConfigureAwait(false);
             request.Headers["Authorization"] = $"Bearer {token}";
 
             return await _requestSender.Send(request).ConfigureAwait(false);

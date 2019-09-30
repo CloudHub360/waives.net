@@ -37,7 +37,7 @@ namespace Waives.Http.RequestHandling
                 });
         }
 
-        internal async Task<AccessToken> FetchAccessToken()
+        internal async Task<AccessToken> FetchAccessTokenAsync()
         {
             return await _cachePolicy.ExecuteAsync(async context =>
             {
@@ -52,7 +52,7 @@ namespace Waives.Http.RequestHandling
 
                 var response = await _requestSender.Send(request).ConfigureAwait(false);
                 return await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
-            }, new Context(nameof(FetchAccessToken))).ConfigureAwait(false);
+            }, new Context(nameof(FetchAccessTokenAsync))).ConfigureAwait(false);
         }
 
         public void Dispose()
