@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using Polly.Extensions.Http;
@@ -33,11 +34,11 @@ namespace Waives.Http.RequestHandling
             set => _wrappedRequestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default)
         {
             return await _policy
                 .ExecuteAsync(() =>
-                    _wrappedRequestSender.SendAsync(request))
+                    _wrappedRequestSender.SendAsync(request, cancellationToken))
                 .ConfigureAwait(false);
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
 
@@ -22,7 +23,7 @@ namespace Waives.Http.RequestHandling
             set => _wrappedRequestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default)
         {
             var stopWatch = new Stopwatch();
             Logger.Trace("Sending {RequestMethod} request to {RequestUri}", request.Method, request.RequestUri);
@@ -30,7 +31,7 @@ namespace Waives.Http.RequestHandling
             try
             {
                 stopWatch.Start();
-                var response = await _wrappedRequestSender.SendAsync(request).ConfigureAwait(false);
+                var response = await _wrappedRequestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 stopWatch.Stop();
 
                 Logger.Trace(

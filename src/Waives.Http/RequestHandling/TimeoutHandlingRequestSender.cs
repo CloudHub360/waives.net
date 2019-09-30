@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Http.RequestHandling
@@ -24,12 +25,13 @@ namespace Waives.Http.RequestHandling
         /// into a WaivesApiException.
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await _wrappedRequestSender.SendAsync(request).ConfigureAwait(false);
+                return await _wrappedRequestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e) when (e is TaskCanceledException || e is OperationCanceledException)
             {
