@@ -140,8 +140,60 @@ namespace Waives.Pipelines
         }
 
         /// <summary>
-        ///
+        /// Redacts data from documents, based on extraction results provided by the specified extractor. The extractor
+        /// must have been created previously in your Waives account in order to be used here.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The result of a redaction operation is the original document, converted to a PDF file if required, and with
+        /// the extraction results removed from the electronic content of the file. Additionally, the content is removed
+        /// from the document image, replaced with a black bar. This PDF document is returned as a <see cref="Stream"/>
+        /// from the Waives API, and so a callback must be supplied accepting this <see cref="Stream"/>.
+        /// </para>
+        /// <para>
+        /// The redaction functionality is currently a beta-stage feature of the Waives API and has a couple of known
+        /// issues.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <![CDATA[
+        /// using System;
+        /// using System.Threading.Tasks;
+        /// using Waives.Pipelines;
+        /// using Waives.Pipelines.Extensions.DocumentSources.FileSystem
+        ///
+        /// namespace Waives.Pipelines.Example
+        /// {
+        ///     public class Program
+        ///     {
+        ///         public static void Main(string[] args)
+        ///         {
+        ///             Task.Run(() => MainAsync(args)).Wait();
+        ///         }
+        ///
+        ///         public static async Task MainAsync(string[] args)
+        ///         {
+        ///             var pipeline = WaivesApi.CreatePipeline(new WaivesOptions
+        ///             {
+        ///                 ClientId = "clientId",
+        ///                 ClientSecret = "clientSecret"
+        ///             });
+        ///
+        ///             pipeline
+        ///                 .WithDocumentsFrom(FileSystemSource.Create(@"C:\temp\inbox"))
+        ///                 .RedactWith("my-extractor", async (d, redactedPdf) =>
+        ///                 {
+        ///                     var redactedFilePath = $"{d.Source.SourceId}.redacted.pdf";
+        ///                     using (var fileStream = File.OpenWrite(redactedFilePath))
+        ///                     {
+        ///                         await redactedPdf.CopyTo(fileStream);
+        ///                     }
+        ///                 });
+        ///         }
+        ///     }
+        /// }
+        /// ]]>
+        /// </example>
         /// <param name="extractorName"></param>
         /// <param name="resultFunc"></param>
         /// <returns></returns>
