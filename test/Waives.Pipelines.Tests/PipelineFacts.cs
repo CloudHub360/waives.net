@@ -226,6 +226,21 @@ namespace Waives.Pipelines.Tests
         }
 
         [Fact]
+        public async Task RunAsync_throws_when_OnDocumentError_throws()
+        {
+            var document = new TestDocument(Generate.Bytes());
+            var source = Observable.Repeat(document, 1);
+
+            await Assert.ThrowsAsync<Exception>(() => _sut.WithDocumentsFrom(source)
+                .Then(waivesDocument => throw new Exception())
+                .OnDocumentError(err =>
+                {
+                    throw new Exception();
+                })
+                .RunAsync());
+        }
+
+        [Fact]
         public async Task OnDocumentError_is_run_multiple_times_in_correct_order_if_specified()
         {
             var onDocumentErrorCalledFor = new List<(DocumentError error, int sequence)>();
