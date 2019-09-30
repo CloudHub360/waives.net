@@ -25,7 +25,6 @@ namespace Waives.Pipelines.Tests
             _httpDocument = Substitute.For<IHttpDocument>();
             _httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
             _httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
-            _httpDocument.Redact(Arg.Any<string>()).Returns(new MemoryStream(new byte[] { 1, 2, 3 }));
             _httpDocument.Delete();
 
             _documentFactory
@@ -92,6 +91,11 @@ namespace Waives.Pipelines.Tests
         [Fact]
         public async Task RedactWith_extracts_from_each_document_with_Waives()
         {
+            var expectedStream = new MemoryStream(Generate.Bytes());
+            _httpDocument
+                .Redact(Arg.Any<string>())
+                .Returns(expectedStream);
+
             var source = Observable.Return(new TestDocument(Generate.Bytes()));
             var extractorName = Generate.String();
 
@@ -100,7 +104,7 @@ namespace Waives.Pipelines.Tests
                 .RedactWith(extractorName, (d, redactedPdf) =>
                 {
                     Assert.Equal(TestDocument.SourceIdString, d.Source.SourceId);
-                    AssertStreamsAreEqual(new MemoryStream(new byte[] { 1, 2, 3 }), redactedPdf);
+                    AssertStreamsAreEqual(expectedStream, redactedPdf);
                     return Task.CompletedTask;
                 });
 
@@ -252,10 +256,7 @@ namespace Waives.Pipelines.Tests
 
             await Assert.ThrowsAsync<Exception>(() => _sut.WithDocumentsFrom(source)
                 .Then(waivesDocument => throw new Exception())
-                .OnDocumentError(err =>
-                {
-                    throw new Exception();
-                })
+                .OnDocumentError(err => throw new Exception())
                 .RunAsync());
         }
 
@@ -303,14 +304,12 @@ namespace Waives.Pipelines.Tests
             Assert.Same(expectedException, actualException);
         }
 		
-		private static void AssertStreamsAreEqual(Stream expected, Stream actual)
+        private static void AssertStreamsAreEqual(MemoryStream expected, Stream actual)
         {
-            int expectedByte, actualByte;
-            while ((expectedByte = expected.ReadByte()) != -1 &&
-                   (actualByte = actual.ReadByte()) != -1)
-            {
-                Assert.Equal(expectedByte, actualByte);
-            }
+            var actualMemoryStream = new MemoryStream();
+            actual.CopyTo(actualMemoryStream);
+
+            Assert.Equal(expected.GetBuffer(), actualMemoryStream.GetBuffer());
         }
     }
 }
