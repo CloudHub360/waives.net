@@ -23,9 +23,9 @@ namespace Waives.Pipelines.Tests
         public PipelineFacts()
         {
             _httpDocument = Substitute.For<IHttpDocument>();
-            _httpDocument.Classify(Arg.Any<string>()).Returns(new ClassificationResult());
-            _httpDocument.Extract(Arg.Any<string>()).Returns(new ExtractionResults());
-            _httpDocument.Delete();
+            _httpDocument.ClassifyAsync(Arg.Any<string>()).Returns(new ClassificationResult());
+            _httpDocument.ExtractAsync(Arg.Any<string>()).Returns(new ExtractionResults());
+            _httpDocument.DeleteAsync();
 
             _documentFactory
                 .CreateDocument(Arg.Any<Document>())
@@ -70,7 +70,7 @@ namespace Waives.Pipelines.Tests
 
             await pipeline.RunAsync();
 
-            await _httpDocument.Received(1).Classify(classifierName);
+            await _httpDocument.Received(1).ClassifyAsync(classifierName);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace Waives.Pipelines.Tests
                 .Then(t => { Assert.NotNull(t.ExtractionResults); });
 
             await pipeline.RunAsync();
-            await _httpDocument.Received(1).Extract(extractorName);
+            await _httpDocument.Received(1).ExtractAsync(extractorName);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace Waives.Pipelines.Tests
         {
             var expectedStream = new MemoryStream(Generate.Bytes());
             _httpDocument
-                .Redact(Arg.Any<string>())
+                .RedactAsync(Arg.Any<string>())
                 .Returns(expectedStream);
 
             var source = Observable.Return(new TestDocument(Generate.Bytes()));
@@ -109,7 +109,7 @@ namespace Waives.Pipelines.Tests
                 });
 
             await pipeline.RunAsync();
-            await _httpDocument.Received(1).Redact(extractorName);
+            await _httpDocument.Received(1).RedactAsync(extractorName);
         }
 
         [Fact]
@@ -197,7 +197,7 @@ namespace Waives.Pipelines.Tests
             var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
             await _sut
                 .WithDocumentsFrom(source)
-                .Then(d => d.HttpDocument.Received(1).Delete())
+                .Then(d => d.HttpDocument.Received(1).DeleteAsync())
                 .RunAsync();
         }
 
@@ -294,7 +294,7 @@ namespace Waives.Pipelines.Tests
         public async Task RunAsync_throws_if_document_deletion_fails()
         {
             var expectedException = new Exception();
-            _httpDocument.Delete().Throws(expectedException);
+            _httpDocument.DeleteAsync().Throws(expectedException);
             var source = Observable.Return(new TestDocument(Generate.Bytes()));
 
             var pipeline = _sut

@@ -33,7 +33,7 @@ namespace Waives.Pipelines
         {
             return new WaivesDocument(Source, _waivesDocument)
             {
-                ClassificationResults = await _waivesDocument.Classify(classifierName).ConfigureAwait(false),
+                ClassificationResults = await _waivesDocument.ClassifyAsync(classifierName).ConfigureAwait(false),
                 ExtractionResults = ExtractionResults
             };
         }
@@ -43,7 +43,7 @@ namespace Waives.Pipelines
             return new WaivesDocument(Source, _waivesDocument)
             {
                 ClassificationResults = ClassificationResults,
-                ExtractionResults = await _waivesDocument.Extract(extractorName).ConfigureAwait(false)
+                ExtractionResults = await _waivesDocument.ExtractAsync(extractorName).ConfigureAwait(false)
             };
         }
 
@@ -59,7 +59,7 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(resultFunc));
             }
 
-            var resultStream = await _waivesDocument.Redact(extractorName);
+            var resultStream = await _waivesDocument.RedactAsync(extractorName);
             await resultFunc(this, resultStream);
 
             return this;
@@ -67,7 +67,7 @@ namespace Waives.Pipelines
 
         public async Task Delete()
         {
-            await _waivesDocument.Delete().ConfigureAwait(false);
+            await _waivesDocument.DeleteAsync().ConfigureAwait(false);
         }
     }
 }
