@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http.Logging;
 using Waives.Pipelines.HttpAdapters;
@@ -65,8 +66,8 @@ namespace Waives.Pipelines
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
 
-        private readonly List<Func<WaivesDocument, Task<WaivesDocument>>> _docActions =
-            new List<Func<WaivesDocument, Task<WaivesDocument>>>();
+        private readonly List<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>> _docActions =
+            new List<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>>();
 
         internal Pipeline(IHttpDocumentFactory documentFactory, int maxConcurrency)
         {
@@ -104,9 +105,9 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ClassifyWith(string classifierName)
         {
-            _docActions.Add(async d =>
+            _docActions.Add(async (d, ct) =>
             {
-                var document = await d.ClassifyAsync(classifierName)
+                var document = await d.ClassifyAsync(classifierName, ct)
                     .ConfigureAwait(false);
 
                 _logger.Info(
@@ -126,9 +127,9 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ExtractWith(string extractorName)
         {
-            _docActions.Add(async d =>
+            _docActions.Add(async (d, ct) =>
             {
-                var document = await d.ExtractAsync(extractorName).ConfigureAwait(false);
+                var document = await d.ExtractAsync(extractorName, ct).ConfigureAwait(false);
                 _logger.Info(
                     "Extracted data from document {DocumentId} from '{DocumentSource}'",
                     d.Id,
@@ -199,9 +200,9 @@ namespace Waives.Pipelines
         /// <returns></returns>
         public Pipeline RedactWith(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
         {
-            _docActions.Add(async d =>
+            _docActions.Add(async (d, ct) =>
             {
-                var document = await d.RedactAsync(extractorName, resultFunc).ConfigureAwait(false);
+                var document = await d.RedactAsync(extractorName, resultFunc, ct).ConfigureAwait(false);
                 _logger.Info(
                     "Redacted data from document {DocumentId} from '{DocumentSource}' using extractor '{ExtractorName}'",
                     d.Id,
@@ -220,7 +221,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Action<WaivesDocument> action)
         {
-            _docActions.Add(document =>
+            _docActions.Add((document, cancellationToken) =>
             {
                 action(document);
                 return Task.FromResult(document);
@@ -236,7 +237,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task> action)
         {
-            _docActions.Add(async d =>
+            _docActions.Add(async (d, ct) =>
             {
                 await action(d).ConfigureAwait(false);
                 return d;
@@ -252,7 +253,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> action)
         {
-            _docActions.Add(async d => await action(d).ConfigureAwait(false));
+            _docActions.Add(async (d, ct) => await action(d).ConfigureAwait(false));
 
             return this;
         }
@@ -291,9 +292,14 @@ namespace Waives.Pipelines
         /// <summary>
         /// Start processing the documents in the pipeline.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>A <see cref="Task"/> which completes when processing of all the documents
-        /// in the pipeline is complete.</returns>
-        public async Task RunAsync()
+        /// in the pipeline is complete.
+        /// </returns>
+        public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             var taskCompletion = new TaskCompletionSource<bool>(
                 TaskCreationOptions.RunContinuationsAsynchronously);
@@ -326,21 +332,21 @@ namespace Waives.Pipelines
                 }
             }
 
-            Func<Document, Task<WaivesDocument>> docCreator = async d =>
+            Func<Document, CancellationToken, Task<WaivesDocument>> docCreator = async (d, ct) =>
             {
                 _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
 
                 var httpDocument = await _documentFactory
-                    .CreateDocumentAsync(d).ConfigureAwait(false);
+                    .CreateDocumentAsync(d, ct).ConfigureAwait(false);
 
                 return new WaivesDocument(d, httpDocument);
             };
 
-            Func<WaivesDocument, Task> docDeleter = async d =>
+            Func<WaivesDocument, CancellationToken, Task> docDeleter = async (d, ct) =>
             {
                 try
                 {
-                    await d.HttpDocument.DeleteAsync().ConfigureAwait(false);
+                    await d.HttpDocument.DeleteAsync(ct).ConfigureAwait(false);
 
                     _logger.Info(
                         "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
