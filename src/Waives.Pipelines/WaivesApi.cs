@@ -58,7 +58,7 @@ namespace Waives.Pipelines
         /// <param name="options"></param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static async Task<Pipeline> CreatePipeline(WaivesOptions options)
+        public static async Task<Pipeline> CreatePipelineAsync(WaivesOptions options)
         {
             var waivesClient = CreateAuthenticatedWaivesClient(options);
 
