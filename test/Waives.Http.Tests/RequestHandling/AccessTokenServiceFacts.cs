@@ -30,7 +30,7 @@ namespace Waives.Http.Tests.RequestHandling
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetToken(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.FetchAccessToken();
+            await _sut.FetchAccessTokenAsync();
 
             await _requestSender
                 .Received(1)
@@ -47,7 +47,7 @@ namespace Waives.Http.Tests.RequestHandling
                 .Throws(new WaivesApiException(Response.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.FetchAccessToken());
+                _sut.FetchAccessTokenAsync());
 
             Assert.Equal(Response.ErrorMessage, exception.Message);
         }
