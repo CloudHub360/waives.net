@@ -47,10 +47,10 @@ namespace Waives.Pipelines
             };
         }
 
-        public async Task<WaivesDocument> Redact(string extractorName, Func<Stream, Task> resultFunc)
+        public async Task<WaivesDocument> Redact(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
         {
             var resultStream = await _waivesDocument.Redact(extractorName);
-            await resultFunc(resultStream);
+            await resultFunc(this, resultStream);
 
             return this;
         }
