@@ -331,7 +331,7 @@ namespace Waives.Pipelines
                 _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
 
                 var httpDocument = await _documentFactory
-                    .CreateDocument(d).ConfigureAwait(false);
+                    .CreateDocumentAsync(d).ConfigureAwait(false);
 
                 return new WaivesDocument(d, httpDocument);
             };

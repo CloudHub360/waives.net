@@ -62,7 +62,7 @@ namespace Waives.Pipelines
         {
             var waivesClient = CreateAuthenticatedWaivesClient(options);
 
-            var documentFactory = await HttpDocumentFactory.Create(
+            var documentFactory = await HttpDocumentFactory.CreateAsync(
                 waivesClient,
                 options.DeleteExistingDocuments).ConfigureAwait(false);
 
