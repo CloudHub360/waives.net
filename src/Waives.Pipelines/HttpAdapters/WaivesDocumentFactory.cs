@@ -31,7 +31,7 @@ namespace Waives.Pipelines.HttpAdapters
         {
             using (var documentStream = await source.OpenStream().ConfigureAwait(false))
             {
-                var httpDocument = new HttpDocument(await _apiClient.CreateDocument(documentStream).ConfigureAwait(false));
+                var httpDocument = new HttpDocument(await _apiClient.CreateDocumentAsync(documentStream).ConfigureAwait(false));
                 return httpDocument;
             }
         }
@@ -49,7 +49,7 @@ namespace Waives.Pipelines.HttpAdapters
 
         private static async Task DeleteOrphanedDocuments(WaivesClient apiClient)
         {
-            var orphanedDocuments = await apiClient.GetAllDocuments().ConfigureAwait(false);
+            var orphanedDocuments = await apiClient.GetAllDocumentsAsync().ConfigureAwait(false);
             await Task.WhenAll(orphanedDocuments.Select(d => d.DeleteAsync())).ConfigureAwait(false);
         }
     }
