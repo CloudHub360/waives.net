@@ -49,6 +49,16 @@ namespace Waives.Pipelines
 
         public async Task<WaivesDocument> Redact(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
         {
+            if (string.IsNullOrWhiteSpace(extractorName))
+            {
+                throw new ArgumentNullException(nameof(extractorName));
+            }
+
+            if (resultFunc == null)
+            {
+                throw new ArgumentNullException(nameof(resultFunc));
+            }
+
             var resultStream = await _waivesDocument.Redact(extractorName);
             await resultFunc(this, resultStream);
 
