@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
 
@@ -19,9 +20,9 @@ namespace Waives.Http.RequestHandling
             set => _wrappedRequestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default)
         {
-            var response = await _wrappedRequestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _wrappedRequestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
                 return response;

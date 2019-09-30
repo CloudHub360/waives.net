@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Http.RequestHandling
@@ -21,12 +22,12 @@ namespace Waives.Http.RequestHandling
             set => _requestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default)
         {
             var token = await _accessTokenService.FetchAccessTokenAsync().ConfigureAwait(false);
             request.Headers["Authorization"] = $"Bearer {token}";
 
-            return await _requestSender.SendAsync(request).ConfigureAwait(false);
+            return await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         public void Dispose()

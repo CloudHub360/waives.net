@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Http.RequestHandling
@@ -7,6 +8,6 @@ namespace Waives.Http.RequestHandling
     {
         int Timeout { get; set; }
 
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request);
+        Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default);
     }
 }

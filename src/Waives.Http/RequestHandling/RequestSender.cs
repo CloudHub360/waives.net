@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Http.RequestHandling
@@ -28,10 +29,10 @@ namespace Waives.Http.RequestHandling
             set => _httpClient.Timeout = TimeSpan.FromSeconds(value);
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate template)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate template, CancellationToken cancellationToken = default)
         {
             var request = template.CreateRequest();
-            return await _httpClient.SendAsync(request).ConfigureAwait(false);
+            return await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }
