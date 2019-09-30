@@ -269,5 +269,19 @@ namespace Waives.Pipelines.Tests
             Assert.Equal(1, onDocumentErrorCalledFor.First().sequence);
             Assert.Equal(2, onDocumentErrorCalledFor.Last().sequence);
         }
+
+        [Fact]
+        public async Task RunAsync_throws_if_document_deletion_fails()
+        {
+            var expectedException = new Exception();
+            _httpDocument.Delete().Throws(expectedException);
+            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+
+            var pipeline = _sut
+                .WithDocumentsFrom(source);
+            var actualException = await Assert.ThrowsAsync<Exception>(() => pipeline.RunAsync());
+
+            Assert.Same(expectedException, actualException);
+        }
     }
 }
