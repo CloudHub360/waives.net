@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Pipelines
@@ -32,14 +33,14 @@ namespace Waives.Pipelines
             return results.Select(r => r.Document);
         }
 
-        private static async Task<DocumentError> OnProcessingErrorAsync<TDocument>(ProcessingError<TDocument> error)
+        private static async Task<DocumentError> OnProcessingErrorAsync<TDocument>(ProcessingError<TDocument> error, CancellationToken cancellationToken = default)
         {
             // Try coercing the document in error to a Waives Document. If it is, it
             // has been created in the platform and must be deleted before proceeding.
             var waivesDocument = error.Document as WaivesDocument;
             if (waivesDocument != null)
             {
-                await waivesDocument.DeleteAsync().ConfigureAwait(false);
+                await waivesDocument.DeleteAsync(cancellationToken).ConfigureAwait(false);
                 return new DocumentError(waivesDocument.Source, error.Exception);
             }
 

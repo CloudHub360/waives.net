@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
 using Waives.Pipelines.HttpAdapters;
@@ -29,25 +30,32 @@ namespace Waives.Pipelines
 
         public ExtractionResults ExtractionResults { get; private set; }
 
-        public async Task<WaivesDocument> ClassifyAsync(string classifierName)
+        public async Task<WaivesDocument> ClassifyAsync(string classifierName, CancellationToken cancellationToken = default)
         {
             return new WaivesDocument(Source, _waivesDocument)
             {
-                ClassificationResults = await _waivesDocument.ClassifyAsync(classifierName).ConfigureAwait(false),
+                ClassificationResults = await _waivesDocument
+                    .ClassifyAsync(classifierName, cancellationToken)
+                    .ConfigureAwait(false),
                 ExtractionResults = ExtractionResults
             };
         }
 
-        public async Task<WaivesDocument> ExtractAsync(string extractorName)
+        public async Task<WaivesDocument> ExtractAsync(string extractorName, CancellationToken cancellationToken = default)
         {
             return new WaivesDocument(Source, _waivesDocument)
             {
                 ClassificationResults = ClassificationResults,
-                ExtractionResults = await _waivesDocument.ExtractAsync(extractorName).ConfigureAwait(false)
+                ExtractionResults = await _waivesDocument
+                    .ExtractAsync(extractorName, cancellationToken)
+                    .ConfigureAwait(false)
             };
         }
 
-        public async Task<WaivesDocument> RedactAsync(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
+        public async Task<WaivesDocument> RedactAsync(
+            string extractorName,
+            Func<WaivesDocument, Stream, Task> resultFunc,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(extractorName))
             {
@@ -59,15 +67,17 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(resultFunc));
             }
 
-            var resultStream = await _waivesDocument.RedactAsync(extractorName);
-            await resultFunc(this, resultStream);
+            var resultStream = await _waivesDocument
+                .RedactAsync(extractorName, cancellationToken)
+                .ConfigureAwait(false);
+            await resultFunc(this, resultStream).ConfigureAwait(false);
 
             return this;
         }
 
-        public async Task DeleteAsync()
+        public async Task DeleteAsync(CancellationToken cancellationToken = default)
         {
-            await _waivesDocument.DeleteAsync().ConfigureAwait(false);
+            await _waivesDocument.DeleteAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
