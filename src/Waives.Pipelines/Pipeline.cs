@@ -142,7 +142,7 @@ namespace Waives.Pipelines
         /// <param name="extractorName"></param>
         /// <param name="resultFunc"></param>
         /// <returns></returns>
-        public Pipeline RedactWith(string extractorName, Func<Stream, Task> resultFunc)
+        public Pipeline RedactWith(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
         {
             _docActions.Add(async d =>
             {

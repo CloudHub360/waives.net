@@ -97,8 +97,9 @@ namespace Waives.Pipelines.Tests
 
             var pipeline = _sut
                 .WithDocumentsFrom(source)
-                .RedactWith(extractorName, redactedPdf =>
+                .RedactWith(extractorName, (d, redactedPdf) =>
                 {
+                    Assert.Equal(TestDocument.SourceIdString, d.Source.SourceId);
                     AssertStreamsAreEqual(new MemoryStream(new byte[] { 1, 2, 3 }), redactedPdf);
                     return Task.CompletedTask;
                 });

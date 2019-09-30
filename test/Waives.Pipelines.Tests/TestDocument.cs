@@ -5,7 +5,9 @@ namespace Waives.Pipelines.Tests
 {
     internal class TestDocument : Document
     {
-        public TestDocument(byte[] contents, string sourceId = "Test Document") : base(sourceId)
+        internal const string SourceIdString = "Test Document";
+
+        public TestDocument(byte[] contents, string sourceId = SourceIdString) : base(sourceId)
         {
             Stream = new MemoryStream(contents);
         }
