@@ -106,7 +106,7 @@ namespace Waives.Pipelines
         {
             _docActions.Add(async d =>
             {
-                var document = await d.Classify(classifierName)
+                var document = await d.ClassifyAsync(classifierName)
                     .ConfigureAwait(false);
 
                 _logger.Info(
@@ -128,7 +128,7 @@ namespace Waives.Pipelines
         {
             _docActions.Add(async d =>
             {
-                var document = await d.Extract(extractorName).ConfigureAwait(false);
+                var document = await d.ExtractAsync(extractorName).ConfigureAwait(false);
                 _logger.Info(
                     "Extracted data from document {DocumentId} from '{DocumentSource}'",
                     d.Id,
@@ -201,7 +201,7 @@ namespace Waives.Pipelines
         {
             _docActions.Add(async d =>
             {
-                var document = await d.Redact(extractorName, resultFunc).ConfigureAwait(false);
+                var document = await d.RedactAsync(extractorName, resultFunc).ConfigureAwait(false);
                 _logger.Info(
                     "Redacted data from document {DocumentId} from '{DocumentSource}' using extractor '{ExtractorName}'",
                     d.Id,
