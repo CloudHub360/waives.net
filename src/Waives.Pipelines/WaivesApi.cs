@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http;
 using Waives.Pipelines.HttpAdapters;
@@ -56,15 +57,21 @@ namespace Waives.Pipelines
         /// ]]>
         /// </example>
         /// <param name="options"></param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>A new <see cref="Pipeline"/> instance with which you can
         /// configure your document processing pipeline.</returns>
-        public static async Task<Pipeline> CreatePipelineAsync(WaivesOptions options)
+        public static async Task<Pipeline> CreatePipelineAsync(WaivesOptions options, CancellationToken cancellationToken = default)
         {
             var waivesClient = CreateAuthenticatedWaivesClient(options);
 
             var documentFactory = await HttpDocumentFactory.CreateAsync(
-                waivesClient,
-                options.DeleteExistingDocuments).ConfigureAwait(false);
+                    waivesClient,
+                    options.DeleteExistingDocuments,
+                    cancellationToken)
+                .ConfigureAwait(false);
 
             return new Pipeline(
                 documentFactory,
