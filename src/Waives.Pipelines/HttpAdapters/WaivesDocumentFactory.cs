@@ -10,7 +10,7 @@ namespace Waives.Pipelines.HttpAdapters
     /// </summary>
     internal interface IHttpDocumentFactory
     {
-        Task<IHttpDocument> CreateDocument(Document source);
+        Task<IHttpDocument> CreateDocumentAsync(Document source);
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ namespace Waives.Pipelines.HttpAdapters
             _apiClient = apiClient;
         }
 
-        public async Task<IHttpDocument> CreateDocument(Document source)
+        public async Task<IHttpDocument> CreateDocumentAsync(Document source)
         {
             using (var documentStream = await source.OpenStream().ConfigureAwait(false))
             {
@@ -36,18 +36,18 @@ namespace Waives.Pipelines.HttpAdapters
             }
         }
 
-        internal static async Task<IHttpDocumentFactory> Create(WaivesClient apiClient, bool deleteOrphanedDocuments = true)
+        internal static async Task<IHttpDocumentFactory> CreateAsync(WaivesClient apiClient, bool deleteOrphanedDocuments = true)
         {
             if (deleteOrphanedDocuments)
             {
-                await DeleteOrphanedDocuments(apiClient).ConfigureAwait(false);
+                await DeleteOrphanedDocumentsAsync(apiClient).ConfigureAwait(false);
                 Logger.Info("Deleted all Waives documents");
             }
 
             return new LoggingDocumentFactory(new HttpDocumentFactory(apiClient));
         }
 
-        private static async Task DeleteOrphanedDocuments(WaivesClient apiClient)
+        private static async Task DeleteOrphanedDocumentsAsync(WaivesClient apiClient)
         {
             var orphanedDocuments = await apiClient.GetAllDocumentsAsync().ConfigureAwait(false);
             await Task.WhenAll(orphanedDocuments.Select(d => d.DeleteAsync())).ConfigureAwait(false);

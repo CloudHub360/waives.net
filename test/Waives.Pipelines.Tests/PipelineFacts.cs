@@ -28,7 +28,7 @@ namespace Waives.Pipelines.Tests
             _httpDocument.DeleteAsync();
 
             _documentFactory
-                .CreateDocument(Arg.Any<Document>())
+                .CreateDocumentAsync(Arg.Any<Document>())
                 .Returns(_httpDocument);
 
             _sut = new Pipeline(_documentFactory, 10);
@@ -54,7 +54,7 @@ namespace Waives.Pipelines.Tests
             var pipeline = _sut.WithDocumentsFrom(source);
             await pipeline.RunAsync();
 
-            await _documentFactory.Received(1).CreateDocument(testDocument);
+            await _documentFactory.Received(1).CreateDocumentAsync(testDocument);
         }
 
         [Fact]
@@ -231,7 +231,7 @@ namespace Waives.Pipelines.Tests
             var source = Observable.Repeat(document, 1);
 
             _documentFactory
-                .CreateDocument(Arg.Any<Document>())
+                .CreateDocumentAsync(Arg.Any<Document>())
                 .Throws(exception);
 
             await _sut.WithDocumentsFrom(source)
@@ -269,7 +269,7 @@ namespace Waives.Pipelines.Tests
             var source = Observable.Repeat(document, 1);
 
             _documentFactory
-                .CreateDocument(Arg.Any<Document>())
+                .CreateDocumentAsync(Arg.Any<Document>())
                 .Throws(exception);
 
             await _sut.WithDocumentsFrom(source)

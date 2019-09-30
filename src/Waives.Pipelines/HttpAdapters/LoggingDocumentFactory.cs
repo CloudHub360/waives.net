@@ -14,9 +14,9 @@ namespace Waives.Pipelines.HttpAdapters
             _wrappedDocumentFactory = underlyingDocumentFactory;
         }
 
-        public async Task<IHttpDocument> CreateDocument(Document source)
+        public async Task<IHttpDocument> CreateDocumentAsync(Document source)
         {
-            var httpDocument = await _wrappedDocumentFactory.CreateDocument(source).ConfigureAwait(false);
+            var httpDocument = await _wrappedDocumentFactory.CreateDocumentAsync(source).ConfigureAwait(false);
 
             Logger.Info(
                 "Created Waives document {DocumentId} from '{DocumentSourceId}'",
