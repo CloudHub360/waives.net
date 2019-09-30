@@ -29,7 +29,7 @@ namespace Waives.Pipelines
 
         public ExtractionResults ExtractionResults { get; private set; }
 
-        public async Task<WaivesDocument> Classify(string classifierName)
+        public async Task<WaivesDocument> ClassifyAsync(string classifierName)
         {
             return new WaivesDocument(Source, _waivesDocument)
             {
@@ -38,7 +38,7 @@ namespace Waives.Pipelines
             };
         }
 
-        public async Task<WaivesDocument> Extract(string extractorName)
+        public async Task<WaivesDocument> ExtractAsync(string extractorName)
         {
             return new WaivesDocument(Source, _waivesDocument)
             {
@@ -47,7 +47,7 @@ namespace Waives.Pipelines
             };
         }
 
-        public async Task<WaivesDocument> Redact(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
+        public async Task<WaivesDocument> RedactAsync(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
         {
             if (string.IsNullOrWhiteSpace(extractorName))
             {
@@ -65,7 +65,7 @@ namespace Waives.Pipelines
             return this;
         }
 
-        public async Task Delete()
+        public async Task DeleteAsync()
         {
             await _waivesDocument.DeleteAsync().ConfigureAwait(false);
         }
