@@ -112,14 +112,14 @@ namespace Waives.Http
         /// The Waives platform implements a limit on the number of documents that may concurrently
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
-        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// completed on them. It can be useful to use <see cref="GetAllDocumentsAsync"/> in conjunction
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="documentSource">The <see cref="Stream"/> source of the document.</param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
-        public async Task<Document> CreateDocument(Stream documentSource)
+        public async Task<Document> CreateDocumentAsync(Stream documentSource)
         {
             if (documentSource == null)
             {
@@ -165,16 +165,16 @@ namespace Waives.Http
         /// The Waives platform implements a limit on the number of documents that may concurrently
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
-        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// completed on them. It can be useful to use <see cref="GetAllDocumentsAsync"/> in conjunction
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="path">A path to a file on disk from which the document will be created.</param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
-        public async Task<Document> CreateDocument(string path)
+        public async Task<Document> CreateDocumentAsync(string path)
         {
-            return await CreateDocument(File.OpenRead(path)).ConfigureAwait(false);
+            return await CreateDocumentAsync(File.OpenRead(path)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Waives.Http
         /// The Waives platform implements a limit on the number of documents that may concurrently
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
-        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// completed on them. It can be useful to use <see cref="GetAllDocumentsAsync"/> in conjunction
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="uri">The HTTP(S) URI of a file, accessible to Waives, from which the document will be created.</param>
@@ -192,7 +192,7 @@ namespace Waives.Http
         /// <exception cref="ArgumentNullException">Thrown when the provided <see cref="Uri"/> is null.</exception>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
-        public async Task<Document> CreateDocument(Uri uri)
+        public async Task<Document> CreateDocumentAsync(Uri uri)
         {
             uri = uri ?? throw new ArgumentNullException(nameof(uri));
 
@@ -218,9 +218,9 @@ namespace Waives.Http
         /// <summary>
         /// Fetch a reference for the given document in the Waives platform.
         /// </summary>
-        /// <param name="id">The ID of the document, as returned by <see cref="CreateDocument(Stream)"/>.</param>
+        /// <param name="id">The ID of the document, as returned by <see cref="CreateDocumentAsync(Stream)"/>.</param>
         /// <returns>A <see cref="Document"/> client for the specified document ID.</returns>
-        public async Task<Document> GetDocument(string id)
+        public async Task<Document> GetDocumentAsync(string id)
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/documents/{id}", UriKind.Relative));
             var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
@@ -236,12 +236,12 @@ namespace Waives.Http
         /// The Waives platform implements a limit on the number of documents that may concurrently
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
-        /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
+        /// completed on them. It can be useful to use <see cref="GetAllDocumentsAsync"/> in conjunction
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <returns>An <see cref="IEnumerable{Document}"/> representing all the documents
         /// created in your account.</returns>
-        public async Task<IEnumerable<Document>> GetAllDocuments()
+        public async Task<IEnumerable<Document>> GetAllDocumentsAsync()
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
             var response = await _requestSender.SendAsync(request).ConfigureAwait(false);

@@ -35,7 +35,7 @@ namespace Waives.Http.Tests
 
             using (var stream = new MemoryStream(_documentContents))
             {
-                await _sut.CreateDocument(stream);
+                await _sut.CreateDocumentAsync(stream);
             }
 
             await _requestSender
@@ -54,7 +54,7 @@ namespace Waives.Http.Tests
 
             using (var stream = new MemoryStream(_documentContents))
             {
-                await _sut.CreateDocument(stream);
+                await _sut.CreateDocumentAsync(stream);
 
                 await _requestSender
                     .Received(1)
@@ -72,7 +72,7 @@ namespace Waives.Http.Tests
 
             using (var stream = new UnseekableMemoryStream(_documentContents))
             {
-                await _sut.CreateDocument(stream);
+                await _sut.CreateDocumentAsync(stream);
 
                 await _requestSender
                     .Received(1)
@@ -94,7 +94,7 @@ namespace Waives.Http.Tests
                 .SendAsync(Arg.Is<HttpRequestMessageTemplate>(m => m.RequestUri.ToString().Contains("/classify")))
                 .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.CreateDocument(filePath);
+            await _sut.CreateDocumentAsync(filePath);
 
             await _requestSender
                 .Received(1)
@@ -111,7 +111,7 @@ namespace Waives.Http.Tests
                 .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.CreateDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.CreateDocument(fileUri);
+            await _sut.CreateDocumentAsync(fileUri);
 
             var expectedJsonContent = new JsonContent(new ImportDocumentRequest
             {
@@ -137,7 +137,7 @@ namespace Waives.Http.Tests
 
             using (var stream = new MemoryStream(_documentContents))
             {
-                var document = await _sut.CreateDocument(stream);
+                var document = await _sut.CreateDocumentAsync(stream);
 
                 Assert.Equal("expectedDocumentId", document.Id);
 
@@ -165,7 +165,7 @@ namespace Waives.Http.Tests
             using (var stream = new MemoryStream(_documentContents))
             {
                 var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                    _sut.CreateDocument(stream));
+                    _sut.CreateDocumentAsync(stream));
 
                 Assert.Equal(Response.ErrorMessage, exception.Message);
             }
@@ -174,7 +174,7 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task CreateDocument_throws_if_stream_is_empty()
         {
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateDocument(Stream.Null));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateDocumentAsync(Stream.Null));
             Assert.Contains("The provided stream has no content.", exception.Message);
             Assert.Equal("documentSource", exception.ParamName);
         }
@@ -182,14 +182,14 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task CreateDocument_throws_if_stream_is_null()
         {
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.CreateDocument((Stream)null));
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.CreateDocumentAsync((Stream)null));
             Assert.Equal("documentSource", exception.ParamName);
         }
 
         [Fact]
         public async Task CreateDocument_throws_if_unseekable_stream_is_empty()
         {
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateDocument(new UnseekableMemoryStream()));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateDocumentAsync(new UnseekableMemoryStream()));
             Assert.Contains("The provided stream has no content.", exception.Message);
             Assert.Equal("documentSource", exception.ParamName);
         }
@@ -202,7 +202,7 @@ namespace Waives.Http.Tests
                 .Returns(ci => Response.GetDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
             var documentId = $"anonymousString{Guid.NewGuid()}";
-            await _sut.GetDocument(documentId);
+            await _sut.GetDocumentAsync(documentId);
 
             await _requestSender
                 .Received(1)
@@ -218,7 +218,7 @@ namespace Waives.Http.Tests
                 .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetDocument(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var document = await _sut.GetDocument($"anonymousString{Guid.NewGuid()}");
+            var document = await _sut.GetDocumentAsync($"anonymousString{Guid.NewGuid()}");
 
             Assert.Equal("expectedDocumentId1", document.Id);
         }
@@ -231,7 +231,7 @@ namespace Waives.Http.Tests
                 .Throws(new WaivesApiException(Response.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.GetDocument($"anonymousString{Guid.NewGuid()}"));
+                _sut.GetDocumentAsync($"anonymousString{Guid.NewGuid()}"));
 
             Assert.Equal(Response.ErrorMessage, exception.Message);
         }
@@ -243,7 +243,7 @@ namespace Waives.Http.Tests
                 .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.GetAllDocuments();
+            await _sut.GetAllDocumentsAsync();
 
             await _requestSender
                 .Received(1)
@@ -259,7 +259,7 @@ namespace Waives.Http.Tests
                 .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetAllDocuments(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var documents = await _sut.GetAllDocuments();
+            var documents = await _sut.GetAllDocumentsAsync();
 
             var documentsArray = documents.ToArray();
             Assert.Equal("expectedDocumentId1", documentsArray.First().Id);
@@ -274,7 +274,7 @@ namespace Waives.Http.Tests
                 .Throws(new WaivesApiException(Response.ErrorMessage));
 
             var exception = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.GetAllDocuments());
+                _sut.GetAllDocumentsAsync());
 
             Assert.Equal(Response.ErrorMessage, exception.Message);
         }
