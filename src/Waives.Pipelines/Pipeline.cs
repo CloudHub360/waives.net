@@ -247,27 +247,38 @@ namespace Waives.Pipelines
             {
                 _logger.Error(e, "An error occurred processing the pipeline");
 
-                taskCompletion.SetException(e);
+                taskCompletion.TrySetException(e);
             }
 
             void OnDocumentException(Exception exception, Document document)
             {
-                _onDocumentError(new DocumentError(document, exception));
+                try
+                {
+                    _onDocumentError(new DocumentError(document, exception));
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "An error occurred when calling the error handler");
+
+                    taskCompletion.TrySetException(e);
+                }
             }
 
-            _logger.Info("Pipeline started");
+            Func<Document, Task<WaivesDocument>> docCreator = async d =>
+            {
+                _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
 
-            var documentProcessor = new DocumentProcessor(
-                async d =>
-                {
-                    _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
+                var httpDocument = await _documentFactory
+                    .CreateDocument(d).ConfigureAwait(false);
 
                     var httpDocument = await _documentFactory
                         .CreateDocument(d).ConfigureAwait(false);
 
-                    return new WaivesDocument(d, httpDocument);
-                },
-                docActions,
+            _logger.Info("Pipeline started");
+
+            var documentProcessor = new DocumentProcessor(
+                docCreator,
+                _docActions,
                 OnDocumentException);
 
             var pipelineObserver = new ConcurrentPipelineObserver(
@@ -276,9 +287,15 @@ namespace Waives.Pipelines
                 OnPipelineError,
                 _maxConcurrency);
 
-            _docSource.Subscribe(pipelineObserver);
-
-            await taskCompletion.Task;
+            var connection = _docSource.Subscribe(pipelineObserver);
+            try
+            {
+                await taskCompletion.Task;
+            }
+            finally
+            {
+                connection.Dispose();
+            }
         }
     }
 }
