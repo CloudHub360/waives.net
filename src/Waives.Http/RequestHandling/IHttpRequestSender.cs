@@ -7,6 +7,6 @@ namespace Waives.Http.RequestHandling
     {
         int Timeout { get; set; }
 
-        Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request);
+        Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request);
     }
 }

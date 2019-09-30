@@ -25,10 +25,10 @@ namespace Waives.Http.Tests.RequestHandling
         public async Task Throw_WaivesApiException_on_failed_requests(HttpStatusCode statusCode)
         {
             _requestSender
-                .Send(_request)
+                .SendAsync(_request)
                 .ReturnsForAnyArgs(Response.ErrorFrom(statusCode, _request));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Send(_request));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.SendAsync(_request));
             Assert.Equal(Response.ErrorMessage, exception.Message);
         }
 
@@ -37,10 +37,10 @@ namespace Waives.Http.Tests.RequestHandling
         {
             var expected = Response.SuccessFrom(statusCode, _request);
             _requestSender
-                .Send(_request)
+                .SendAsync(_request)
                 .ReturnsForAnyArgs(expected);
 
-            var actual = await _sut.Send(_request);
+            var actual = await _sut.SendAsync(_request);
 
             Assert.Equal(expected, actual);
         }

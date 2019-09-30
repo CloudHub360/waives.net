@@ -19,9 +19,9 @@ namespace Waives.Http.RequestHandling
             set => _wrappedRequestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
         {
-            var response = await _wrappedRequestSender.Send(request).ConfigureAwait(false);
+            var response = await _wrappedRequestSender.SendAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
                 return response;

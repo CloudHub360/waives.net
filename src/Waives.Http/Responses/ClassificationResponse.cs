@@ -13,7 +13,7 @@ namespace Waives.Http.Responses
     }
 
     /// <summary>
-    /// Represents the results of a <see cref="Document.Classify"/> operation.
+    /// Represents the results of a <see cref="Document.ClassifyAsync"/> operation.
     /// </summary>
     /// <remarks>
     /// <para>

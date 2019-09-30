@@ -28,10 +28,10 @@ namespace Waives.Http.Tests.RequestHandling
         {
             var expectedResponse = Response.Success(_request);
             _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(expectedResponse);
 
-            var response = await _sut.Send(_request);
+            var response = await _sut.SendAsync(_request);
 
             Assert.Same(expectedResponse, response);
         }
@@ -41,11 +41,11 @@ namespace Waives.Http.Tests.RequestHandling
         public async Task Throws_WaivesApiException_if_wrapped_sender_times_out(Exception senderException)
         {
             _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(senderException);
 
             await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.Send(_request));
+                _sut.SendAsync(_request));
         }
 
         [Theory]
@@ -53,11 +53,11 @@ namespace Waives.Http.Tests.RequestHandling
         public async Task Includes_request_details_in_exception_if_wrapped_sender_times_out(Exception senderException)
         {
             _sender
-                .Send(Arg.Any<HttpRequestMessageTemplate>())
+                .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(senderException);
 
             var actualException = await Assert.ThrowsAsync<WaivesApiException>(() =>
-                _sut.Send(_request));
+                _sut.SendAsync(_request));
 
             Assert.Contains(_request.Method.ToString(), actualException.Message);
             Assert.Contains(_request.RequestUri.ToString(), actualException.Message);

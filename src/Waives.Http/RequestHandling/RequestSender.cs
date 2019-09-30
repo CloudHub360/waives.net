@@ -28,7 +28,7 @@ namespace Waives.Http.RequestHandling
             set => _httpClient.Timeout = TimeSpan.FromSeconds(value);
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate template)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate template)
         {
             var request = template.CreateRequest();
             return await _httpClient.SendAsync(request).ConfigureAwait(false);

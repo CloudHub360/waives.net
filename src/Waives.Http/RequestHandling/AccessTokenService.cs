@@ -50,7 +50,7 @@ namespace Waives.Http.RequestHandling
                     })
                 };
 
-                var response = await _requestSender.Send(request).ConfigureAwait(false);
+                var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
                 return await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
             }, new Context(nameof(FetchAccessTokenAsync))).ConfigureAwait(false);
         }

@@ -21,12 +21,12 @@ namespace Waives.Http.RequestHandling
             set => _requestSender.Timeout = value;
         }
 
-        public async Task<HttpResponseMessage> Send(HttpRequestMessageTemplate request)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request)
         {
             var token = await _accessTokenService.FetchAccessTokenAsync().ConfigureAwait(false);
             request.Headers["Authorization"] = $"Bearer {token}";
 
-            return await _requestSender.Send(request).ConfigureAwait(false);
+            return await _requestSender.SendAsync(request).ConfigureAwait(false);
         }
 
         public void Dispose()

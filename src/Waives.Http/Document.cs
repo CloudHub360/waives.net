@@ -40,7 +40,7 @@ namespace Waives.Http
             var request = new HttpRequestMessageTemplate(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
-            await _requestSender.Send(request).ConfigureAwait(false);
+            await _requestSender.SendAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Waives.Http
             var request = new HttpRequestMessageTemplate(HttpMethod.Put,
                 readUrl.CreateUri());
 
-            await _requestSender.Send(request).ConfigureAwait(false);
+            await _requestSender.SendAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Waives.Http
                     { "Accept", format.ToMimeType() }
                 });
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
             var responseBody = await response
                 .Content
                 .ReadAsStreamAsync()
@@ -124,7 +124,7 @@ namespace Waives.Http
                     classifier_name = classifierName
                 }));
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
             var responseBody = await response.Content.ReadAsAsync<ClassificationResponse>().ConfigureAwait(false);
             return responseBody.ClassificationResults;
         }
@@ -168,7 +168,7 @@ namespace Waives.Http
                 Content = new JsonContent(redactions)
             };
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
             return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
 
@@ -188,7 +188,7 @@ namespace Waives.Http
                     { "Accept", desiredResponseFormat }
                 });
 
-            var response = await _requestSender.Send(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
             return response.Content;
         }
     }
