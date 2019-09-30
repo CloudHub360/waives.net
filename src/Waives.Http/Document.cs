@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http.RequestHandling;
 using Waives.Http.Requests;
@@ -33,33 +34,42 @@ namespace Waives.Http
         /// <summary>
         /// Deletes this document in the Waives platform.
         /// </summary>
-        public async Task DeleteAsync()
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
+        public async Task DeleteAsync(CancellationToken cancellationToken = default)
         {
             var selfUrl = _behaviours["self"];
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
-            await _requestSender.SendAsync(request).ConfigureAwait(false);
+            await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Reads text from the document. Subsequent calls to Classify and Extract
         /// will use the results from this operation.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <remarks>Not all types of files support this operation.
         /// See the documentation for a list of supported file types. If you are doing
         /// multiple classifications or extractions with different configurations
         /// it is most efficient to call this method first, so the document is only
-        /// read once.</remarks>
-        public async Task ReadAsync()
+        /// read once.
+        /// </remarks>
+        public async Task ReadAsync(CancellationToken cancellationToken = default)
         {
             var readUrl = _behaviours["document:read"];
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Put,
                 readUrl.CreateUri());
 
-            await _requestSender.SendAsync(request).ConfigureAwait(false);
+            await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -68,13 +78,18 @@ namespace Waives.Http
         /// </summary>
         /// <param name="path">The path of the file to write the results to</param>
         /// <param name="format">The format of the results required</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <remarks>The Read method must be called before this method, otherwise a
-        /// WaivesApiException will be thrown.</remarks>
-        public async Task GetReadResultsAsync(string path, ReadResultsFormat format)
+        /// WaivesApiException will be thrown.
+        /// </remarks>
+        public async Task GetReadResultsAsync(string path, ReadResultsFormat format, CancellationToken cancellationToken = default)
         {
             using (var fileStream = File.OpenWrite(path))
             {
-                await GetReadResultsAsync(fileStream, format).ConfigureAwait(false);
+                await GetReadResultsAsync(fileStream, format, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -84,9 +99,14 @@ namespace Waives.Http
         /// </summary>
         /// <param name="resultsStream">The stream to write the results to</param>
         /// <param name="format">The format of the results required</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <remarks>The Read method must be called before this method, otherwise a
-        /// WaivesApiException will be thrown.</remarks>
-        public async Task GetReadResultsAsync(Stream resultsStream, ReadResultsFormat format)
+        /// WaivesApiException will be thrown.
+        /// </remarks>
+        public async Task GetReadResultsAsync(Stream resultsStream, ReadResultsFormat format, CancellationToken cancellationToken = default)
         {
             var readUrl = _behaviours["document:read"];
 
@@ -97,7 +117,7 @@ namespace Waives.Http
                     { "Accept", format.ToMimeType() }
                 });
 
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             var responseBody = await response
                 .Content
                 .ReadAsStreamAsync()
@@ -109,12 +129,16 @@ namespace Waives.Http
         }
 
         /// <summary>
-        /// Performs classification on this document using the given classifer
+        /// Performs classification on this document using the given classifier
         /// name. The named classifier must already exist in the Waives platform.
         /// </summary>
         /// <param name="classifierName">The name of the classifier to use.</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>The results of the classification operation.</returns>
-        public async Task<ClassificationResult> ClassifyAsync(string classifierName)
+        public async Task<ClassificationResult> ClassifyAsync(string classifierName, CancellationToken cancellationToken = default)
         {
             var classifyUrl = _behaviours["document:classify"];
 
@@ -124,7 +148,7 @@ namespace Waives.Http
                     classifier_name = classifierName
                 }));
 
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             var responseBody = await response.Content.ReadAsAsync<ClassificationResponse>().ConfigureAwait(false);
             return responseBody.ClassificationResults;
         }
@@ -134,10 +158,18 @@ namespace Waives.Http
         /// name. The named extractor must already exist in the Waives platform.
         /// </summary>
         /// <param name="extractorName">The name of the extractor to use.</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>The results of the extraction operation.</returns>
-        public async Task<ExtractionResults> ExtractAsync(string extractorName)
+        public async Task<ExtractionResults> ExtractAsync(string extractorName, CancellationToken cancellationToken = default)
         {
-            var extractionResponse = await DoExtractionAsync(extractorName).ConfigureAwait(false);
+            var extractionResponse = await DoExtractionAsync(
+                    extractorName,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
             return await extractionResponse.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
         }
 
@@ -152,14 +184,18 @@ namespace Waives.Http
         /// The name of the extractor to use to identify the areas of the
         /// document to redact.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>
         /// A <see cref="Stream"/> of bytes containing a PDF file. The returned
         /// Stream should be disposed of in your own code.
         /// </returns>
-        public async Task<Stream> RedactAsync(string extractorName)
+        public async Task<Stream> RedactAsync(string extractorName, CancellationToken cancellationToken = default)
         {
             var extractionResponse =
-                await DoExtractionAsync(extractorName, RedactionRequest.MimeType)
+                await DoExtractionAsync(extractorName, RedactionRequest.MimeType, cancellationToken)
                 .ConfigureAwait(false);
 
             var redactions = await extractionResponse.ReadAsStringAsync().ConfigureAwait(false);
@@ -168,12 +204,13 @@ namespace Waives.Http
                 Content = new JsonContent(redactions)
             };
 
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
 
         private async Task<HttpContent> DoExtractionAsync(string extractorName,
-            string desiredResponseFormat = ExtractionResults.MimeType)
+            string desiredResponseFormat = ExtractionResults.MimeType,
+            CancellationToken cancellationToken = default)
         {
             var extractUrl = _behaviours["document:extract"].CreateUri(new
             {
@@ -188,7 +225,7 @@ namespace Waives.Http
                     { "Accept", desiredResponseFormat }
                 });
 
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             return response.Content;
         }
     }
