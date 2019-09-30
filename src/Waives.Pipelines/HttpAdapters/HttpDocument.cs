@@ -41,22 +41,22 @@ namespace Waives.Pipelines.HttpAdapters
 
         public async Task<ClassificationResult> Classify(string classifierName)
         {
-            return await _documentClient.Classify(classifierName).ConfigureAwait(false);
+            return await _documentClient.ClassifyAsync(classifierName).ConfigureAwait(false);
         }
 
         public async Task<ExtractionResults> Extract(string extractorName)
         {
-            return await _documentClient.Extract(extractorName).ConfigureAwait(false);
+            return await _documentClient.ExtractAsync(extractorName).ConfigureAwait(false);
         }
 
         public async Task<Stream> Redact(string extractorName)
         {
-            return await _documentClient.Redact(extractorName).ConfigureAwait(false);
+            return await _documentClient.RedactAsync(extractorName).ConfigureAwait(false);
         }
 
         public async Task Delete()
         {
-            await _documentClient.Delete().ConfigureAwait(false);
+            await _documentClient.DeleteAsync().ConfigureAwait(false);
         }
     }
 }

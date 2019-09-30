@@ -113,12 +113,12 @@ namespace Waives.Http
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
         /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
-        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="documentSource">The <see cref="Stream"/> source of the document.</param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
-        /// <seealso cref="Document.Delete"/>
+        /// <seealso cref="Document.DeleteAsync"/>
         public async Task<Document> CreateDocument(Stream documentSource)
         {
             if (documentSource == null)
@@ -166,12 +166,12 @@ namespace Waives.Http
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
         /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
-        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="path">A path to a file on disk from which the document will be created.</param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
-        /// <seealso cref="Document.Delete"/>
+        /// <seealso cref="Document.DeleteAsync"/>
         public async Task<Document> CreateDocument(string path)
         {
             return await CreateDocument(File.OpenRead(path)).ConfigureAwait(false);
@@ -185,13 +185,13 @@ namespace Waives.Http
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
         /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
-        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="uri">The HTTP(S) URI of a file, accessible to Waives, from which the document will be created.</param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the provided <see cref="Uri"/> is null.</exception>
         /// <seealso cref="Document"/>
-        /// <seealso cref="Document.Delete"/>
+        /// <seealso cref="Document.DeleteAsync"/>
         public async Task<Document> CreateDocument(Uri uri)
         {
             uri = uri ?? throw new ArgumentNullException(nameof(uri));
@@ -237,7 +237,7 @@ namespace Waives.Http
         /// exist within your account. It is expected that documents will exist only transiently
         /// within the Waives platform, and must be deleted after all desired operations have been
         /// completed on them. It can be useful to use <see cref="GetAllDocuments"/> in conjunction
-        /// with <see cref="Document.Delete"/> to ensure you are starting from a clean slate.
+        /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <returns>An <see cref="IEnumerable{Document}"/> representing all the documents
         /// created in your account.</returns>
