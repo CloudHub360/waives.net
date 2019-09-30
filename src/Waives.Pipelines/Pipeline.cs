@@ -29,8 +29,11 @@ namespace Waives.Pipelines
     ///
     ///         public static async Task MainAsync(string[] args)
     ///         {
-    ///             await WaivesApi.Login("clientId", "clientSecret");
-    ///             var pipeline = WaivesApi.CreatePipeline();
+    ///             var pipeline = WaivesApi.CreatePipeline(new WaivesOptions
+    ///             {
+    ///                 ClientId = "clientId",
+    ///                 ClientSecret = "clientSecret"
+    ///             });
     ///
     ///             pipeline
     ///                 .WithDocumentsFrom(FileSystemSource.Create(@"C:\temp\inbox"))
@@ -40,7 +43,7 @@ namespace Waives.Pipelines
     ///
     ///             try
     ///             {
-    ///                 pipeline.Start();
+    ///                 await pipeline.RunAsync();
     ///             }
     ///             catch (WaivesException ex)
     ///             {
