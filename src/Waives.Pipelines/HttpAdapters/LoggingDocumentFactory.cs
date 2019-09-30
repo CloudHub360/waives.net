@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Waives.Http.Logging;
 
 namespace Waives.Pipelines.HttpAdapters
@@ -14,9 +15,11 @@ namespace Waives.Pipelines.HttpAdapters
             _wrappedDocumentFactory = underlyingDocumentFactory;
         }
 
-        public async Task<IHttpDocument> CreateDocumentAsync(Document source)
+        public async Task<IHttpDocument> CreateDocumentAsync(Document source, CancellationToken cancellationToken = default)
         {
-            var httpDocument = await _wrappedDocumentFactory.CreateDocumentAsync(source).ConfigureAwait(false);
+            var httpDocument = await _wrappedDocumentFactory
+                .CreateDocumentAsync(source, cancellationToken)
+                .ConfigureAwait(false);
 
             Logger.Info(
                 "Created Waives document {DocumentId} from '{DocumentSourceId}'",

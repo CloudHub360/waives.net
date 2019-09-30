@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http;
 using Waives.Http.Logging;
@@ -10,7 +11,7 @@ namespace Waives.Pipelines.HttpAdapters
     /// </summary>
     internal interface IHttpDocumentFactory
     {
-        Task<IHttpDocument> CreateDocumentAsync(Document source);
+        Task<IHttpDocument> CreateDocumentAsync(Document source, CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -27,30 +28,36 @@ namespace Waives.Pipelines.HttpAdapters
             _apiClient = apiClient;
         }
 
-        public async Task<IHttpDocument> CreateDocumentAsync(Document source)
+        public async Task<IHttpDocument> CreateDocumentAsync(Document source, CancellationToken cancellationToken = default)
         {
             using (var documentStream = await source.OpenStream().ConfigureAwait(false))
             {
-                var httpDocument = new HttpDocument(await _apiClient.CreateDocumentAsync(documentStream).ConfigureAwait(false));
+                var httpDocument = new HttpDocument(await _apiClient
+                    .CreateDocumentAsync(documentStream, cancellationToken)
+                    .ConfigureAwait(false));
+
                 return httpDocument;
             }
         }
 
-        internal static async Task<IHttpDocumentFactory> CreateAsync(WaivesClient apiClient, bool deleteOrphanedDocuments = true)
+        internal static async Task<IHttpDocumentFactory> CreateAsync(
+            WaivesClient apiClient,
+            bool deleteOrphanedDocuments = true,
+            CancellationToken cancellationToken = default)
         {
             if (deleteOrphanedDocuments)
             {
-                await DeleteOrphanedDocumentsAsync(apiClient).ConfigureAwait(false);
+                await DeleteOrphanedDocumentsAsync(apiClient, cancellationToken).ConfigureAwait(false);
                 Logger.Info("Deleted all Waives documents");
             }
 
             return new LoggingDocumentFactory(new HttpDocumentFactory(apiClient));
         }
 
-        private static async Task DeleteOrphanedDocumentsAsync(WaivesClient apiClient)
+        private static async Task DeleteOrphanedDocumentsAsync(WaivesClient apiClient, CancellationToken cancellationToken = default)
         {
-            var orphanedDocuments = await apiClient.GetAllDocumentsAsync().ConfigureAwait(false);
-            await Task.WhenAll(orphanedDocuments.Select(d => d.DeleteAsync())).ConfigureAwait(false);
+            var orphanedDocuments = await apiClient.GetAllDocumentsAsync(cancellationToken).ConfigureAwait(false);
+            await Task.WhenAll(orphanedDocuments.Select(d => d.DeleteAsync(cancellationToken))).ConfigureAwait(false);
         }
     }
 }
