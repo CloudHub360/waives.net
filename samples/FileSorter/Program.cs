@@ -61,7 +61,7 @@ namespace FileSorter
             // inbox path.
             var filesystem = FileSystem.WatchForChanges(inbox, cancellation.Token);
 
-            var pipeline = await WaivesApi.CreatePipeline(new WaivesOptions
+            var pipeline = await WaivesApi.CreatePipelineAsync(new WaivesOptions
             {
                 ClientId = "clientId",
                 ClientSecret = "clientSecret"
