@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
@@ -116,10 +117,14 @@ namespace Waives.Http
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="documentSource">The <see cref="Stream"/> source of the document.</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
-        public async Task<Document> CreateDocumentAsync(Stream documentSource)
+        public async Task<Document> CreateDocumentAsync(Stream documentSource, CancellationToken cancellationToken = default)
         {
             if (documentSource == null)
             {
@@ -137,7 +142,7 @@ namespace Waives.Http
                     30 * 1000 * 1000, /* 30 MB */
                     Path.GetTempPath);
 
-                await documentSource.ReadAsync(new byte[1], 0, 1).ConfigureAwait(false);
+                await documentSource.ReadAsync(new byte[1], 0, 1, cancellationToken).ConfigureAwait(false);
                 documentSource.Seek(0, SeekOrigin.Begin);
             }
 
@@ -152,7 +157,7 @@ namespace Waives.Http
                     Content = new StreamContent(documentSource)
                 };
 
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
             var document = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
 
             return new Document(_requestSender, document.Id, document.Links);
@@ -169,12 +174,16 @@ namespace Waives.Http
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="path">A path to a file on disk from which the document will be created.</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
-        public async Task<Document> CreateDocumentAsync(string path)
+        public async Task<Document> CreateDocumentAsync(string path, CancellationToken cancellationToken = default)
         {
-            return await CreateDocumentAsync(File.OpenRead(path)).ConfigureAwait(false);
+            return await CreateDocumentAsync(File.OpenRead(path), cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -188,11 +197,15 @@ namespace Waives.Http
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
         /// <param name="uri">The HTTP(S) URI of a file, accessible to Waives, from which the document will be created.</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the provided <see cref="Uri"/> is null.</exception>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
-        public async Task<Document> CreateDocumentAsync(Uri uri)
+        public async Task<Document> CreateDocumentAsync(Uri uri, CancellationToken cancellationToken = default)
         {
             uri = uri ?? throw new ArgumentNullException(nameof(uri));
 
@@ -206,7 +219,7 @@ namespace Waives.Http
 
                 };
 
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             var id = responseContent.Id;
@@ -218,12 +231,16 @@ namespace Waives.Http
         /// <summary>
         /// Fetch a reference for the given document in the Waives platform.
         /// </summary>
-        /// <param name="id">The ID of the document, as returned by <see cref="CreateDocumentAsync(Stream)"/>.</param>
+        /// <param name="id">The ID of the document, as returned by <see cref="CreateDocumentAsync(Stream, CancellationToken)"/>.</param>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>A <see cref="Document"/> client for the specified document ID.</returns>
-        public async Task<Document> GetDocumentAsync(string id)
+        public async Task<Document> GetDocumentAsync(string id, CancellationToken cancellationToken = default)
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/documents/{id}", UriKind.Relative));
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<HalResponse>().ConfigureAwait(false);
             return new Document(_requestSender, responseContent.Id, responseContent.Links);
@@ -239,12 +256,16 @@ namespace Waives.Http
         /// completed on them. It can be useful to use <see cref="GetAllDocumentsAsync"/> in conjunction
         /// with <see cref="Document.DeleteAsync"/> to ensure you are starting from a clean slate.
         /// </remarks>
+        /// <param name="cancellationToken">
+        /// The token to monitor for cancellation requests. The default value is
+        /// <see cref="CancellationToken.None"/>.
+        /// </param>
         /// <returns>An <see cref="IEnumerable{Document}"/> representing all the documents
         /// created in your account.</returns>
-        public async Task<IEnumerable<Document>> GetAllDocumentsAsync()
+        public async Task<IEnumerable<Document>> GetAllDocumentsAsync(CancellationToken cancellationToken = default)
         {
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri("/documents", UriKind.Relative));
-            var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
+            var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             var responseContent = await response.Content.ReadAsAsync<DocumentCollection>().ConfigureAwait(false);
             return responseContent.Documents.Select(d => new Document(_requestSender, d.Id, d.Links));
