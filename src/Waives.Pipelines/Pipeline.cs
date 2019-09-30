@@ -217,22 +217,6 @@ namespace Waives.Pipelines
         /// in the pipeline is complete.</returns>
         public async Task RunAsync()
         {
-            // take a copy of _docActions so Start() is idempotent
-            var docActions = new List<Func<WaivesDocument, Task<WaivesDocument>>>(_docActions)
-            {
-                async d =>
-                {
-                    await d.HttpDocument.Delete().ConfigureAwait(false);
-
-                    _logger.Info(
-                        "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
-                        d.Id,
-                        d.Source.SourceId);
-
-                    return d;
-                }
-            };
-
             var taskCompletion = new TaskCompletionSource<bool>(
                 TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -271,14 +255,25 @@ namespace Waives.Pipelines
                 var httpDocument = await _documentFactory
                     .CreateDocument(d).ConfigureAwait(false);
 
-                    var httpDocument = await _documentFactory
-                        .CreateDocument(d).ConfigureAwait(false);
+                return new WaivesDocument(d, httpDocument);
+            };
+
+            Func<WaivesDocument, Task> docDeleter = async d =>
+            {
+                await d.HttpDocument.Delete().ConfigureAwait(false);
+
+                _logger.Info(
+                    "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
+                    d.Id,
+                    d.Source.SourceId);
+            };
 
             _logger.Info("Pipeline started");
 
             var documentProcessor = new DocumentProcessor(
                 docCreator,
                 _docActions,
+                docDeleter,
                 OnDocumentException);
 
             var pipelineObserver = new ConcurrentPipelineObserver(
