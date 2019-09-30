@@ -145,13 +145,13 @@ namespace Waives.Http.Tests
                     .Send(Arg.Any<HttpRequestMessageTemplate>())
                     .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
-                await document.Classify("classifier");
+                await document.ClassifyAsync("classifier");
 
                 _requestSender
                     .Send(Arg.Any<HttpRequestMessageTemplate>())
                     .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-                await document.Delete();
+                await document.DeleteAsync();
             }
         }
 

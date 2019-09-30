@@ -33,7 +33,7 @@ namespace Waives.Http
         /// <summary>
         /// Deletes this document in the Waives platform.
         /// </summary>
-        public async Task Delete()
+        public async Task DeleteAsync()
         {
             var selfUrl = _behaviours["self"];
 
@@ -52,7 +52,7 @@ namespace Waives.Http
         /// multiple classifications or extractions with different configurations
         /// it is most efficient to call this method first, so the document is only
         /// read once.</remarks>
-        public async Task Read()
+        public async Task ReadAsync()
         {
             var readUrl = _behaviours["document:read"];
 
@@ -70,11 +70,11 @@ namespace Waives.Http
         /// <param name="format">The format of the results required</param>
         /// <remarks>The Read method must be called before this method, otherwise a
         /// WaivesApiException will be thrown.</remarks>
-        public async Task GetReadResults(string path, ReadResultsFormat format)
+        public async Task GetReadResultsAsync(string path, ReadResultsFormat format)
         {
             using (var fileStream = File.OpenWrite(path))
             {
-                await GetReadResults(fileStream, format).ConfigureAwait(false);
+                await GetReadResultsAsync(fileStream, format).ConfigureAwait(false);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Waives.Http
         /// <param name="format">The format of the results required</param>
         /// <remarks>The Read method must be called before this method, otherwise a
         /// WaivesApiException will be thrown.</remarks>
-        public async Task GetReadResults(Stream resultsStream, ReadResultsFormat format)
+        public async Task GetReadResultsAsync(Stream resultsStream, ReadResultsFormat format)
         {
             var readUrl = _behaviours["document:read"];
 
@@ -114,7 +114,7 @@ namespace Waives.Http
         /// </summary>
         /// <param name="classifierName">The name of the classifier to use.</param>
         /// <returns>The results of the classification operation.</returns>
-        public async Task<ClassificationResult> Classify(string classifierName)
+        public async Task<ClassificationResult> ClassifyAsync(string classifierName)
         {
             var classifyUrl = _behaviours["document:classify"];
 
@@ -135,15 +135,15 @@ namespace Waives.Http
         /// </summary>
         /// <param name="extractorName">The name of the extractor to use.</param>
         /// <returns>The results of the extraction operation.</returns>
-        public async Task<ExtractionResults> Extract(string extractorName)
+        public async Task<ExtractionResults> ExtractAsync(string extractorName)
         {
-            var extractionResponse = await DoExtraction(extractorName).ConfigureAwait(false);
+            var extractionResponse = await DoExtractionAsync(extractorName).ConfigureAwait(false);
             return await extractionResponse.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
         }
 
         /// <summary>
         /// Performs redaction on this document using results from an
-        /// <see cref="Extract" langword="extraction"/> operation using the
+        /// <see cref="ExtractAsync" langword="extraction"/> operation using the
         /// specified extractor name. The named extractor must already exist in
         /// the Waives platform. The result of this operation is a PDF file with
         /// the extracted data removed from the file.
@@ -156,10 +156,10 @@ namespace Waives.Http
         /// A <see cref="Stream"/> of bytes containing a PDF file. The returned
         /// Stream should be disposed of in your own code.
         /// </returns>
-        public async Task<Stream> Redact(string extractorName)
+        public async Task<Stream> RedactAsync(string extractorName)
         {
             var extractionResponse =
-                await DoExtraction(extractorName, RedactionRequest.MimeType)
+                await DoExtractionAsync(extractorName, RedactionRequest.MimeType)
                 .ConfigureAwait(false);
 
             var redactions = await extractionResponse.ReadAsStringAsync().ConfigureAwait(false);
@@ -172,7 +172,7 @@ namespace Waives.Http
             return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         }
 
-        private async Task<HttpContent> DoExtraction(string extractorName,
+        private async Task<HttpContent> DoExtractionAsync(string extractorName,
             string desiredResponseFormat = ExtractionResults.MimeType)
         {
             var extractUrl = _behaviours["document:extract"].CreateUri(new

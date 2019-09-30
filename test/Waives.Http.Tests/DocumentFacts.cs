@@ -63,7 +63,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Delete();
+            await _sut.DeleteAsync();
 
             await _requestSender
                 .Received(1)
@@ -80,7 +80,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Delete());
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.DeleteAsync());
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -91,7 +91,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Success(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Read();
+            await _sut.ReadAsync();
 
             await _requestSender
                 .Received(1)
@@ -108,7 +108,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Read());
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.ReadAsync());
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -122,7 +122,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), $"Anonymous string {Guid.NewGuid()}"));
 
-            await _sut.GetReadResults(_readResultsFilename, format);
+            await _sut.GetReadResultsAsync(_readResultsFilename, format);
 
             await _requestSender
                 .Received(1)
@@ -140,7 +140,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.GetReadResults(_readResultsFilename, ReadResultsFormat.Pdf));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.GetReadResultsAsync(_readResultsFilename, ReadResultsFormat.Pdf));
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -156,7 +156,7 @@ namespace Waives.Http.Tests
             using (var resultsStream = new MemoryStream())
             using (var sr = new StreamReader(resultsStream))
             {
-                await _sut.GetReadResults(resultsStream, ReadResultsFormat.Text);
+                await _sut.GetReadResultsAsync(resultsStream, ReadResultsFormat.Text);
 
                 resultsStream.Position = 0;
                 Assert.Equal(readResults, sr.ReadToEnd());
@@ -172,7 +172,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.GetReadResults(ci.Arg<HttpRequestMessageTemplate>(), readResults));
 
-            await _sut.GetReadResults(_readResultsFilename, ReadResultsFormat.Text);
+            await _sut.GetReadResultsAsync(_readResultsFilename, ReadResultsFormat.Text);
 
 
             Assert.Equal(readResults, await File.ReadAllTextAsync(_readResultsFilename));
@@ -185,7 +185,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Classify(_classifierName);
+            await _sut.ClassifyAsync(_classifierName);
 
             await _requestSender
                 .Received(1)
@@ -201,7 +201,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Classify(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var result = await _sut.Classify(_classifierName);
+            var result = await _sut.ClassifyAsync(_classifierName);
 
             Assert.Equal("expectedDocumentType", result.DocumentType);
             Assert.Equal(2.85512137M, result.RelativeConfidence);
@@ -219,7 +219,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Classify(_classifierName));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.ClassifyAsync(_classifierName));
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -231,7 +231,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Extract(_extractorName);
+            await _sut.ExtractAsync(_extractorName);
 
             await _requestSender
                 .Received(1)
@@ -247,7 +247,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var response = await _sut.Extract(_extractorName);
+            var response = await _sut.ExtractAsync(_extractorName);
 
 
             var extractionPage = response.DocumentMetadata.Pages.First();
@@ -290,7 +290,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Any<HttpRequestMessageTemplate>())
                 .Throws(new WaivesApiException(exceptionMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Extract(_extractorName));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.ExtractAsync(_extractorName));
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -305,7 +305,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Redact(_extractorName);
+            await _sut.RedactAsync(_extractorName);
 
             await _requestSender
                 .Received(1)
@@ -325,7 +325,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
 
-            var response = await _sut.Redact(_extractorName);
+            var response = await _sut.RedactAsync(_extractorName);
 
             var result = new byte[3].AsMemory();
             response.Read(result.Span);
@@ -345,7 +345,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Throws(new WaivesApiException(exceptionMessage));
 
-            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.Redact(_extractorName));
+            var exception = await Assert.ThrowsAsync<WaivesApiException>(() => _sut.RedactAsync(_extractorName));
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -360,7 +360,7 @@ namespace Waives.Http.Tests
                 .Send(Arg.Is<HttpRequestMessageTemplate>(t => t.RequestUri.ToString().Contains("redact")))
                 .Returns(ci => Response.Redact(ci.Arg<HttpRequestMessageTemplate>()));
 
-            await _sut.Redact(_extractorName);
+            await _sut.RedactAsync(_extractorName);
 
             await _requestSender
                 .Received(1)
