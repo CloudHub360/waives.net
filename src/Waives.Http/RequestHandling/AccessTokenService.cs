@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Polly;
@@ -37,22 +38,28 @@ namespace Waives.Http.RequestHandling
                 });
         }
 
-        internal async Task<AccessToken> FetchAccessTokenAsync()
+        internal async Task<AccessToken> FetchAccessTokenAsync(CancellationToken cancellationToken = default)
         {
-            return await _cachePolicy.ExecuteAsync(async context =>
-            {
-                var request = new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
-                {
-                    Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            return await _cachePolicy.ExecuteAsync(
+                    async (context, cancellation) =>
                     {
-                        { "client_id", _clientId },
-                        { "client_secret", _clientSecret }
-                    })
-                };
+                        var request =
+                            new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/oauth/token", UriKind.Relative))
+                            {
+                                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                                {
+                                    {"client_id", _clientId},
+                                    {"client_secret", _clientSecret}
+                                })
+                            };
 
-                var response = await _requestSender.SendAsync(request).ConfigureAwait(false);
-                return await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
-            }, new Context(nameof(FetchAccessTokenAsync))).ConfigureAwait(false);
+                        var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                        return await response.Content.ReadAsAsync<AccessToken>().ConfigureAwait(false);
+                    },
+                    new Context(nameof(FetchAccessTokenAsync)),
+                    cancellationToken,
+                    continueOnCapturedContext: false)
+                .ConfigureAwait(false);
         }
 
         public void Dispose()
