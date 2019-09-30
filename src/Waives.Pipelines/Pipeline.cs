@@ -260,12 +260,21 @@ namespace Waives.Pipelines
 
             Func<WaivesDocument, Task> docDeleter = async d =>
             {
-                await d.HttpDocument.Delete().ConfigureAwait(false);
+                try
+                {
+                    await d.HttpDocument.Delete().ConfigureAwait(false);
 
-                _logger.Info(
-                    "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
-                    d.Id,
-                    d.Source.SourceId);
+                    _logger.Info(
+                        "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
+                        d.Id,
+                        d.Source.SourceId);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "An error occurred when deleting '{DocumentId}''", d.Id);
+
+                    taskCompletion.TrySetException(e);
+                }
             };
 
             _logger.Info("Pipeline started");
