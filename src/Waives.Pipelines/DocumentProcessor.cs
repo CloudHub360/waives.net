@@ -29,7 +29,7 @@ namespace Waives.Pipelines
             try
             {
                 waivesDocument = await _docCreator(document);
-                await RunActions(waivesDocument).ConfigureAwait(false);
+                await RunActionsAsync(waivesDocument).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -44,7 +44,7 @@ namespace Waives.Pipelines
             }
         }
 
-        private async Task RunActions(WaivesDocument document)
+        private async Task RunActionsAsync(WaivesDocument document)
         {
             foreach (var docAction in _docActions)
             {
