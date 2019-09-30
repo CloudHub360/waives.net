@@ -275,7 +275,7 @@ namespace Waives.Pipelines.Tests
         {
             var expectedException = new Exception();
             _httpDocument.Delete().Throws(expectedException);
-            var source = Observable.Repeat(new TestDocument(Generate.Bytes()), 1);
+            var source = Observable.Return(new TestDocument(Generate.Bytes()));
 
             var pipeline = _sut
                 .WithDocumentsFrom(source);
