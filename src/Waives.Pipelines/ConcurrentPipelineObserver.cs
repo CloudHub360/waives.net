@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Waives.Pipelines
@@ -8,6 +9,7 @@ namespace Waives.Pipelines
         private readonly IDocumentProcessor _documentProcessor;
         private readonly Action _onPipelineCompleted;
         private readonly Action<Exception> _onError;
+        private readonly CancellationToken _cancellationToken;
 
         private readonly WorkPool _workPool;
 
@@ -15,18 +17,20 @@ namespace Waives.Pipelines
             IDocumentProcessor documentProcessor,
             Action onPipelineCompleted,
             Action<Exception> onError,
-            int maxConcurrency)
+            int maxConcurrency,
+            CancellationToken cancellationToken = default)
         {
             _documentProcessor = documentProcessor ?? throw new ArgumentNullException(nameof(documentProcessor));
             _onPipelineCompleted = onPipelineCompleted ?? throw new ArgumentNullException(nameof(onPipelineCompleted));
             _onError = onError ?? throw new ArgumentNullException(nameof(onError));
+            _cancellationToken = cancellationToken;
             _workPool = new WorkPool(maxConcurrency);
         }
 
         public void OnCompleted()
         {
-             _workPool.WaitAsync()
-                .ContinueWith(_ => _onPipelineCompleted())
+             _workPool.WaitAsync(_cancellationToken)
+                .ContinueWith(_ => _onPipelineCompleted(), _cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -39,7 +43,9 @@ namespace Waives.Pipelines
 
         public void OnNext(Document document)
         {
-            _workPool.Post(async () => await _documentProcessor.RunAsync(document));
+            _workPool.Post(
+                async () => await _documentProcessor.RunAsync(document, _cancellationToken),
+                _cancellationToken);
         }
 
         private void Dispose(bool disposing)

@@ -373,7 +373,8 @@ namespace Waives.Pipelines
                 documentProcessor,
                 OnPipelineComplete,
                 OnPipelineError,
-                _maxConcurrency);
+                _maxConcurrency,
+                cancellationToken);
 
             var connection = _docSource.Subscribe(pipelineObserver);
             try
