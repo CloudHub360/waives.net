@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http.Responses;
 
@@ -11,13 +12,13 @@ namespace Waives.Pipelines.HttpAdapters
     /// </summary>
     internal interface IHttpDocument
     {
-        Task<ClassificationResult> ClassifyAsync(string classifierName);
+        Task<ClassificationResult> ClassifyAsync(string classifierName, CancellationToken cancellationToken = default);
 
-        Task<ExtractionResults> ExtractAsync(string extractorName);
+        Task<ExtractionResults> ExtractAsync(string extractorName, CancellationToken cancellationToken = default);
 
-        Task<Stream> RedactAsync(string extractorName);
+        Task<Stream> RedactAsync(string extractorName, CancellationToken cancellationToken = default);
 
-        Task DeleteAsync();
+        Task DeleteAsync(CancellationToken cancellationToken = default);
 
         string Id { get; }
     }
@@ -39,24 +40,32 @@ namespace Waives.Pipelines.HttpAdapters
             _documentClient = documentClient;
         }
 
-        public async Task<ClassificationResult> ClassifyAsync(string classifierName)
+        public async Task<ClassificationResult> ClassifyAsync(string classifierName, CancellationToken cancellationToken = default)
         {
-            return await _documentClient.ClassifyAsync(classifierName).ConfigureAwait(false);
+            return await _documentClient
+                .ClassifyAsync(classifierName, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<ExtractionResults> ExtractAsync(string extractorName)
+        public async Task<ExtractionResults> ExtractAsync(string extractorName, CancellationToken cancellationToken = default)
         {
-            return await _documentClient.ExtractAsync(extractorName).ConfigureAwait(false);
+            return await _documentClient
+                .ExtractAsync(extractorName, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task<Stream> RedactAsync(string extractorName)
+        public async Task<Stream> RedactAsync(string extractorName, CancellationToken cancellationToken = default)
         {
-            return await _documentClient.RedactAsync(extractorName).ConfigureAwait(false);
+            return await _documentClient
+                .RedactAsync(extractorName, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync()
+        public async Task DeleteAsync(CancellationToken cancellationToken = default)
         {
-            await _documentClient.DeleteAsync().ConfigureAwait(false);
+            await _documentClient
+                .DeleteAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }
