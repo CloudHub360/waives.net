@@ -342,11 +342,11 @@ namespace Waives.Pipelines
                 return new WaivesDocument(d, httpDocument);
             };
 
-            Func<WaivesDocument, CancellationToken, Task> docDeleter = async (d, ct) =>
+            Func<WaivesDocument, Task> docDeleter = async d =>
             {
                 try
                 {
-                    await d.HttpDocument.DeleteAsync(ct).ConfigureAwait(false);
+                    await d.HttpDocument.DeleteAsync().ConfigureAwait(false);
 
                     _logger.Info(
                         "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",

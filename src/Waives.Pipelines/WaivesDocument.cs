@@ -75,9 +75,9 @@ namespace Waives.Pipelines
             return this;
         }
 
-        public async Task DeleteAsync(CancellationToken cancellationToken = default)
+        public async Task DeleteAsync()
         {
-            await _waivesDocument.DeleteAsync(cancellationToken).ConfigureAwait(false);
+            await _waivesDocument.DeleteAsync().ConfigureAwait(false);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Waives.Pipelines.HttpAdapters
 
         Task<Stream> RedactAsync(string extractorName, CancellationToken cancellationToken = default);
 
-        Task DeleteAsync(CancellationToken cancellationToken = default);
+        Task DeleteAsync();
 
         string Id { get; }
     }
@@ -61,10 +61,10 @@ namespace Waives.Pipelines.HttpAdapters
                 .ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(CancellationToken cancellationToken = default)
+        public async Task DeleteAsync()
         {
             await _documentClient
-                .DeleteAsync(cancellationToken)
+                .DeleteAsync()
                 .ConfigureAwait(false);
         }
     }
