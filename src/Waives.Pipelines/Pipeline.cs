@@ -367,17 +367,16 @@ namespace Waives.Pipelines
                 }
             }
 
-            Func<Document, CancellationToken, Task<WaivesDocument>> docCreator = async (d, ct) =>
+            async Task<WaivesDocument> CreateDocument(Document d, CancellationToken ct)
             {
                 Logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
 
-                var httpDocument = await _documentFactory
-                    .CreateDocumentAsync(d, ct).ConfigureAwait(false);
+                var httpDocument = await _documentFactory.CreateDocumentAsync(d, ct).ConfigureAwait(false);
 
                 return new WaivesDocument(d, httpDocument);
-            };
+            }
 
-            Func<WaivesDocument, Task> docDeleter = async d =>
+            async Task DeleteDocument(WaivesDocument d)
             {
                 try
                 {
@@ -394,14 +393,14 @@ namespace Waives.Pipelines
 
                     taskCompletion.TrySetException(e);
                 }
-            };
+            }
 
             Logger.Info("Pipeline started");
 
             var documentProcessor = new DocumentProcessor(
-                docCreator,
+                CreateDocument,
                 _docActions,
-                docDeleter,
+                DeleteDocument,
                 OnDocumentException);
 
             var pipelineObserver = new ConcurrentPipelineObserver(
