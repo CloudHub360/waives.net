@@ -61,12 +61,12 @@ namespace Waives.Pipelines
 
         private readonly IHttpDocumentFactory _documentFactory;
         private readonly int _maxConcurrency;
-        private IObservable<Document> _docSource = Observable.Empty<Document>();
+        private IObservable<Document> _documentSource = Observable.Empty<Document>();
         private Action _onPipelineCompletedUserAction = () => { };
         private readonly Action<DocumentError> _onDocumentError;
         private Action<DocumentError> _userErrorAction = err => { };
 
-        private readonly List<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>> _docActions =
+        private readonly List<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>> _documentActions =
             new List<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>>();
 
         internal Pipeline(IHttpDocumentFactory documentFactory, int maxConcurrency)
@@ -93,7 +93,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            _docSource = documentSource ?? throw new ArgumentNullException(nameof(documentSource));
+            _documentSource = documentSource ?? throw new ArgumentNullException(nameof(documentSource));
 
             return this;
         }
@@ -111,7 +111,7 @@ namespace Waives.Pipelines
                     nameof(classifierName));
             }
 
-            _docActions.Add(async (d, ct) =>
+            _documentActions.Add(async (d, ct) =>
             {
                 var document = await d.ClassifyAsync(classifierName, ct)
                     .ConfigureAwait(false);
@@ -139,7 +139,7 @@ namespace Waives.Pipelines
                     nameof(extractorName));
             }
 
-            _docActions.Add(async (d, ct) =>
+            _documentActions.Add(async (d, ct) =>
             {
                 var document = await d.ExtractAsync(extractorName, ct).ConfigureAwait(false);
                 Logger.Info(
@@ -212,7 +212,7 @@ namespace Waives.Pipelines
         /// <returns></returns>
         public Pipeline RedactWith(string extractorName, Func<WaivesDocument, Stream, Task> resultFunc)
         {
-            _docActions.Add(async (d, ct) =>
+            _documentActions.Add(async (d, ct) =>
             {
                 var document = await d.RedactAsync(extractorName, resultFunc, ct).ConfigureAwait(false);
                 Logger.Info(
@@ -238,7 +238,7 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(action));
             }
 
-            _docActions.Add((document, cancellationToken) =>
+            _documentActions.Add((document, cancellationToken) =>
             {
                 action(document);
                 return Task.FromResult(document);
@@ -259,7 +259,7 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(action));
             }
 
-            _docActions.Add(async (d, ct) =>
+            _documentActions.Add(async (d, ct) =>
             {
                 await action(d).ConfigureAwait(false);
                 return d;
@@ -280,7 +280,7 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(action));
             }
 
-            _docActions.Add(async (d, ct) => await action(d).ConfigureAwait(false));
+            _documentActions.Add(async (d, ct) => await action(d).ConfigureAwait(false));
 
             return this;
         }
@@ -399,7 +399,7 @@ namespace Waives.Pipelines
 
             var documentProcessor = new DocumentProcessor(
                 CreateDocument,
-                _docActions,
+                _documentActions,
                 DeleteDocument,
                 OnDocumentException);
 
@@ -410,7 +410,7 @@ namespace Waives.Pipelines
                 _maxConcurrency,
                 cancellationToken);
 
-            var connection = _docSource.Subscribe(pipelineObserver);
+            var connection = _documentSource.Subscribe(pipelineObserver);
             try
             {
                 await taskCompletion.Task;
