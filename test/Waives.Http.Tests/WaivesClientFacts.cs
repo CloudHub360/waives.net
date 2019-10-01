@@ -115,7 +115,7 @@ namespace Waives.Http.Tests
 
             var expectedJsonContent = new JsonContent(new ImportDocumentRequest
             {
-                Url = fileUri.ToString()
+                Url = fileUri
             });
 
             var expectedContents = await expectedJsonContent.ReadAsByteArrayAsync();

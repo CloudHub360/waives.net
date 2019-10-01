@@ -219,7 +219,7 @@ namespace Waives.Http
                 {
                     Content = new JsonContent(new ImportDocumentRequest
                     {
-                        Url = uri.ToString()
+                        Url = uri
                     })
 
                 };
