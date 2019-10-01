@@ -1,6 +1,5 @@
 ﻿using System;
 using Waives.Http;
-using Waives.Http.Logging;
 
 namespace Waives.Pipelines
 {
