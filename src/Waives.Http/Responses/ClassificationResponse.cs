@@ -25,7 +25,7 @@ namespace Waives.Http.Responses
     /// scenario, you may want to route this document for a person to review, or handle differently in some other way.
     /// </para>
     /// <para>In general, unconfident classifications indicate that the content of the document is substantially different
-    /// from any documents contained in your sample set. Therefore you may also wish to capture these documents, analyse them
+    /// from any documents contained in your sample set. Therefore you may also wish to capture these documents, analyze them
     /// and if appropriate add some to your samples and retrain your classifier.
     /// </para>
     /// </remarks>
@@ -53,7 +53,7 @@ namespace Waives.Http.Responses
         public bool IsConfident { get; internal set; }
 
         /// <summary>
-        /// Gets a collection of scores for each possible document type in the classifer.
+        /// Gets a collection of scores for each possible document type in the classifier.
         /// </summary>
         [JsonProperty("document_type_scores")]
         public IEnumerable<DocumentTypeScore> DocumentTypeScores { get; internal set; }
