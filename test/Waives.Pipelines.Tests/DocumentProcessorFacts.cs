@@ -12,7 +12,7 @@ namespace Waives.Pipelines.Tests
     public class DocumentProcessorFacts
     {
         private readonly Func<Document, CancellationToken, Task<WaivesDocument>> _docCreator;
-        private readonly Func<WaivesDocument, CancellationToken, Task> _docDeleter;
+        private readonly Func<WaivesDocument, Task> _docDeleter;
         private readonly Action<Exception, Document> _onDocumentException;
         private readonly TestDocument _testDocument;
 
@@ -23,7 +23,7 @@ namespace Waives.Pipelines.Tests
                 var waivesDocument = new WaivesDocument(document, Substitute.For<IHttpDocument>());
                 return Task.FromResult(waivesDocument);
             };
-            _docDeleter = (document, cancellationToken) => Task.CompletedTask;
+            _docDeleter = _ => Task.CompletedTask;
             _onDocumentException = (exception, document) => { };
             _testDocument = new TestDocument(Generate.Bytes());
         }
@@ -88,7 +88,7 @@ namespace Waives.Pipelines.Tests
         public async Task Deletes_document_after_error()
         {
             var docDeleted = false;
-            Func<WaivesDocument, CancellationToken, Task> docDeleter = (document, cancellationToken) =>
+            Func<WaivesDocument, Task> docDeleter = document =>
             {
                 docDeleted = true;
                 return Task.CompletedTask;
@@ -109,7 +109,7 @@ namespace Waives.Pipelines.Tests
         public async Task Deletes_document_after_error_in_error_handler()
         {
             var docDeleted = false;
-            Func<WaivesDocument, CancellationToken, Task> docDeleter = (document, cancellationToken) =>
+            Func<WaivesDocument, Task> docDeleter = document =>
             {
                 docDeleted = true;
                 return Task.CompletedTask;

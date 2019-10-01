@@ -9,12 +9,12 @@ namespace Waives.Pipelines
     {
         private readonly Func<Document, CancellationToken, Task<WaivesDocument>> _docCreator;
         private readonly IEnumerable<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>> _docActions;
-        private readonly Func<WaivesDocument, CancellationToken, Task> _docDeleter;
+        private readonly Func<WaivesDocument, Task> _docDeleter;
         private readonly Action<Exception, Document> _onDocumentException;
 
         public DocumentProcessor(Func<Document, CancellationToken, Task<WaivesDocument>> docCreator,
             IEnumerable<Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>> docActions,
-            Func<WaivesDocument, CancellationToken, Task> docDeleter,
+            Func<WaivesDocument, Task> docDeleter,
             Action<Exception, Document> onDocumentException)
         {
             _docCreator = docCreator ?? throw new ArgumentNullException(nameof(docCreator));
@@ -39,7 +39,7 @@ namespace Waives.Pipelines
             {
                 if (waivesDocument != null)
                 {
-                    await _docDeleter(waivesDocument, cancellationToken);
+                    await _docDeleter(waivesDocument);
                 }
             }
         }
