@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 // ReSharper disable once CheckNamespace
+// ReSharper disable IdentifierTypo
 namespace DocoptNet
 {
     public static class DocoptExtensions
     {
         public static IEnumerable<T> AsEnumerable<T>(this ValueObject option, Func<object, T> itemProjection)
         {
-            var items = new List<T>();
-            foreach (var item in option.AsList)
-            {
-                items.Add(itemProjection(item));
-            }
-
-            return items;
+            return option.AsList.Cast<object>().Select(itemProjection).ToList();
         }
     }
 }
+// ReSharper restore IdentifierTypo
