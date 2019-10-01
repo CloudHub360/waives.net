@@ -57,7 +57,7 @@ namespace Waives.Pipelines.HttpAdapters
         private static async Task DeleteOrphanedDocumentsAsync(WaivesClient apiClient, CancellationToken cancellationToken = default)
         {
             var orphanedDocuments = await apiClient.GetAllDocumentsAsync(cancellationToken).ConfigureAwait(false);
-            await Task.WhenAll(orphanedDocuments.Select(d => d.DeleteAsync())).ConfigureAwait(false);
+            await Task.WhenAll(orphanedDocuments.Select(d => d.DeleteAsync(cancellationToken))).ConfigureAwait(false);
         }
     }
 }

@@ -34,14 +34,14 @@ namespace Waives.Http
         /// <summary>
         /// Deletes this document in the Waives platform.
         /// </summary>
-        public async Task DeleteAsync()
+        public async Task DeleteAsync(CancellationToken cancellationToken = default)
         {
             var selfUrl = _behaviours["self"];
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
-            await _requestSender.SendAsync(request).ConfigureAwait(false);
+            await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
