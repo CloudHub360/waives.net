@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Waives.Pipelines
@@ -17,7 +18,7 @@ namespace Waives.Pipelines
         {
             if (string.IsNullOrWhiteSpace(sourceId))
             {
-                throw new System.ArgumentNullException(nameof(sourceId));
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(sourceId));
             }
 
             SourceId = sourceId;
