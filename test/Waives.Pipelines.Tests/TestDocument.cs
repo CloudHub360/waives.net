@@ -7,16 +7,16 @@ namespace Waives.Pipelines.Tests
     {
         internal const string SourceIdString = "Test Document";
 
+        private readonly Stream _stream;
+
         public TestDocument(byte[] contents, string sourceId = SourceIdString) : base(sourceId)
         {
-            Stream = new MemoryStream(contents);
+            _stream = new MemoryStream(contents);
         }
 
         public override Task<Stream> OpenStream()
         {
-            return Task.FromResult(Stream);
+            return Task.FromResult(_stream);
         }
-
-        internal Stream Stream { get; }
     }
 }
