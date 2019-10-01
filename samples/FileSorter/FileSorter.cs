@@ -8,12 +8,12 @@ namespace FileSorter
     public class FileSorter
     {
         private readonly string _outboxPath;
-        private readonly string _errorboxPath;
+        private readonly string _errorBoxPath;
 
-        public FileSorter(string outboxPath, string errorboxPath)
+        public FileSorter(string outboxPath, string errorBoxPath)
         {
             _outboxPath = outboxPath;
-            _errorboxPath = errorboxPath;
+            _errorBoxPath = errorBoxPath;
         }
 
         public void MoveDocument(WaivesDocument result)
@@ -61,10 +61,10 @@ namespace FileSorter
             }
 
             // Move the document to the error box
-            MoveFile(document, _errorboxPath);
+            MoveFile(document, _errorBoxPath);
 
             // Write a log for the document indicating the failure.
-            var logFile = Path.Combine(_errorboxPath, $"{document.FilePath.Name}.log");
+            var logFile = Path.Combine(_errorBoxPath, $"{document.FilePath.Name}.log");
             Console.WriteLine($"Writing error log file to {logFile}");
             File.WriteAllText(logFile, error.Exception.Message);
         }

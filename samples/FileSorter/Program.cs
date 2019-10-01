@@ -40,12 +40,12 @@ namespace FileSorter
 
             var inbox = options["<directory>"].ToString();
             var outbox = options["--output"].ToString();
-            var errorbox = options["--failures"]?.ToString()
+            var errorBox = options["--failures"]?.ToString()
                            ?? Path.Combine(options["<directory>"].ToString(), "failures");
 
             EnsureDirectoryExists(inbox);
             EnsureDirectoryExists(outbox);
-            EnsureDirectoryExists(errorbox);
+            EnsureDirectoryExists(errorBox);
 
             var cancellation = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
@@ -54,10 +54,10 @@ namespace FileSorter
                 cancellation.Cancel();
             };
 
-            var fileSorter = new FileSorter(outbox, errorbox);
+            var fileSorter = new FileSorter(outbox, errorBox);
 
             // Creates an EventingDocumentSource wrapping a FileSystemWatcher emitting
-            // a new doucment into the pipeline whenever a document is created in the
+            // a new document into the pipeline whenever a document is created in the
             // inbox path.
             var filesystem = FileSystem.WatchForChanges(inbox, cancellation.Token);
 
@@ -65,7 +65,7 @@ namespace FileSorter
             {
                 ClientId = "clientId",
                 ClientSecret = "clientSecret"
-            });
+            }, cancellation.Token);
 
             pipeline.WithDocumentsFrom(filesystem)
                 .ClassifyWith(options["<classifier>"].ToString())
@@ -75,7 +75,7 @@ namespace FileSorter
 
             try
             {
-                await pipeline.RunAsync();
+                await pipeline.RunAsync(cancellation.Token);
             }
             catch (PipelineException ex)
             {
