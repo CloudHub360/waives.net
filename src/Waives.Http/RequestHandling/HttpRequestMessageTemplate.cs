@@ -18,8 +18,8 @@ namespace Waives.Http.RequestHandling
             Headers = new Dictionary<string, string>();
         }
 
-        public HttpMethod Method { get; set; }
-        public Uri RequestUri { get; set; }
+        public HttpMethod Method { get; }
+        public Uri RequestUri { get; }
         public HttpContent Content { get; set; }
         public IDictionary<string, string> Headers { get; }
 
