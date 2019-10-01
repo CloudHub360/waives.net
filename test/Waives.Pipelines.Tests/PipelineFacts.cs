@@ -303,7 +303,7 @@ namespace Waives.Pipelines.Tests
 
             Assert.Same(expectedException, actualException);
         }
-		
+
         private static void AssertStreamsAreEqual(MemoryStream expected, Stream actual)
         {
             var actualMemoryStream = new MemoryStream();
