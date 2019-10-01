@@ -65,6 +65,11 @@ namespace Waives.Pipelines
         /// configure your document processing pipeline.</returns>
         public static async Task<Pipeline> CreatePipelineAsync(WaivesOptions options, CancellationToken cancellationToken = default)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             var waivesClient = CreateAuthenticatedWaivesClient(options);
 
             var documentFactory = await HttpDocumentFactory.CreateAsync(

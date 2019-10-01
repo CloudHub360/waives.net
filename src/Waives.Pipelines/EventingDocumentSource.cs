@@ -28,8 +28,13 @@ namespace Waives.Pipelines
         /// <param name="token">A token for cancelling the <paramref name="emitter"/>'s work.</param>
         /// <returns>A new <see cref="EventingDocumentSource"/> configured to capture new document
         /// events from the <paramref name="emitter"/>.</returns>
-        public static EventingDocumentSource Create(DocumentEmitter emitter, CancellationToken token)
+        public static EventingDocumentSource Create(DocumentEmitter emitter, CancellationToken token = default)
         {
+            if (emitter == null)
+            {
+                throw new ArgumentNullException(nameof(emitter));
+            }
+
             var documents = Observable
                 .FromEventPattern<NewDocumentEventArgs>(emitter, nameof(emitter.NewDocument))
                 .Select(e => e.EventArgs.Document)
