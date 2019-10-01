@@ -25,7 +25,7 @@ namespace Waives.Http.RequestHandling
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessageTemplate request, CancellationToken cancellationToken = default)
         {
             var token = await _accessTokenService.FetchAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-            request.Headers["Authorization"] = $"Bearer {token}";
+            request.Headers["Authorization"] = token.ToString();
 
             return await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
