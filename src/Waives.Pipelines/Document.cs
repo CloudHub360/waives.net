@@ -7,10 +7,10 @@ namespace Waives.Pipelines
     /// <summary>
     /// Represents a document which will be processed.
     /// </summary>
-    public abstract class Document
+    public abstract class Document : IEquatable<Document>
     {
         /// <summary>
-        /// Initialises the <see cref="Document"/> with the given <paramref name="sourceId"/>.
+        /// Initializes the <see cref="Document"/> with the given <paramref name="sourceId"/>.
         /// </summary>
         /// <param name="sourceId">A value uniquely identifying this document.</param>
         /// <seealso cref="SourceId"/>
@@ -68,7 +68,7 @@ namespace Waives.Pipelines
             return Equals(this, other);
         }
 
-        public static bool Equals(Document x, Document y)
+        private static bool Equals(Document x, Document y)
         {
             if (ReferenceEquals(x, y))
             {
