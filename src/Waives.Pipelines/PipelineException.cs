@@ -7,15 +7,18 @@ namespace Waives.Pipelines
     /// </summary>
     public class PipelineException : Exception
     {
-        public PipelineException()
+        // ReSharper disable once UnusedMember.Global
+        internal PipelineException()
         {
         }
 
-        public PipelineException(string message) : base(message)
+        // ReSharper disable once UnusedMember.Global
+        internal PipelineException(string message) : base(message)
         {
         }
 
-        public PipelineException(string message, Exception innerException) : base(message, innerException)
+        // ReSharper disable once UnusedMember.Global
+        internal PipelineException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
