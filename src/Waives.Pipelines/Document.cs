@@ -11,13 +11,13 @@ namespace Waives.Pipelines
         /// <summary>
         /// Initialises the <see cref="Document"/> with the given <paramref name="sourceId"/>.
         /// </summary>
-        /// <param name="sourceId">A value uniquely identifying this doucment.</param>
+        /// <param name="sourceId">A value uniquely identifying this document.</param>
         /// <seealso cref="SourceId"/>
         protected Document(string sourceId)
         {
             if (string.IsNullOrWhiteSpace(sourceId))
             {
-                throw new System.ArgumentException("message", nameof(sourceId));
+                throw new System.ArgumentNullException(nameof(sourceId));
             }
 
             SourceId = sourceId;
