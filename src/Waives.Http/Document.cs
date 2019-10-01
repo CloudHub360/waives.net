@@ -34,18 +34,14 @@ namespace Waives.Http
         /// <summary>
         /// Deletes this document in the Waives platform.
         /// </summary>
-        /// <param name="cancellationToken">
-        /// The token to monitor for cancellation requests. The default value is
-        /// <see cref="CancellationToken.None"/>.
-        /// </param>
-        public async Task DeleteAsync(CancellationToken cancellationToken = default)
+        public async Task DeleteAsync()
         {
             var selfUrl = _behaviours["self"];
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Delete,
                 selfUrl.CreateUri());
 
-            await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            await _requestSender.SendAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
