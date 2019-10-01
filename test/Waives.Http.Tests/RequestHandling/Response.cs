@@ -43,14 +43,6 @@ namespace Waives.Http.Tests.RequestHandling
 
         public const string ErrorMessage = "The error message";
 
-        public static HttpResponseMessage ErrorWithMessage(HttpRequestMessageTemplate requestTemplate)
-        {
-            return From(HttpStatusCode.NotFound, requestTemplate, new StringContent(ErrorResponse)
-            {
-                Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-            });
-        }
-
         public static HttpResponseMessage CreateDocument(HttpRequestMessageTemplate requestTemplate)
         {
             return From(HttpStatusCode.OK, requestTemplate, new StringContent(CreateDocumentResponse)
