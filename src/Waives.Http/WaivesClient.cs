@@ -7,8 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json;
-using Waives.Http.Logging;
 using Waives.Http.RequestHandling;
 using Waives.Http.Requests;
 using Waives.Http.Responses;
@@ -36,11 +34,10 @@ namespace Waives.Http
         /// </summary>
         /// <param name="apiUri">The URI of the Waives API instance to use. Defaults
         /// to https://api.waives.io/. </param>
-        /// <param name="logger">An optional logger to use, for further insight into
-        /// the requests being issued.</param>
         /// <returns>A new <see cref="WaivesClient"/> instance ready for
         /// authentication. <see cref="Login"/> must be called on this client before
-        /// attempting to use it for document operations.</returns>
+        /// attempting to use it for document operations.
+        /// </returns>
         /// <example>
         /// <code>
         /// <![CDATA[

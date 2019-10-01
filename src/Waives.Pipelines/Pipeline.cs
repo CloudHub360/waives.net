@@ -57,7 +57,7 @@ namespace Waives.Pipelines
     /// </example>
     public class Pipeline
     {
-        private static readonly ILog _logger = LogProvider.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
         private readonly IHttpDocumentFactory _documentFactory;
         private readonly int _maxConcurrency;
@@ -76,7 +76,7 @@ namespace Waives.Pipelines
 
             _onDocumentError = err =>
             {
-                _logger.ErrorException(
+                Logger.ErrorException(
                     "An error occurred during processing of document '{DocumentId}'",
                     err.Exception,
                     err.Document.SourceId);
@@ -116,7 +116,7 @@ namespace Waives.Pipelines
                 var document = await d.ClassifyAsync(classifierName, ct)
                     .ConfigureAwait(false);
 
-                _logger.Info(
+                Logger.Info(
                     "Classified document {DocumentId} from '{DocumentSource}'",
                     d.Id,
                     d.Source.SourceId);
@@ -142,7 +142,7 @@ namespace Waives.Pipelines
             _docActions.Add(async (d, ct) =>
             {
                 var document = await d.ExtractAsync(extractorName, ct).ConfigureAwait(false);
-                _logger.Info(
+                Logger.Info(
                     "Extracted data from document {DocumentId} from '{DocumentSource}'",
                     d.Id,
                     d.Source.SourceId);
@@ -215,7 +215,7 @@ namespace Waives.Pipelines
             _docActions.Add(async (d, ct) =>
             {
                 var document = await d.RedactAsync(extractorName, resultFunc, ct).ConfigureAwait(false);
-                _logger.Info(
+                Logger.Info(
                     "Redacted data from document {DocumentId} from '{DocumentSource}' using extractor '{ExtractorName}'",
                     d.Id,
                     d.Source.SourceId,
@@ -342,13 +342,13 @@ namespace Waives.Pipelines
             void OnPipelineComplete()
             {
                 _onPipelineCompletedUserAction();
-                _logger.Info("Pipeline complete");
+                Logger.Info("Pipeline complete");
                 taskCompletion.SetResult(true);
             }
 
             void OnPipelineError(Exception e)
             {
-                _logger.Error(e, "An error occurred processing the pipeline");
+                Logger.Error(e, "An error occurred processing the pipeline");
 
                 taskCompletion.TrySetException(e);
             }
@@ -361,7 +361,7 @@ namespace Waives.Pipelines
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e, "An error occurred when calling the error handler");
+                    Logger.Error(e, "An error occurred when calling the error handler");
 
                     taskCompletion.TrySetException(e);
                 }
@@ -369,7 +369,7 @@ namespace Waives.Pipelines
 
             Func<Document, CancellationToken, Task<WaivesDocument>> docCreator = async (d, ct) =>
             {
-                _logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
+                Logger.Info("Started processing '{DocumentSourceId}'", d.SourceId);
 
                 var httpDocument = await _documentFactory
                     .CreateDocumentAsync(d, ct).ConfigureAwait(false);
@@ -383,20 +383,20 @@ namespace Waives.Pipelines
                 {
                     await d.HttpDocument.DeleteAsync().ConfigureAwait(false);
 
-                    _logger.Info(
+                    Logger.Info(
                         "Deleted document {DocumentId}. Processing of '{DocumentSourceId}' complete.",
                         d.Id,
                         d.Source.SourceId);
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e, "An error occurred when deleting '{DocumentId}''", d.Id);
+                    Logger.Error(e, "An error occurred when deleting '{DocumentId}''", d.Id);
 
                     taskCompletion.TrySetException(e);
                 }
             };
 
-            _logger.Info("Pipeline started");
+            Logger.Info("Pipeline started");
 
             var documentProcessor = new DocumentProcessor(
                 docCreator,

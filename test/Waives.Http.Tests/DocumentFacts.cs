@@ -226,7 +226,6 @@ namespace Waives.Http.Tests
         [Fact]
         public async Task Extract_sends_request_with_correct_uri()
         {
-            var exceptionMessage = $"Anonymous string {Guid.NewGuid()}";
             _requestSender
                 .SendAsync(Arg.Any<HttpRequestMessageTemplate>())
                 .Returns(ci => Response.Extract(ci.Arg<HttpRequestMessageTemplate>()));

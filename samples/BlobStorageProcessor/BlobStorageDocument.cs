@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Waives;
 using Waives.Pipelines;
 
 namespace BlobStorageProcessor

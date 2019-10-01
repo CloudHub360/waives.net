@@ -91,8 +91,9 @@ namespace Waives.Pipelines.Tests
             _scheduler.Start(() => documents);
 
             Assert.Equal(1, errorActionCalledFor.Count);
-            Assert.False(errorActionCalledFor.Any(err =>
-                ReferenceEquals(err.Document, _successfulDocument) ));
+            Assert.All(
+                errorActionCalledFor.Select(err => err.Document),
+                d => Assert.NotSame(_successfulDocument, d));
         }
 
         [Fact]
