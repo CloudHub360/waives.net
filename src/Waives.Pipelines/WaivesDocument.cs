@@ -12,19 +12,17 @@ namespace Waives.Pipelines
     /// </summary>
     public class WaivesDocument
     {
-        private readonly IHttpDocument _waivesDocument;
-
         internal WaivesDocument(Document source, IHttpDocument waivesDocument)
         {
             Source = source;
-            _waivesDocument = waivesDocument;
+            HttpDocument = waivesDocument;
         }
 
-        public string Id => _waivesDocument.Id;
+        public string Id => HttpDocument.Id;
 
         public Document Source { get; }
 
-        internal IHttpDocument HttpDocument => _waivesDocument;
+        internal IHttpDocument HttpDocument { get; }
 
         public ClassificationResult ClassificationResults { get; private set; }
 
@@ -38,9 +36,9 @@ namespace Waives.Pipelines
                     nameof(classifierName));
             }
 
-            return new WaivesDocument(Source, _waivesDocument)
+            return new WaivesDocument(Source, HttpDocument)
             {
-                ClassificationResults = await _waivesDocument
+                ClassificationResults = await HttpDocument
                     .ClassifyAsync(classifierName, cancellationToken)
                     .ConfigureAwait(false),
                 ExtractionResults = ExtractionResults
@@ -55,10 +53,10 @@ namespace Waives.Pipelines
                     nameof(extractorName));
             }
 
-            return new WaivesDocument(Source, _waivesDocument)
+            return new WaivesDocument(Source, HttpDocument)
             {
                 ClassificationResults = ClassificationResults,
-                ExtractionResults = await _waivesDocument
+                ExtractionResults = await HttpDocument
                     .ExtractAsync(extractorName, cancellationToken)
                     .ConfigureAwait(false)
             };
@@ -79,17 +77,12 @@ namespace Waives.Pipelines
                 throw new ArgumentNullException(nameof(resultFunc));
             }
 
-            var resultStream = await _waivesDocument
+            var resultStream = await HttpDocument
                 .RedactAsync(extractorName, cancellationToken)
                 .ConfigureAwait(false);
             await resultFunc(this, resultStream).ConfigureAwait(false);
 
             return this;
-        }
-
-        public async Task DeleteAsync()
-        {
-            await _waivesDocument.DeleteAsync().ConfigureAwait(false);
         }
     }
 }
