@@ -87,6 +87,11 @@ namespace Waives.Http
         /// </remarks>
         public async Task GetReadResultsAsync(string path, ReadResultsFormat format, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(path));
+            }
+
             using (var fileStream = File.OpenWrite(path))
             {
                 await GetReadResultsAsync(fileStream, format, cancellationToken).ConfigureAwait(false);
@@ -108,6 +113,11 @@ namespace Waives.Http
         /// </remarks>
         public async Task GetReadResultsAsync(Stream resultsStream, ReadResultsFormat format, CancellationToken cancellationToken = default)
         {
+            if (resultsStream == null)
+            {
+                throw new ArgumentNullException(nameof(resultsStream));
+            }
+
             var readUrl = _behaviours["document:read"];
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Get,
@@ -140,6 +150,12 @@ namespace Waives.Http
         /// <returns>The results of the classification operation.</returns>
         public async Task<ClassificationResult> ClassifyAsync(string classifierName, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(classifierName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(classifierName));
+            }
+
             var classifyUrl = _behaviours["document:classify"];
 
             var request = new HttpRequestMessageTemplate(HttpMethod.Post,
@@ -165,11 +181,16 @@ namespace Waives.Http
         /// <returns>The results of the extraction operation.</returns>
         public async Task<ExtractionResults> ExtractAsync(string extractorName, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(extractorName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(extractorName));
+            }
+
             var extractionResponse = await DoExtractionAsync(
                     extractorName,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-
             return await extractionResponse.ReadAsAsync<ExtractionResults>().ConfigureAwait(false);
         }
 
@@ -194,6 +215,12 @@ namespace Waives.Http
         /// </returns>
         public async Task<Stream> RedactAsync(string extractorName, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(extractorName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(extractorName));
+            }
+
             var extractionResponse =
                 await DoExtractionAsync(extractorName, RedactionRequest.MimeType, cancellationToken)
                 .ConfigureAwait(false);

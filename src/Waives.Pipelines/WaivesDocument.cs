@@ -32,6 +32,12 @@ namespace Waives.Pipelines
 
         public async Task<WaivesDocument> ClassifyAsync(string classifierName, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(classifierName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(classifierName));
+            }
+
             return new WaivesDocument(Source, _waivesDocument)
             {
                 ClassificationResults = await _waivesDocument
@@ -43,6 +49,12 @@ namespace Waives.Pipelines
 
         public async Task<WaivesDocument> ExtractAsync(string extractorName, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(extractorName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(extractorName));
+            }
+
             return new WaivesDocument(Source, _waivesDocument)
             {
                 ClassificationResults = ClassificationResults,

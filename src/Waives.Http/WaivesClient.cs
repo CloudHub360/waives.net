@@ -183,6 +183,11 @@ namespace Waives.Http
         /// <seealso cref="Document.DeleteAsync"/>
         public async Task<Document> CreateDocumentAsync(string path, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(path));
+            }
+
             return await CreateDocumentAsync(File.OpenRead(path), cancellationToken).ConfigureAwait(false);
         }
 
@@ -239,6 +244,11 @@ namespace Waives.Http
         /// <returns>A <see cref="Document"/> client for the specified document ID.</returns>
         public async Task<Document> GetDocumentAsync(string id, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(id));
+            }
+
             var request = new HttpRequestMessageTemplate(HttpMethod.Get, new Uri($"/documents/{id}", UriKind.Relative));
             var response = await _requestSender.SendAsync(request, cancellationToken).ConfigureAwait(false);
 

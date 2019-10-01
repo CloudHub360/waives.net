@@ -12,11 +12,16 @@ namespace Waives.Pipelines
 
         protected DocumentSource(IObservable<Document> buffer)
         {
-            _observable = buffer;
+            _observable = buffer ?? throw new ArgumentNullException(nameof(buffer));
         }
 
         public IDisposable Subscribe(IObserver<Document> observer)
         {
+            if (observer == null)
+            {
+                throw new ArgumentNullException(nameof(observer));
+            }
+
             return _observable.Subscribe(observer);
         }
     }

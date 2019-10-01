@@ -93,7 +93,7 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline WithDocumentsFrom(IObservable<Document> documentSource)
         {
-            _docSource = documentSource;
+            _docSource = documentSource ?? throw new ArgumentNullException(nameof(documentSource));
 
             return this;
         }
@@ -105,6 +105,12 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ClassifyWith(string classifierName)
         {
+            if (string.IsNullOrWhiteSpace(classifierName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(classifierName));
+            }
+
             _docActions.Add(async (d, ct) =>
             {
                 var document = await d.ClassifyAsync(classifierName, ct)
@@ -127,6 +133,12 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline ExtractWith(string extractorName)
         {
+            if (string.IsNullOrWhiteSpace(extractorName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.",
+                    nameof(extractorName));
+            }
+
             _docActions.Add(async (d, ct) =>
             {
                 var document = await d.ExtractAsync(extractorName, ct).ConfigureAwait(false);
@@ -221,6 +233,11 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Action<WaivesDocument> action)
         {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
             _docActions.Add((document, cancellationToken) =>
             {
                 action(document);
@@ -237,6 +254,11 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task> action)
         {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
             _docActions.Add(async (d, ct) =>
             {
                 await action(d).ConfigureAwait(false);
@@ -253,6 +275,11 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline Then(Func<WaivesDocument, Task<WaivesDocument>> action)
         {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
             _docActions.Add(async (d, ct) => await action(d).ConfigureAwait(false));
 
             return this;
@@ -265,7 +292,12 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnPipelineCompleted(Action action)
         {
-            _onPipelineCompletedUserAction = action ?? (() => { });
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            _onPipelineCompletedUserAction = action;
             return this;
         }
 
@@ -276,13 +308,16 @@ namespace Waives.Pipelines
         /// <returns>The modified <see cref="Pipeline"/>.</returns>
         public Pipeline OnDocumentError(Action<DocumentError> action)
         {
-            var userAction = action ?? (err => { });
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
 
             var previousAction = _userErrorAction;
             _userErrorAction = err =>
             {
                 previousAction(err);
-                userAction(err);
+                action(err);
             };
 
             return this;
