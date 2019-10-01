@@ -38,9 +38,9 @@ namespace Waives.Pipelines.Tests
         public async Task OnPipelineCompleted_is_run_at_the_end_of_a_successful_pipeline()
         {
             var pipelineCompleted = false;
-            _sut.OnPipelineCompleted(() => pipelineCompleted = true);
+            var pipeline = _sut.OnPipelineCompleted(() => pipelineCompleted = true);
 
-            await _sut.RunAsync();
+            await pipeline.RunAsync();
 
             Assert.True(pipelineCompleted);
         }
