@@ -55,7 +55,7 @@ namespace Waives.Pipelines.Extensions.DocumentSources.FileSystem
         /// <remarks>
         /// Enable or disable the underlying <see cref="FileSystemWatcher"/>.
         /// </remarks>
-        public override bool EnableRaisingEvents
+        protected override bool EnableRaisingEvents
         {
             get => _filesystemWatcher.EnableRaisingEvents;
             set => _filesystemWatcher.EnableRaisingEvents = value;

@@ -15,6 +15,7 @@ namespace Waives.Pipelines
         /// Raised when a new document has been detected in the underlying
         /// event stream.
         /// </summary>
+        // ReSharper disable once EventNeverSubscribedTo.Global
         public event EventHandler<NewDocumentEventArgs> NewDocument;
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace Waives.Pipelines
         /// Defaults to <c>true</c>. This should be used to temporarily disable
         /// event emission without also signalling completion.
         /// </summary>
-        public virtual bool EnableRaisingEvents { get; set; } = true;
+        protected virtual bool EnableRaisingEvents { get; set; } = true;
 
         /// <summary>
         /// The process for emitting events.
@@ -81,6 +82,7 @@ namespace Waives.Pipelines
         /// Start emitting objects from the underlying event stream, with no
         /// cancellation possible.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public void Start()
         {
             Start(CancellationToken.None);
