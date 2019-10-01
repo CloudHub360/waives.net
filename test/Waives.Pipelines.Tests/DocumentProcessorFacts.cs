@@ -88,17 +88,19 @@ namespace Waives.Pipelines.Tests
         public async Task Deletes_document_after_error()
         {
             var docDeleted = false;
-            Func<WaivesDocument, Task> docDeleter = document =>
+
+            Task DocumentDeleter(WaivesDocument document)
             {
                 docDeleted = true;
                 return Task.CompletedTask;
-            };
+            }
+
             var fakeDocActions = FakeDocAction.AListOfDocActions(1);
 
             var sut = new DocumentProcessor(
                 _docCreator,
                 fakeDocActions.Select<FakeDocAction, Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>>(f => f.ThrowError),
-                docDeleter,
+                DocumentDeleter,
                 _onDocumentException);
             await sut.RunAsync(_testDocument);
 
@@ -109,20 +111,22 @@ namespace Waives.Pipelines.Tests
         public async Task Deletes_document_after_error_in_error_handler()
         {
             var docDeleted = false;
-            Func<WaivesDocument, Task> docDeleter = document =>
+
+            Task DocumentDeleter(WaivesDocument document)
             {
                 docDeleted = true;
                 return Task.CompletedTask;
-            };
+            }
+
             var fakeDocActions = FakeDocAction.AListOfDocActions(1);
 
-            Action<Exception, Document> onDocumentException = (exception, document) => throw new Exception();
+            void OnDocumentException(Exception exception, Document document) => throw new Exception();
 
             var sut = new DocumentProcessor(
                 _docCreator,
                 fakeDocActions.Select<FakeDocAction, Func<WaivesDocument, CancellationToken, Task<WaivesDocument>>>(f => f.ThrowError),
-                docDeleter,
-                onDocumentException);
+                DocumentDeleter,
+                OnDocumentException);
 
             await Assert.ThrowsAsync<Exception>(() => sut.RunAsync(_testDocument));
             Assert.True(docDeleted);
