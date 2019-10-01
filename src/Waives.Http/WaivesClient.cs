@@ -78,10 +78,11 @@ namespace Waives.Http
         }
 
         /// <summary>
-        /// Gets or sets a duration on the underlying <see cref="System.Net.Http.HttpClient"/>
+        /// Gets or sets a duration on the underlying <see cref="HttpClient"/>
         /// to wait until the requests time out. The timeout unit is seconds, and defaults to 120.
         /// </summary>
-        /// <seealso cref="System.Net.Http.HttpClient.Timeout"/>
+        /// <seealso cref="HttpClient.Timeout"/>
+        // ReSharper disable once UnusedMember.Global
         public int Timeout
         {
             get => _requestSender.Timeout;
@@ -178,6 +179,7 @@ namespace Waives.Http
         /// <returns>A <see cref="Document"/> client for the given document.</returns>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
+        // ReSharper disable once UnusedMethodReturnValue.Global
         public async Task<Document> CreateDocumentAsync(string path, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(path))
@@ -207,12 +209,13 @@ namespace Waives.Http
         /// <exception cref="ArgumentNullException">Thrown when the provided <see cref="Uri"/> is null.</exception>
         /// <seealso cref="Document"/>
         /// <seealso cref="Document.DeleteAsync"/>
+        // ReSharper disable once UnusedMethodReturnValue.Global
         public async Task<Document> CreateDocumentAsync(Uri uri, CancellationToken cancellationToken = default)
         {
             uri = uri ?? throw new ArgumentNullException(nameof(uri));
 
             var request =
-                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri($"/documents", UriKind.Relative))
+                new HttpRequestMessageTemplate(HttpMethod.Post, new Uri("/documents", UriKind.Relative))
                 {
                     Content = new JsonContent(new ImportDocumentRequest
                     {
