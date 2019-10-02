@@ -8,7 +8,7 @@ namespace Waives.Http
 {
     public class ConsoleLogProvider : LogProviderBase
     {
-        public static bool Log(LogLevel logLevel,
+        private static bool Log(LogLevel logLevel,
             Func<string> messageFunc,
             Exception exception = null,
             params object[] formatParameters)
@@ -20,7 +20,7 @@ namespace Waives.Http
 
             var message = ReplaceStructuredLoggingTokens(messageFunc(), formatParameters);
 
-            Console.WriteLine($"[{logLevel}] {message} {exception}");
+            Console.WriteLine($"[{DateTime.Now}] [{logLevel}] {message} {exception}");
             return true;
         }
 

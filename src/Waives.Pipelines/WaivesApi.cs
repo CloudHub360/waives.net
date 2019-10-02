@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Waives.Http;
+using Waives.Http.Logging;
 using Waives.Pipelines.HttpAdapters;
 
 [assembly: InternalsVisibleTo("Waives.Pipelines.Tests")]
@@ -68,6 +69,11 @@ namespace Waives.Pipelines
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
+            }
+
+            if (options.LogProvider != null)
+            {
+                LogProvider.SetCurrentLogProvider(options.LogProvider);
             }
 
             var waivesClient = CreateAuthenticatedWaivesClient(options);
