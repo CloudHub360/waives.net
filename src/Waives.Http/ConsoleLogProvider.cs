@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Waives.Http.Logging;
@@ -13,6 +14,16 @@ namespace Waives.Http
     // ReSharper disable once UnusedMember.Global
     public sealed class ConsoleLogProvider : LogProviderBase
     {
+        private static readonly Dictionary<LogLevel, ConsoleColor> Colors = new Dictionary<LogLevel, ConsoleColor>
+        {
+            {LogLevel.Fatal, ConsoleColor.Red},
+            {LogLevel.Error, ConsoleColor.Yellow},
+            {LogLevel.Warn, ConsoleColor.Magenta},
+            {LogLevel.Info, ConsoleColor.White},
+            {LogLevel.Debug, ConsoleColor.Gray},
+            {LogLevel.Trace, ConsoleColor.DarkGray},
+        };
+
         private static bool Log(LogLevel logLevel,
             Func<string> messageFunc,
             Exception exception = null,
@@ -31,7 +42,33 @@ namespace Waives.Http
 
         public override Logger GetLogger(string name)
         {
-            return Log;
+            return (logLevel, messageFunc, exception, formatParameters) =>
+            {
+                if (messageFunc == null)
+                {
+                    return true;
+                }
+
+                if (Colors.TryGetValue(logLevel, out ConsoleColor consoleColor))
+                {
+                    var originalForeground = Console.ForegroundColor;
+                    try
+                    {
+                        Console.ForegroundColor = consoleColor;
+                        Log(logLevel, messageFunc, exception, formatParameters);
+                    }
+                    finally
+                    {
+                        Console.ForegroundColor = originalForeground;
+                    }
+                }
+                else
+                {
+                    Log(logLevel, messageFunc, exception, formatParameters);
+                }
+
+                return true;
+            };
         }
 
         private static string ReplaceStructuredLoggingTokens(string message,
@@ -44,9 +81,7 @@ namespace Waives.Http
 
             foreach (Match match in tokens)
             {
-                var param = i < formatParameters.Length ?
-                    formatParameters[i++].ToString() :
-                    "*NO PARAM*";
+                var param = i < formatParameters.Length ? formatParameters[i++].ToString() : "*NO PARAM*";
 
                 message = message.Replace(match.ToString(), $"{{{param}}}");
             }
