@@ -304,6 +304,21 @@ namespace Waives.Pipelines.Tests
             Assert.Same(expectedException, actualException);
         }
 
+        [Fact]
+        public async Task RunAsync_throws_if_completion_callback_fails()
+        {
+            var expectedException = new Exception();
+            var source = Observable.Return(new TestDocument(Generate.Bytes()));
+
+            var pipeline = _sut
+                .WithDocumentsFrom(source)
+                .OnPipelineCompleted(() => throw expectedException);
+
+            var actualException = await Assert.ThrowsAsync<Exception>(() => pipeline.RunAsync());
+
+            Assert.Same(expectedException, actualException);
+        }
+
         private static void AssertStreamsAreEqual(MemoryStream expected, Stream actual)
         {
             var actualMemoryStream = new MemoryStream();
