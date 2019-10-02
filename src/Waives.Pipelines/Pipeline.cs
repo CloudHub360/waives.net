@@ -341,9 +341,16 @@ namespace Waives.Pipelines
 
             void OnPipelineComplete()
             {
-                _onPipelineCompletedUserAction();
-                Logger.Info("Pipeline complete");
-                taskCompletion.SetResult(true);
+                try
+                {
+                    _onPipelineCompletedUserAction();
+                    Logger.Info("Pipeline complete");
+                    taskCompletion.SetResult(true);
+                }
+                catch (Exception e)
+                {
+                    taskCompletion.TrySetException(e);
+                }
             }
 
             void OnPipelineError(Exception e)
