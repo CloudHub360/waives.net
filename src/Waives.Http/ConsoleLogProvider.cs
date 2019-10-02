@@ -6,7 +6,12 @@ using Waives.Http.Logging.LogProviders;
 
 namespace Waives.Http
 {
-    public class ConsoleLogProvider : LogProviderBase
+    /// <summary>
+    /// ConsoleLogProvider is an example ILogProvider implementation. It is not recommended for use
+    /// in production.
+    /// </summary>
+    // ReSharper disable once UnusedMember.Global
+    public sealed class ConsoleLogProvider : LogProviderBase
     {
         private static bool Log(LogLevel logLevel,
             Func<string> messageFunc,
