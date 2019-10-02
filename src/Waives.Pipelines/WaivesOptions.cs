@@ -1,5 +1,6 @@
 ﻿using System;
 using Waives.Http;
+using Waives.Http.Logging;
 
 namespace Waives.Pipelines
 {
@@ -41,6 +42,12 @@ namespace Waives.Pipelines
         /// </summary>
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
         public int MaxConcurrency { get; set; } = DefaultMaximumConcurrentDocuments;
+
+        /// <summary>
+        /// Used to specify a custom logger.
+        /// </summary>
+        // ReSharper disable once UnusedMember.Global
+        public ILogProvider LogProvider { get; set; }
 
         private const byte DefaultMaximumConcurrentDocuments = 10;
     }
