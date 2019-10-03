@@ -9,102 +9,63 @@ effort basis only.
 If you are using Visual Studio, please ensure you are using Visual Studio 2017
 or later.
 
-## Getting Started
+## Installing the SDK
 
-The Waives .NET SDK is available as a set of NuGet packages. If you wish, you
-can download the bleeding-edge version of the libraries from the MyGet feed,
-which requires a little bit of configuration of NuGet:
+The Waives .NET SDK is available as a set of NuGet packages. You can install them in the usual
+way, detailed below for stable builds and early releases. [The documentation](https://docs.waives.io/docs/dotnet)
+has information to help you get started, and you will need to obtain an API client ID and
+secret from [the Waives dashboard](https://dashboard.waives.io).
 
-1. Add a [NuGet.config](https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior)
-  file to the root of your project's repository.
-2. Add the following content to this file:
+### Stable builds
 
-   ```xml
-   <?xml version="1.0" encoding="utf-8"?>
-   <configuration>
-     <packageSources>
-       <add key="Waives Pre-release" value="https://www.myget.org/F/waives-nightly/api/v3/index.json" protocolVersion="3" />
-     </packageSources>
-   </configuration>
-   ```
+These are available from the public NuGet feed, and can be installed using one of the following
+mechanisms, as best suits your application.
 
-3. Install the latest pre-release version using your NuGet client or
-
-   ```powershell
-   Install-Package -Pre Waives.Pipelines
-   ```
-
-## API overview
-
-### Waives.Pipelines
-
-Waives.Pipelines is the high-level document-processing API built against Waives.
-It exposes a pipeline model sourcing documents from the place you specify (e.g.
-file system, cloud storage, database, etc.), defines a set of operations that
-can be completed on a document, such as classification and extraction, and
-provides hooks for running your own actions with a document at arbitrary points
-in the pipeline's execution. The pipeline API is a fluent API defining the
-pipeline's execution order.
-
-To get started with this API, simply:
-
-```csharp
-// Define a pipeline that classifies each document and writes its classification
-// to the console. This will also authenticate with the Waives API.
-var pipeline = await WaivesApi.CreatePipeline(new WaivesOptions
-{
-    ClientId = "clientId",
-    ClientSecret = "clientSecret"
-});
-
-pipeline.WithDocumentsFrom(myDocumentSource)
-    .ClassifyWith("mortgages")
-    .Then(d => Console.WriteLine(d.ClassificationResults.DocumentType))
-    .OnPipelineCompleted(() => Console.WriteLine("Classification complete"));
-
-try
-{
-    // Run the pipeline
-    pipeline.Start();
-}
-catch (PipelineException ex)
-{
-    // Handle an unrecoverable pipeline processing error
-    Console.WriteLine(ex);
-}
+#### Package Manager
+```powershell
+Install-Package Waives.Pipelines
 ```
 
-### Waives.Http
-
-Waives.Http is a lower-level client which makes the HTTP requests against the
-Waives API. This is provided for more advanced scenarios which do not fit the
-pipeline model so cleanly.
-
-To get started with this API:
-
-```csharp
-var client = WaivesClient.Create();
-await client.Login("clientId", "clientSecret");
-
-try
-{
-    var document = await client.CreateDocument(@"C:\path\to\my\document.pdf");
-    var classification = await document.Classify("mortgages");
-}
-finally
-{
-    // Ensure the document is deleted after use
-    await document.Delete();
-}
+#### dotnet CLI
+```powershell
+dotnet add package Waives.Pipelines
 ```
 
-### Extension packages
+#### `PackageReference` project file element
+```xml
+<PackageReference Include="Waives.Pipelines" Version="1.0.0" />
+```
 
-Similarly to the ASP.NET Core set of packages, we publish non-core functionality
-as separate NuGet packages named extensions. These extensions are:
+### Development builds
+If you need a preview (pre-beta) release, you can pull the bleeding-edge versions of the libraries
+from our MyGet feed, as described here.
 
-* **Waives.Pipelines.Extensions.DocumentSources.FileSystem**: provides an implementation of
-  `Document` and `DocumentEmitter` reading files from a local or remote disk.
+#### Package Manager
+```powershell
+Install-Package -Pre Waives.Pipelines -Source https://www.myget.org/F/waives-nightly/api/v3/index.json
+```
+
+#### dotnet CLI
+```powershell
+dotnet add package Waives.Pipelines --source https://www.myget.org/F/waives-nightly/api/v3/index.json 
+```
+
+#### `PackageReference` project file element
+Create a file called `NuGet.config` in the same location as your Visual Studio solution file, and
+add the following content to it:
+```xml
+<?xml version="1.0" encoding="utf-8"?>                                                                                                                                                                                                                                          <configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+  </packageSources>
+</configuration>
+```
+
+Now update your project file to include the following line, replacing the version string with the
+version you wish to install.
+```xml
+<PackageReference Include="Waives.Pipelines" Version="1.0.0" />
+```
 
 ## Sample applications
 
